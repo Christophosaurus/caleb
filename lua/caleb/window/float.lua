@@ -59,7 +59,6 @@ end
 function M.enforce_cursor_in_game_window(win)
     vim.api.nvim_command('stopinsert')
     vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", true)
-    vim.api.nvim_win_set_cursor(win.win, {24, 0})
 end
 
 --- @param win FloatWindow

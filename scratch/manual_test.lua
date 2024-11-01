@@ -13,7 +13,6 @@ local function now()
     return vim.loop.now()
 end
 
-
 local box = {
     colors = {1},
     render_height = 1,
