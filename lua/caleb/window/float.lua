@@ -15,34 +15,27 @@ local function get_control_window_opts()
         height = 1,
         row = height - 2,
         col = width - 2,
-        style = "minimal"
+        style = "minimal",
     }
 end
 
 --- @return FloatWindow
 function M.create_control_window()
-
     local opts = get_control_window_opts()
-    local buf = api.nvim_create_buf(false, true) -- No file, scratch buffer
+    local buf = api.nvim_create_buf(false, true)
     local win = api.nvim_open_win(buf, true, opts)
 
-    return {win, buf}
+    return { win = win, buf = buf }
 end
 
 local function get_game_window_opts()
     local width = api.nvim_get_option("columns")
     local height = api.nvim_get_option("lines")
 
-    local p_height = math.max(
-        0,
-        math.floor((height - 24) / 2)
-    )
+    local p_height = math.max(0, math.floor((height - 24) / 2))
 
     -- gutter makes this a bit offset...
-    local p_width = math.max(
-        0,
-        math.floor((width - 80) / 2)
-    )
+    local p_width = math.max(0, math.floor((width - 80) / 2))
 
     return {
         relative = "editor",
@@ -50,7 +43,7 @@ local function get_game_window_opts()
         height = 24,
         row = p_height,
         col = p_width,
-        style = "minimal"
+        style = "minimal",
     }
 end
 
@@ -60,7 +53,7 @@ function M.create_game_window()
     local buf = api.nvim_create_buf(false, true) -- No file, scratch buffer
     local win = api.nvim_open_win(buf, true, opts)
 
-    return {win, buf}
+    return { win = win, buf = buf }
 end
 
 ---@param game FloatWindow
@@ -73,6 +66,19 @@ end
 function M.resize_control_window(control)
     local opts = get_control_window_opts()
     api.nvim_win_set_config(control.win, opts)
+end
+
+---@param win FloatWindow
+function M.close_float(win)
+    if vim.api.nvim_buf_is_valid(win.buf) then
+        vim.api.nvim_buf_delete(win.buf, {
+            force = true,
+        })
+    end
+
+    if vim.api.nvim_win_is_valid(win.win) then
+        vim.api.nvim_win_close(win.win, true)
+    end
 end
 
 return M

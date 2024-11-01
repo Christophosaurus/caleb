@@ -1,6 +1,5 @@
 local utils = require("caleb.utils")
 local float = require("caleb.window.float")
-local M = {}
 local autocmd = vim.api.nvim_create_autocmd
 
 --- @class GameControl
@@ -14,13 +13,27 @@ GameControl.__index = GameControl
 function GameControl:new(opts)
     return setmetatable({
         opts = opts,
-        active = false,
+        _active = false,
     }, self)
 end
 
+function GameControl:is_active()
+    return self._active
+end
+
+function GameControl:dump_window_information()
+    return {
+        game = self._game,
+        control = self._control,
+    }
+end
+
 function GameControl:activate()
+    assert(self._active == false, "the game is already active")
+
     self._control = float.create_control_window()
     self._game = float.create_game_window()
+    vim.api.nvim_set_current_win(self._control.win)
 
     assert(self._control.buf ~= nil, "unable to create control window buf")
     assert(self._game.buf ~= nil, "unable to create game window buf")
@@ -35,19 +48,7 @@ function GameControl:activate()
                 return
             end
             vim.api.nvim_set_current_win(self._control.win)
-        end
-    })
-
-    autocmd("ModeChanged", {
-        group = group,
-        pattern = "*",
-        callback = function(event)
-            if not self._active then
-                return
-            end
-            local mode = utils.split(event.match, ":")
-            print(vim.inspect(mode))
-        end
+        end,
     })
 
     self._on_key_id = vim.on_key(function(key)
@@ -59,21 +60,24 @@ function GameControl:activate()
             return
         end
     end)
+
+    self._active = true
 end
 
 function GameControl:deactivate()
-    if self._on_key_id ~= nil then
-        vim.on_key(nil, self._on_key_id)
-        self._on_key_id = nil
-    end
+    assert(self._active, "cannot deactivate a playing game")
 
+    vim.on_key(nil, self._on_key_id)
     utils.del_group_id()
+    float.close_float(self._game)
+    float.close_float(self._control)
+
+    self._game = nil
+    self._control = nil
+    self._on_key_id = nil
+    self._active = false
 end
 
-local game = GameControl:new({})
-game:activate()
-vim.defer_fn(function()
-    game:deactivate()
-end, 5000)
-
-return M
+return {
+    GameControl = GameControl,
+}
