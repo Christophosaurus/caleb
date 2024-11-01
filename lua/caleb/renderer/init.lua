@@ -1,5 +1,6 @@
 local float = require("caleb.window.float")
 local consts = require("caleb.consts")
+local utils = require("caleb.utils")
 local colors = require("caleb.renderer.colors")
 
 local WIDTH = consts.RENDER_WIDTH
@@ -116,7 +117,7 @@ end
 function Renderer:render()
     colors.clear_highlights()
     float.clear_game_window(self._window)
-    float.enforce_cursor_in_game_window(self._window)
+    utils.force_game_mode()
 
     for y = 1, consts.RENDER_HEIGHT, 1 do
         local offset = (y - 1) * consts.RENDER_WIDTH

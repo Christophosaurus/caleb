@@ -1,4 +1,5 @@
 local consts = require("caleb.consts")
+local utils  = require("caleb.utils")
 local WIDTH = consts.RENDER_WIDTH
 local HEIGHT = consts.RENDER_HEIGHT
 
@@ -54,11 +55,6 @@ local function get_game_window_opts()
         col = p_width,
         style = "minimal",
     }
-end
-
-function M.enforce_cursor_in_game_window(win)
-    vim.api.nvim_command('stopinsert')
-    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", true)
 end
 
 --- @param win FloatWindow

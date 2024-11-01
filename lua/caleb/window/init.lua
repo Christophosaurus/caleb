@@ -33,6 +33,7 @@ function GameControl:activate()
 
     self._control = float.create_control_window()
     self._game = float.create_game_window()
+    self:_force_window()
 
     assert(self._control.buf ~= nil, "unable to create control window buf")
     assert(self._game.buf ~= nil, "unable to create game window buf")
@@ -51,30 +52,18 @@ function GameControl:activate()
         end,
     })
 
-    self._on_key_id = vim.on_key(function(key)
-        if
-            #key > 1
-            and string.byte(key, 1) == 128
-            and string.byte(key, 2) == 253
-        then
-            return
-        end
-    end)
-
     self._active = true
 end
 
 function GameControl:deactivate()
     assert(self._active, "cannot deactivate a playing game")
 
-    vim.on_key(nil, self._on_key_id)
     utils.del_group_id()
     float.close_float(self._game)
     float.close_float(self._control)
 
     self._game = nil
     self._control = nil
-    self._on_key_id = nil
     self._active = false
 end
 
@@ -85,7 +74,7 @@ function GameControl:_force_window()
     if ctrl_valid and game_valid then
         vim.api.nvim_set_current_win(self._control.win)
         vim.api.nvim_win_set_buf(self._game.win, self._game.buf)
-        float.enforce_cursor_in_game_window(self._control)
+        utils.force_game_mode()
     else
         self:deactivate()
     end

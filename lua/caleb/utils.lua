@@ -28,4 +28,11 @@ function M.del_group_id()
     create_autogroup()
 end
 
+function M.force_game_mode()
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", true)
+    vim.api.nvim_command('stopinsert')
+end
+
 return M
+
+

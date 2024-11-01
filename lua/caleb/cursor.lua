@@ -1,4 +1,4 @@
---- @class Caleb
+--- @class Cursor
 --- @field x number
 --- @field y number
 --- @field colors (number | nil)[]
@@ -6,10 +6,10 @@
 --- @field render_width number
 --- @field render_x number
 --- @field render_y number
-local Caleb = {}
-Caleb.__index = Caleb
+local Cursor = {}
+Cursor.__index = Cursor
 
-function Caleb:new(x, y)
+function Cursor:new(x, y)
     return setmetatable({
         x = x,
         y = y,
@@ -21,8 +21,8 @@ function Caleb:new(x, y)
     }, self)
 end
 
-function Caleb:update() end
+function Cursor:update() end
 
-function Caleb:key_down(key) end
+function Cursor:key_down(key) end
 
-return Caleb
+return Cursor
