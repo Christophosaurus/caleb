@@ -8,6 +8,7 @@ declare global {
     type GameOptions = {
         caleb: CalebOpts,
         gravity: Vector2D,
+        frameTimeMS: number,
     }
 
     type CalebOpts = {
@@ -38,7 +39,7 @@ declare global {
         caleb: Caleb
         ctx: CanvasRenderingContext2D
 
-        input: KeyboardEvent[]
+        input: InputState,
         loopStartTime: number,
     }
 
@@ -56,5 +57,33 @@ declare global {
             body: AABB,
         }
     }
+
+    type Handler = (event: KeyboardEvent) => void
+    type HandlerMap = {
+        h: Handler,
+        l: Handler,
+        total: number,
+    }
+    type InputTiming = {timestamp: number, tickHoldDuration: number}
+    type InputMap = {
+        h: InputTiming,
+        l: InputTiming,
+    }
+    type InputState = {
+        total: number,
+        inputs: InputMap,
+    }
+    type HandlerKey = "h" | "l"
+
+
+    type UpdateableModule = {
+        update(gameState: GameState, delta: number): void
+        tickClear(gameState: GameState): void
+    }
+
+    type RenderableModule = {
+        render(gameState: GameState): void
+    }
+
 }
 

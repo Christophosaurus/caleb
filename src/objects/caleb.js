@@ -150,4 +150,9 @@ export function update(gameState, delta) {
     Window.project(gameState.ctx.canvas, caleb);
 }
 
+/**
+* @param gameState {GameState}
+*/
+export function tickClear(gameState) { }
+
 

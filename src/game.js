@@ -1,5 +1,16 @@
+import * as Input from "./input/input.js";
 import * as Caleb from "./objects/caleb.js";
-import { listenToInput } from "./input/input.js";
+
+/** @type UpdateableModule[] */
+const updateables = [
+    Input,
+    Caleb,
+];
+
+/** @type RenderableModule[] */
+const renderables = [
+    Caleb,
+];
 
 /**
  * @param canvas {HTMLCanvasElement}
@@ -8,52 +19,68 @@ import { listenToInput } from "./input/input.js";
 export function startGame(canvas, gameopts) {
 
     const ctx = canvas.getContext("2d");
+    const inputState = Input.createInputState();
+
     /** @type {GameState} */
     const state = {
         opts: gameopts,
         caleb: Caleb.createCaleb(gameopts.caleb),
         loopStartTime: 0,
         ctx,
-        input: [],
+        input: inputState,
     };
 
     ctx.imageSmoothingEnabled = false;
 
-    listenToInput(state.input)
-    window.addEventListener("resize", function() {
-    });
+    // probably something here needs to be done...
+    window.addEventListener("resize", function() { });
 
-    gameLoop(state)
+    gameLoop(state, Date.now())
 }
 
 /**
  * @param state {GameState}
- * @returns {Promise}
+ * @param lastTime {number}
  */
-async function gameLoop(state) {
-
-    let lastTime = Date.now();
-    while (true) {
-        await (new Promise(res => setTimeout(res, 33)));
-        const nextTime = Date.now();
-        state.loopStartTime = nextTime;
-
-        const delta = nextTime - lastTime;
-
-        // sleep for the appropriate amount of time
-        Caleb.update(state, delta)
-
-        state.ctx.clearRect(0, 0, state.ctx.canvas.width, state.ctx.canvas.height);
-        Caleb.render(state)
-
-        lastTime = nextTime;
+function gameLoop(state, lastTime) {
+    const now = Date.now();
+    const remaining = state.opts.frameTimeMS - (now - lastTime)
+    if (remaining < 0) {
+        requestAnimationFrame(function() {
+            tick(state, lastTime);
+            gameLoop(state, lastTime);
+        });
+    } else {
+        setTimeout(function() {
+            tick(state, lastTime);
+            gameLoop(state, lastTime);
+        }, remaining);
     }
-
 }
 
 /**
- * @param canvas {HTMLCanvasElement}
- * @param ctx {CanvasRenderingContext2D}
+ * @param state {GameState}
+ * @param lastTime {number}
  */
-function tick(canvas, ctx) {
+function tick(state, lastTime) {
+    const nextTime = Date.now();
+    state.loopStartTime = nextTime;
+
+    const delta = nextTime - lastTime;
+
+    for (const u of updateables) {
+        u.update(state, delta);
+    }
+
+    state.ctx.clearRect(0, 0, state.ctx.canvas.width, state.ctx.canvas.height);
+
+    for (const r of renderables) {
+        r.render(state);
+    }
+
+    for (const u of updateables) {
+        u.tickClear(state);
+    }
+
+    lastTime = nextTime;
 }
