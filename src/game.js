@@ -49,16 +49,6 @@ async function gameLoop(state) {
         lastTime = nextTime;
     }
 
-    //ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    //const height = canvas.height;
-    //const heightPixels = Math.floor(height / HEIGHT);
-
-    //ctx.fillRect(0, 0, Math.floor(heightPixels / 2), heightPixels);
-
-    //requestAnimationFrame(function() {
-    //    gameLoop(canvas, ctx, opts);
-    //})
 }
 
 /**

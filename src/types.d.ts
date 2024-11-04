@@ -1,3 +1,4 @@
+import { AABB } from "./math/aabb";
 import { Vector2D } from "./math/vector";
 
 export {};
@@ -13,15 +14,8 @@ declare global {
         normWidthsPerSecond: number,
     }
 
-    type Caleb = {
+    type Caleb = Collidable & CanvasProjectable & {
         opts: CalebOpts,
-
-        pos: Vector2D,
-        vel: Vector2D,
-        acc: Vector2D,
-
-        width: number,
-        height: number,
 
         keyDown: string[],
 
@@ -48,15 +42,19 @@ declare global {
         loopStartTime: number,
     }
 
-    type CanvasProjectable = {
-        pos: Vector2D,
-        width: number,
-        height: number,
-
+    type CanvasProjectable = Collidable & {
         renderX: number,
         renderY: number,
         renderWidth: number,
         renderHeight: number,
+    }
+
+    type Collidable = {
+        physics: {
+            vel: Vector2D,
+            acc: Vector2D,
+            body: AABB,
+        }
     }
 }
 

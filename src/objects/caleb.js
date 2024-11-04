@@ -1,4 +1,5 @@
 import { assert, never } from "../assert.js";
+import { AABB } from "../math/aabb.js";
 import { Vector2D } from "../math/vector.js";
 import * as Window from "../window.js";
 
@@ -8,12 +9,12 @@ export function createCaleb(opts) {
     return {
         opts: opts,
 
-        pos: new Vector2D(0, 0),
-        acc: new Vector2D(0, 0),
-        vel: new Vector2D(0, 0),
 
-        width: 1,
-        height: 1,
+        physics: {
+            acc: new Vector2D(0, 0),
+            vel: new Vector2D(0, 0),
+            body: new AABB(new Vector2D(0, 0), 1, 1),
+        },
 
         keyDown: [],
 
@@ -47,6 +48,7 @@ export function createCaleb(opts) {
 function handleInput(caleb, gameState, delta) {
     const pageLoadTime = performance.timeOrigin;
     const keyDownMap = { };
+    const pos = caleb.physics.body.pos;
 
     for (const k of gameState.input) {
         const remaining = gameState.loopStartTime - (pageLoadTime + k.timeStamp)
@@ -54,9 +56,9 @@ function handleInput(caleb, gameState, delta) {
         // this feels like really shitty code
         if (k.type === "keydown" && !caleb.keyDown.includes(k.key) && !keyDownMap[k.key]) {
             if (k.key === "h") {
-                caleb.pos.x -= (remaining / 1000) * caleb.opts.normWidthsPerSecond;
+                pos.x -= (remaining / 1000) * caleb.opts.normWidthsPerSecond;
             } else if (k.key === "l") {
-                caleb.pos.x += (remaining / 1000) * caleb.opts.normWidthsPerSecond;
+                pos.x += (remaining / 1000) * caleb.opts.normWidthsPerSecond;
             }
             keyDownMap[k.key] = true;
 
@@ -70,9 +72,9 @@ function handleInput(caleb, gameState, delta) {
 
             const remainingDown = delta - remaining;
             if (k.key === "h") {
-                caleb.pos.x -= (remainingDown / 1000) * caleb.opts.normWidthsPerSecond;
+                pos.x -= (remainingDown / 1000) * caleb.opts.normWidthsPerSecond;
             } else if (k.key === "l") {
-                caleb.pos.x += (remainingDown / 1000) * caleb.opts.normWidthsPerSecond;
+                pos.x += (remainingDown / 1000) * caleb.opts.normWidthsPerSecond;
             }
 
             caleb.keyDown.splice(idx, 1);
@@ -83,9 +85,9 @@ function handleInput(caleb, gameState, delta) {
 
     for (const k of caleb.keyDown) {
         if (k === "h") {
-            caleb.pos.x -= (delta / 1000) * caleb.opts.normWidthsPerSecond;
+            pos.x -= (delta / 1000) * caleb.opts.normWidthsPerSecond;
         } else if (k === "l") {
-            caleb.pos.x += (delta / 1000) * caleb.opts.normWidthsPerSecond;
+            pos.x += (delta / 1000) * caleb.opts.normWidthsPerSecond;
         }
     }
 
@@ -111,16 +113,18 @@ function updatePosition(caleb, gameState, delta) {
     }
     */
 
+    const pos = caleb.physics.body.pos;
+    const vel = caleb.physics.vel;
 
     // TODO bound caleb to the ground and just don't apply this movement
     const deltaNorm = delta / 1000;
-    caleb.vel.add(gameState.opts.gravity.multiplyCopy(deltaNorm));
+    vel.add(gameState.opts.gravity.multiplyCopy(deltaNorm));
 
-    const scaledVel = caleb.vel.multiplyCopy(delta / 1000)
-    const nextPos = caleb.pos.addCopy(scaledVel);
+    const scaledVel = vel.multiplyCopy(delta / 1000)
+    const nextPos = pos.addCopy(scaledVel);
 
     // TODO Collision on future position?
-    caleb.pos.set(nextPos.x, nextPos.y)
+    pos.set(nextPos.x, nextPos.y)
 }
 
 /**
