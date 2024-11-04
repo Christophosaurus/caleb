@@ -3,7 +3,8 @@
     "allowJs": true,           // Allows JavaScript files to be included
     "checkJs": true,           // Enables type checking for JavaScript files
     "noEmit": true,            // Prevents TypeScript from emitting compiled files
-    "types": ["./src/types"] // Includes browser (DOM) types and your custom types
+    "types": ["./src/types"], // Includes browser (DOM) types and your custom types
+    "target": "ESNext"
   },
   "include": ["**/*.js"]        // Ensures all JavaScript files are type-checked
 }

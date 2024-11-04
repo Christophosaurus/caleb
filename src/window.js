@@ -2,12 +2,21 @@ export const WIDTH = 32
 export const HEIGHT = 24
 
 /**
+ * I am positive i can make this better for "efficiency" but i am also using
+ * javascript, lets... deal with that shit later, and by later i mean when
+ * i inevitably abondon this project
+ *
  * @param canvas {HTMLCanvasElement}
+ * @param projectable {CanvasProjectable}
+ * @returns [number, number]
  */
-export function calculateCanvasPortions(canvas) {
-    return {
-        hUnits: canvas.height / HEIGHT,
-    }
+export function project(canvas, projectable) {
+    const normWidth = canvas.width / WIDTH
+    const normHeight = canvas.height / HEIGHT
+    projectable.renderX = Math.floor(projectable.pos.x * normWidth);
+    projectable.renderY = Math.floor(projectable.pos.y * normHeight);
+    projectable.renderWidth = Math.floor(projectable.width * normWidth);
+    projectable.renderHeight = Math.floor(projectable.height * normHeight);
 }
 
 /**
