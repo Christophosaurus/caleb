@@ -1,3 +1,15 @@
+export const WIDTH = 32
+export const HEIGHT = 24
+
+/**
+ * @param canvas {HTMLCanvasElement}
+ */
+export function calculateCanvasPortions(canvas) {
+    return {
+        hUnits: canvas.height / HEIGHT,
+    }
+}
+
 /**
  * @param canvas {HTMLCanvasElement}
  */
@@ -5,13 +17,13 @@ export function resizeCanvas(canvas) {
     let width = window.innerWidth;
     let height = window.innerHeight;
 
-    const wRatio = width / 16
-    const hRatio = height / 9
+    const wRatio = width / WIDTH
+    const hRatio = height / HEIGHT
 
     if (wRatio > hRatio) {
-        width -= (wRatio - hRatio) * 16
+        width -= (wRatio - hRatio) * WIDTH
     } else {
-        height -= (hRatio - wRatio) * 9
+        height -= (hRatio - wRatio) * HEIGHT
     }
 
     canvas.width = Math.floor(width)
