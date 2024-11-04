@@ -59,7 +59,7 @@ declare global {
     }
 
 
-    type KeyEvent = { type: "keydown" | "keyup", timeStamp: number, key: string };
+    type KeyEvent = { type: "keydown" | "keyup", timestamp: number, key: string };
     type Handler = (event: KeyEvent) => void
     type HandlerMap = {
         h: Handler,

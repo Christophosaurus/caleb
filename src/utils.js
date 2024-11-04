@@ -9,4 +9,3 @@ export function setNow(fn) {
 export function now() {
     return nowFn();
 }
-

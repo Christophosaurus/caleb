@@ -1,20 +1,23 @@
 import { AABB } from "../math/aabb.js";
 import { Vector2D } from "../math/vector.js";
 import * as Window from "../window.js";
-import * as Input from "../input/input.js";
 
 /** @type CalebInputHandlerMap */
 const inputHandlerMap = {
     h: (state, timing) => {
         const hold = timing.tickHoldDuration;
         if (hold === 0) {
+            state.caleb.physics.vel.x = 0;
             return;
         }
-        state.caleb.physics.vel.x = -state.opts.caleb.normWidthsPerSecond * (hold / 1000);
+
+        const x = -state.opts.caleb.normWidthsPerSecond * (hold / 1000);
+        state.caleb.physics.vel.x = x;
     },
     l: (state, timing) => {
         const hold = timing.tickHoldDuration;
         if (hold === 0) {
+            state.caleb.physics.vel.x = 0;
             return;
         }
         state.caleb.physics.vel.x = state.opts.caleb.normWidthsPerSecond * (hold / 1000);
@@ -31,7 +34,7 @@ export function createCaleb(opts) {
         physics: {
             acc: new Vector2D(0, 0),
             vel: new Vector2D(0, 0),
-            body: new AABB(new Vector2D(0, 0), 1, 1),
+            body: new AABB(new Vector2D(0, 0), 0.5, 1),
         },
 
         keyDown: [],
@@ -50,16 +53,11 @@ export function createCaleb(opts) {
 * @param gameState {GameState}
 */
 function handleInput(gameState) {
-    if (!gameState.input.hasInput) {
-        return
-    }
-
     const input = gameState.input.inputs;
     inputHandlerMap.h(gameState, input.h);
     inputHandlerMap.l(gameState, input.l);
 }
 
-let count = 0;
 /**
 * @param caleb {Caleb}
 * @param gameState {GameState}
@@ -103,16 +101,16 @@ export function render(gameState) {
 */
 export function update(gameState, delta) {
     const caleb = gameState.caleb
-    updatePosition(caleb, gameState, delta);
     handleInput(gameState);
+    updatePosition(caleb, gameState, delta);
 
     // techincally i could move this into the engine side not in each update
     Window.project(gameState.ctx.canvas, caleb);
 }
 
 /**
-* @param gameState {GameState}
+* @param _ {GameState}
 */
-export function tickClear(gameState) { }
+export function tickClear(_) { }
 
 

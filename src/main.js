@@ -11,7 +11,7 @@ startGame(canvas, {
     caleb: {
         normWidthsPerSecond: 10,
     },
-    gravity: new Vector2D(0, 24),
+    gravity: new Vector2D(0, 0.1),
 })
 
 

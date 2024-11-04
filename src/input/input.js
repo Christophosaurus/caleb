@@ -3,9 +3,12 @@
 export const keys = ["h", "l"];
 
 /**
+ * Note: there cannot be more than 1 of each type of event per frame
+ * this should not pose a problem to anyone following the rules as frames are
+ * 16 or 33ms.  that would be a keydown, up, then another down over that period of time
  * @param key {HandlerKey}
  * @param out {InputMap}
- * @return HandlerMap
+ * @return Handler
  */
 export function createHandler(key, out) {
     /** @param event {KeyEvent} */
@@ -15,16 +18,14 @@ export function createHandler(key, out) {
             if (item.timestamp > 0) {
                 return
             }
-
-            item.timestamp = event.timeStamp * performance.timeOrigin;
+            item.timestamp = event.timestamp;
         } else if (event.type === "keyup") {
             const item = out[key];
             if (item.timestamp === 0) {
                 return
             }
 
-            const timestamp = event.timeStamp * performance.timeOrigin;
-            item.tickHoldDuration = timestamp - item.timestamp;
+            item.tickHoldDuration = event.timestamp - item.timestamp;
             item.timestamp = 0;
         }
     }
@@ -38,6 +39,7 @@ export function update(gameState, _) {
         const item = inputs[keys[i]];
         if (item.timestamp > 0) {
             item.tickHoldDuration = gameState.loopStartTime - item.timestamp;
+            item.timestamp = gameState.loopStartTime;
         }
     }
 
@@ -67,6 +69,7 @@ export function tickClear(gameState) {
     for (let i = 0; i < keys.length; ++i) {
         gameState.input.inputs[keys[i]].tickHoldDuration = 0;
     }
+    gameState.input.hasInput = false;
 }
 
 /** @return InputState */
@@ -83,9 +86,22 @@ export function createInputState() {
     return inputMap;
 }
 
+/** @param event {KeyboardEvent}
+ * @return {KeyEvent | null} */
+function keyboardEventToKeyEvent(event) {
+    if (event.type !== "keydown" && event.type !== "keyup") {
+        return null;
+    }
+
+    return {
+        timestamp: event.timeStamp + performance.timeOrigin,
+        key: event.key,
+        type: event.type,
+    };
+}
 
 /** @param state {InputState}
-/** @param el {HTMLElement} */
+/** @param el {{addEventListener: (evt: string, cb: (...args: any) => void) => void}} */
 export function listenForKeyboard(state, el) {
 
     const handler = /** @type HandlerMap */ ({
@@ -93,16 +109,15 @@ export function listenForKeyboard(state, el) {
         l: createHandler("l", state.inputs),
     });
 
-    el.addEventListener("keydown", function(event) {
+    /** @param event {KeyboardEvent} */
+    function listen(event) {
+        const evt = keyboardEventToKeyEvent(event);
         if (event.key in handler) {
-            handler[event.key](event);
+            handler[event.key](evt);
         }
-    })
+    }
 
-    el.addEventListener("keyup", function(event) {
-        if (event.key in handler) {
-            handler[event.key](event);
-        }
-    })
+    el.addEventListener("keydown", listen)
+    el.addEventListener("keyup", listen)
 }
 

@@ -1,10 +1,13 @@
 import * as Input from "./input/input.js";
 import * as Caleb from "./objects/caleb.js";
+import * as Debugger from "./debug.js";
+import { now as nowFn } from "./utils.js";
 
 /** @type UpdateableModule[] */
 const updateables = [
     Input,
     Caleb,
+    Debugger,
 ];
 
 /** @type RenderableModule[] */
@@ -20,6 +23,7 @@ export function startGame(canvas, gameopts) {
 
     const ctx = canvas.getContext("2d");
     const inputState = Input.createInputState();
+    Input.listenForKeyboard(inputState, window);
 
     /** @type {GameState} */
     const state = {
@@ -35,21 +39,20 @@ export function startGame(canvas, gameopts) {
     // probably something here needs to be done...
     window.addEventListener("resize", function() { });
 
-    state.loopStartTime = Date.now();
+    state.loopStartTime = nowFn();
     gameLoop(state)
 }
 
 /**
  * @param state {GameState}
- * @param lastTime {number}
  */
 function gameLoop(state) {
-    const start = Date.now();
+    const start = nowFn();
     const delta = start - state.loopStartTime;
     state.loopStartTime = start;
 
     tick(state, delta);
-    const now = Date.now();
+    const now = nowFn();
     const remaining = state.opts.frameTimeMS - (now - start);
 
     if (remaining >= 0) {
