@@ -1,6 +1,6 @@
 
 /** @type HandlerKey[] */
-const keys = ["h", "l"];
+export const keys = ["h", "l"];
 
 /**
  * @param key {HandlerKey}
@@ -8,7 +8,7 @@ const keys = ["h", "l"];
  * @return HandlerMap
  */
 export function createHandler(key, out) {
-    /** @param event {KeyboardEvent} */
+    /** @param event {KeyEvent} */
     return function(event) {
         if (event.type === "keydown") {
             const item = out[key];
@@ -33,12 +33,32 @@ export function createHandler(key, out) {
 /** @param gameState {GameState}
 /** @param _ {number} */
 export function update(gameState, _) {
+    const inputs = gameState.input.inputs;
     for (let i = 0; i < keys.length; ++i) {
-        const item = gameState.input.inputs[keys[i]];
+        const item = inputs[keys[i]];
         if (item.timestamp > 0) {
             item.tickHoldDuration = gameState.loopStartTime - item.timestamp;
         }
     }
+
+    if (inputs.h.tickHoldDuration > 0 && inputs.l.tickHoldDuration > 0) {
+        const h = inputs.h.tickHoldDuration;
+        const l = inputs.l.tickHoldDuration;
+        if (h > l) {
+            inputs.h.tickHoldDuration = h - l;
+            inputs.l.tickHoldDuration = 0;
+        } else {
+            inputs.l.tickHoldDuration = l - h;
+            inputs.h.tickHoldDuration = 0;
+        }
+    }
+
+    let hasInput = false;
+    for (let i = 0; !hasInput && i < keys.length; ++i) {
+        hasInput = inputs[keys[i]].tickHoldDuration > 0
+    }
+
+    gameState.input.hasInput = hasInput;
 }
 
 
@@ -57,7 +77,7 @@ export function createInputState() {
             h: {timestamp: 0, tickHoldDuration: 0},
             l: {timestamp: 0, tickHoldDuration: 0},
         },
-        total: 0,
+        hasInput: false,
     };
 
     return inputMap;

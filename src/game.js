@@ -35,39 +35,35 @@ export function startGame(canvas, gameopts) {
     // probably something here needs to be done...
     window.addEventListener("resize", function() { });
 
-    gameLoop(state, Date.now())
+    state.loopStartTime = Date.now();
+    gameLoop(state)
 }
 
 /**
  * @param state {GameState}
  * @param lastTime {number}
  */
-function gameLoop(state, lastTime) {
+function gameLoop(state) {
+    const start = Date.now();
+    const delta = start - state.loopStartTime;
+    state.loopStartTime = start;
+
+    tick(state, delta);
     const now = Date.now();
-    const remaining = state.opts.frameTimeMS - (now - lastTime)
-    if (remaining < 0) {
-        requestAnimationFrame(function() {
-            tick(state, lastTime);
-            gameLoop(state, lastTime);
-        });
+    const remaining = state.opts.frameTimeMS - (now - start);
+
+    if (remaining >= 0) {
+        requestAnimationFrame(() => gameLoop(state));
     } else {
-        setTimeout(function() {
-            tick(state, lastTime);
-            gameLoop(state, lastTime);
-        }, remaining);
+        setTimeout(() => gameLoop(state), remaining);
     }
 }
 
 /**
  * @param state {GameState}
- * @param lastTime {number}
+ * @param delta {number}
  */
-function tick(state, lastTime) {
-    const nextTime = Date.now();
-    state.loopStartTime = nextTime;
-
-    const delta = nextTime - lastTime;
-
+function tick(state, delta) {
     for (const u of updateables) {
         u.update(state, delta);
     }
@@ -81,6 +77,4 @@ function tick(state, lastTime) {
     for (const u of updateables) {
         u.tickClear(state);
     }
-
-    lastTime = nextTime;
 }

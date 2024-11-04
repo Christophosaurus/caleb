@@ -1,7 +1,25 @@
-import { assert, never } from "../assert.js";
 import { AABB } from "../math/aabb.js";
 import { Vector2D } from "../math/vector.js";
 import * as Window from "../window.js";
+import * as Input from "../input/input.js";
+
+/** @type CalebInputHandlerMap */
+const inputHandlerMap = {
+    h: (state, timing) => {
+        const hold = timing.tickHoldDuration;
+        if (hold === 0) {
+            return;
+        }
+        state.caleb.physics.vel.x = -state.opts.caleb.normWidthsPerSecond * (hold / 1000);
+    },
+    l: (state, timing) => {
+        const hold = timing.tickHoldDuration;
+        if (hold === 0) {
+            return;
+        }
+        state.caleb.physics.vel.x = state.opts.caleb.normWidthsPerSecond * (hold / 1000);
+    },
+};
 
 /** @param opts {CalebOpts}
 /** @returns {Caleb} */
@@ -29,77 +47,19 @@ export function createCaleb(opts) {
 }
 
 /**
- * THIS IS HORRIBLE AND I WANT TO REFACTOR IT, BUT IT WILL WORK
- * THIS IS HORRIBLE AND I WANT TO REFACTOR IT, BUT IT WILL WORK
- * THIS IS HORRIBLE AND I WANT TO REFACTOR IT, BUT IT WILL WORK
- * THIS IS HORRIBLE AND I WANT TO REFACTOR IT, BUT IT WILL WORK
- * THIS IS HORRIBLE AND I WANT TO REFACTOR IT, BUT IT WILL WORK
- * THIS IS HORRIBLE AND I WANT TO REFACTOR IT, BUT IT WILL WORK
- * I HATE INPUT
- * I HATE INPUT
- * I HATE INPUT
- * I HATE INPUT
- * I HATE INPUT
- * I HATE INPUT
-* @param caleb {Caleb}
 * @param gameState {GameState}
-* @param delta {number}
 */
-function handleInput(caleb, gameState, delta) {
-    const pageLoadTime = performance.timeOrigin;
-    const keyDownMap = { };
-    const pos = caleb.physics.body.pos;
-
-    for (const k of gameState.input) {
-        const remaining = gameState.loopStartTime - (pageLoadTime + k.timeStamp)
-
-        // this feels like really shitty code
-        if (k.type === "keydown" && !caleb.keyDown.includes(k.key) && !keyDownMap[k.key]) {
-            if (k.key === "h") {
-                pos.x -= (remaining / 1000) * caleb.opts.normWidthsPerSecond;
-            } else if (k.key === "l") {
-                pos.x += (remaining / 1000) * caleb.opts.normWidthsPerSecond;
-            }
-            keyDownMap[k.key] = true;
-
-        } else if (k.type === "keyup") {
-            const idx = caleb.keyDown.indexOf(k.key)
-            keyDownMap[k.key] = false;
-
-            if (idx === -1) {
-                continue
-            }
-
-            const remainingDown = delta - remaining;
-            if (k.key === "h") {
-                pos.x -= (remainingDown / 1000) * caleb.opts.normWidthsPerSecond;
-            } else if (k.key === "l") {
-                pos.x += (remainingDown / 1000) * caleb.opts.normWidthsPerSecond;
-            }
-
-            caleb.keyDown.splice(idx, 1);
-
-            // even more shitty code else if
-        }
+function handleInput(gameState) {
+    if (!gameState.input.hasInput) {
+        return
     }
 
-    for (const k of caleb.keyDown) {
-        if (k === "h") {
-            pos.x -= (delta / 1000) * caleb.opts.normWidthsPerSecond;
-        } else if (k === "l") {
-            pos.x += (delta / 1000) * caleb.opts.normWidthsPerSecond;
-        }
-    }
-
-    for (const [k, v] of Object.entries(keyDownMap)) {
-        if (v && !caleb.keyDown.includes(k)) {
-            caleb.keyDown.push(k)
-        }
-    }
-
-    gameState.input.length = 0;
+    const input = gameState.input.inputs;
+    inputHandlerMap.h(gameState, input.h);
+    inputHandlerMap.l(gameState, input.l);
 }
 
+let count = 0;
 /**
 * @param caleb {Caleb}
 * @param gameState {GameState}
@@ -118,9 +78,10 @@ function updatePosition(caleb, gameState, delta) {
 
     // TODO bound caleb to the ground and just don't apply this movement
     const deltaNorm = delta / 1000;
-    vel.add(gameState.opts.gravity.multiplyCopy(deltaNorm));
+    const gravVel = gameState.opts.gravity.multiplyCopy(deltaNorm);
+    vel.add(gravVel);
 
-    const scaledVel = vel.multiplyCopy(delta / 1000)
+    const scaledVel = vel.multiplyCopy(deltaNorm)
     const nextPos = pos.addCopy(scaledVel);
 
     // TODO Collision on future position?
@@ -143,8 +104,7 @@ export function render(gameState) {
 export function update(gameState, delta) {
     const caleb = gameState.caleb
     updatePosition(caleb, gameState, delta);
-
-    handleInput(caleb, gameState, delta);
+    handleInput(gameState);
 
     // techincally i could move this into the engine side not in each update
     Window.project(gameState.ctx.canvas, caleb);

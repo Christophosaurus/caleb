@@ -7,10 +7,11 @@ const canvas = /** @type {HTMLCanvasElement} */ (document.getElementById("game_c
 listenToChanges(canvas);
 resizeCanvas(canvas);
 startGame(canvas, {
+    frameTimeMS: 33,
     caleb: {
         normWidthsPerSecond: 10,
     },
-    gravity: new Vector2D(0, 8),
+    gravity: new Vector2D(0, 24),
 })
 
 

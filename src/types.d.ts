@@ -58,7 +58,9 @@ declare global {
         }
     }
 
-    type Handler = (event: KeyboardEvent) => void
+
+    type KeyEvent = { type: "keydown" | "keyup", timeStamp: number, key: string };
+    type Handler = (event: KeyEvent) => void
     type HandlerMap = {
         h: Handler,
         l: Handler,
@@ -70,11 +72,15 @@ declare global {
         l: InputTiming,
     }
     type InputState = {
-        total: number,
+        hasInput: boolean,
         inputs: InputMap,
     }
     type HandlerKey = "h" | "l"
-
+    type CalebInputHandlerMapCB = (state: GameState, timing: InputTiming) => void
+    type CalebInputHandlerMap = {
+        h: CalebInputHandlerMapCB,
+        l: CalebInputHandlerMapCB,
+    }
 
     type UpdateableModule = {
         update(gameState: GameState, delta: number): void

@@ -14,6 +14,7 @@ export function project(canvas, projectable) {
     const normWidth = canvas.width / WIDTH
     const normHeight = canvas.height / HEIGHT
     const body = projectable.physics.body;
+
     projectable.renderX = Math.floor(body.pos.x * normWidth);
     projectable.renderY = Math.floor(body.pos.y * normHeight);
     projectable.renderWidth = Math.floor(body.width * normWidth);
