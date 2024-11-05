@@ -17,7 +17,6 @@ declare global {
 
     type Caleb = Collidable & CanvasProjectable & {
         opts: CalebOpts,
-        keyDown: string[],
         renderColor: string,
     }
 
@@ -37,6 +36,7 @@ declare global {
 
         input: InputState,
         loopStartTime: number,
+        loopDelta: number,
     }
 
     type CanvasProjectable = Collidable & {
@@ -56,17 +56,17 @@ declare global {
 
     type KeyEvent = { type: "keydown" | "keyup", timestamp: number, key: string };
     type Handler = (event: KeyEvent) => void
-    type InputTiming = {timestamp: number, tickHoldDuration: number}
+    type InputTiming = {timestamp: number, tickHoldDuration: number, initial: boolean}
     type DIGIT = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
     type HandlerKey = "h" | "l" | "k"
     type InputState = {
         hasInput: boolean,
         inputs: InputMap,
     }
-    type CalebInputHandlerMapCB = (state: GameState, timing: InputTiming) => void
+    type CalebInputHandlerMapCB = (state: GameState, timing: InputTiming) => boolean
 
     type HandlerMap = { [K in HandlerKey | DIGIT]: Handler; } & { total: number }
-    type InputMap = { [K in HandlerKey]: InputTiming };
+    type InputMap = { [K in HandlerKey | DIGIT]: InputTiming };
     type CalebInputHandlerMap  = { [K in HandlerKey | DIGIT]: CalebInputHandlerMapCB };
 
     type UpdateableModule = {

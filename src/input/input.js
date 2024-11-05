@@ -1,11 +1,15 @@
-/** @type HandlerKey[] */
-export const keys = ["h", "l", "k"];
+import { debugForTickCount } from "../debug.js";
+
+/** @type (HandlerKey | DIGIT)[] */
+export const keys = [
+    "h", "l", "k",
+    .../** @type DIGIT[] */(new Array(10).fill(0).map((_, i) => i))];
 
 /**
  * Note: there cannot be more than 1 of each type of event per frame
  * this should not pose a problem to anyone following the rules as frames are
  * 16 or 33ms.  that would be a keydown, up, then another down over that period of time
- * @param key {HandlerKey}
+ * @param key {HandlerKey | DIGIT}
  * @param out {InputMap}
  * @return Handler
  */
@@ -18,6 +22,7 @@ export function createHandler(key, out) {
                 return
             }
             item.timestamp = event.timestamp;
+            item.initial = true;
         } else if (event.type === "keyup") {
             const item = out[key];
             if (item.timestamp === 0) {
@@ -66,7 +71,9 @@ export function update(gameState, _) {
 /** @param gameState {GameState} */
 export function tickClear(gameState) {
     for (let i = 0; i < keys.length; ++i) {
-        gameState.input.inputs[keys[i]].tickHoldDuration = 0;
+        const item = gameState.input.inputs[keys[i]]
+        item.tickHoldDuration = 0;
+        item.initial = false;
     }
     gameState.input.hasInput = false;
 }
@@ -75,9 +82,12 @@ export function tickClear(gameState) {
 export function createInputState() {
     const inputs = /** @type InputMap */(
         keys.reduce((acc, key) => {
-        acc[key] = {timestamp: 0, tickHoldDuration: 0}
+        acc[key] = {timestamp: 0, tickHoldDuration: 0, initial: false}
         return acc;
     }, {}));
+    for (let i = /** @type DIGIT */(0); i < 10; ++i) {
+        inputs[i] = {timestamp: 0, tickHoldDuration: 0, initial: false}
+    }
 
     /** @type InputState */
     const inputMap = {
@@ -111,6 +121,9 @@ export function listenForKeyboard(state, el) {
         acc[key] = createHandler(key, state.inputs)
         return acc;
     }, {}));
+    for (let i = /** @type DIGIT */(0); i < 10; ++i) {
+        handler[i] = createHandler(i, state.inputs)
+    }
     handler.total = 0;
 
     /** @param event {KeyboardEvent} */

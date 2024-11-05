@@ -37,7 +37,7 @@ export function startGame(canvas, gameopts) {
 
     const ctx = canvas.getContext("2d");
     const inputState = Input.createInputState();
-    Input.listenForKeyboard(inputState, window);
+    Input.listenForKeyboard(inputState, canvas);
 
     /** @type {GameState} */
     const state = {
@@ -45,12 +45,16 @@ export function startGame(canvas, gameopts) {
         caleb: Caleb.createCaleb(gameopts.caleb),
         platforms: [],
         loopStartTime: 0,
+        loopDelta: 0,
         ctx,
         input: inputState,
     };
 
     // TODO environment hydration, platforms? moving things? burnings?
-    state.platforms.push(Platforms.createPlatform(new AABB(new Vector2D(0, 2), 10, 1)));
+    state.platforms.push(
+        Platforms.createPlatform(new AABB(new Vector2D(0, 10), 10, 1)),
+        Platforms.createPlatform(new AABB(new Vector2D(15, 8), 10, 1)),
+    );
     projectStaticObjects(state);
 
     ctx.imageSmoothingEnabled = false;
@@ -70,6 +74,7 @@ function gameLoop(state) {
     const start = nowFn();
     const delta = start - state.loopStartTime;
     state.loopStartTime = start;
+    state.loopDelta = delta;
 
     tick(state, delta);
     const now = nowFn();

@@ -5,7 +5,7 @@ import { debugForCallCount, debugForTickCount } from "../debug.js";
 import { createCalebInputHandler } from "./caleb_input.js";
 import * as Input from "../input/input.js";
 
-const debugLog = debugForTickCount(1000);
+const debugLog = debugForTickCount(0);
 
 const inputHandlerMap = createCalebInputHandler()
 
@@ -15,14 +15,11 @@ export function createCaleb(opts) {
     return {
         opts: opts,
 
-
         physics: {
             acc: new Vector2D(0, 0),
             vel: new Vector2D(0, 0),
             body: new AABB(new Vector2D(0, 0), 0.5, 1),
         },
-
-        keyDown: [],
 
         renderWidth: 0,
         renderHeight: 0,
@@ -34,13 +31,19 @@ export function createCaleb(opts) {
     };
 }
 
+const reducedKeys = Input.keys.filter(k => k !== "l" && k !== "h")
+
 /**
 * @param gameState {GameState}
 */
 function handleInput(gameState) {
     const input = gameState.input.inputs;
-    for (const k of Input.keys) {
+    for (const k of reducedKeys) {
         inputHandlerMap[k](gameState, input[k]);
+    }
+
+    if (!inputHandlerMap.h(gameState, input.h) && !inputHandlerMap.l(gameState, input.l)) {
+        gameState.caleb.physics.vel.x = 0;
     }
 }
 
@@ -100,6 +103,7 @@ export function render(gameState) {
 export function update(gameState, delta) {
     const caleb = gameState.caleb
     handleInput(gameState);
+    debugLog("update", gameState.caleb.physics.vel);
     updatePosition(gameState, delta);
 
     // techincally i could move this into the engine side not in each update
