@@ -58,7 +58,7 @@ function gameLoop(state) {
     if (remaining >= 0) {
         requestAnimationFrame(() => gameLoop(state));
     } else {
-        setTimeout(() => gameLoop(state), remaining);
+        setTimeout(() => requestAnimationFrame(() => gameLoop(state)), remaining);
     }
 }
 

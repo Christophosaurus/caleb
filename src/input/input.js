@@ -1,6 +1,5 @@
-
 /** @type HandlerKey[] */
-export const keys = ["h", "l"];
+export const keys = ["h", "l", "k"];
 
 /**
  * Note: there cannot be more than 1 of each type of event per frame
@@ -74,13 +73,16 @@ export function tickClear(gameState) {
 
 /** @return InputState */
 export function createInputState() {
+    const inputs = /** @type InputMap */(
+        keys.reduce((acc, key) => {
+        acc[key] = {timestamp: 0, tickHoldDuration: 0}
+        return acc;
+    }, {}));
+
     /** @type InputState */
     const inputMap = {
-        inputs: {
-            h: {timestamp: 0, tickHoldDuration: 0},
-            l: {timestamp: 0, tickHoldDuration: 0},
-        },
         hasInput: false,
+        inputs,
     };
 
     return inputMap;
@@ -104,10 +106,12 @@ function keyboardEventToKeyEvent(event) {
 /** @param el {{addEventListener: (evt: string, cb: (...args: any) => void) => void}} */
 export function listenForKeyboard(state, el) {
 
-    const handler = /** @type HandlerMap */ ({
-        h: createHandler("h", state.inputs),
-        l: createHandler("l", state.inputs),
-    });
+    const handler = /** @type HandlerMap */(
+        keys.reduce((acc, key) => {
+        acc[key] = createHandler(key, state.inputs)
+        return acc;
+    }, {}));
+    handler.total = 0;
 
     /** @param event {KeyboardEvent} */
     function listen(event) {

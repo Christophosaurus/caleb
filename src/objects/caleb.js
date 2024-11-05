@@ -1,28 +1,13 @@
 import { AABB } from "../math/aabb.js";
 import { Vector2D } from "../math/vector.js";
 import * as Window from "../window.js";
+import { debugForCallCount, debugForTickCount } from "../debug.js";
+import { createCalebInputHandler } from "./caleb_input.js";
+import * as Input from "../input/input.js";
 
-/** @type CalebInputHandlerMap */
-const inputHandlerMap = {
-    h: (state, timing) => {
-        const hold = timing.tickHoldDuration;
-        if (hold === 0) {
-            state.caleb.physics.vel.x = 0;
-            return;
-        }
+const debugLog = debugForTickCount(1000);
 
-        const x = -state.opts.caleb.normWidthsPerSecond * (hold / 1000);
-        state.caleb.physics.vel.x = x;
-    },
-    l: (state, timing) => {
-        const hold = timing.tickHoldDuration;
-        if (hold === 0) {
-            state.caleb.physics.vel.x = 0;
-            return;
-        }
-        state.caleb.physics.vel.x = state.opts.caleb.normWidthsPerSecond * (hold / 1000);
-    },
-};
+const inputHandlerMap = createCalebInputHandler()
 
 /** @param opts {CalebOpts}
 /** @returns {Caleb} */
@@ -54,8 +39,9 @@ export function createCaleb(opts) {
 */
 function handleInput(gameState) {
     const input = gameState.input.inputs;
-    inputHandlerMap.h(gameState, input.h);
-    inputHandlerMap.l(gameState, input.l);
+    for (const k of Input.keys) {
+        inputHandlerMap[k](gameState, input[k]);
+    }
 }
 
 /**
@@ -74,16 +60,16 @@ function updatePosition(caleb, gameState, delta) {
     const pos = caleb.physics.body.pos;
     const vel = caleb.physics.vel;
 
-    // TODO bound caleb to the ground and just don't apply this movement
+    // Normalize delta to seconds
     const deltaNorm = delta / 1000;
-    const gravVel = gameState.opts.gravity.multiplyCopy(deltaNorm);
-    vel.add(gravVel);
 
-    const scaledVel = vel.multiplyCopy(deltaNorm)
-    const nextPos = pos.addCopy(scaledVel);
+    // Apply gravity to the velocity
+    const gravityEffect = gameState.opts.gravity.multiplyCopy(deltaNorm);
+    vel.add(gravityEffect);
 
-    // TODO Collision on future position?
-    pos.set(nextPos.x, nextPos.y)
+    // Update the position using the updated velocity
+    const positionChange = vel.multiplyCopy(deltaNorm);
+    pos.add(positionChange);
 }
 
 /**
