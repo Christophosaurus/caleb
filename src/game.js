@@ -50,17 +50,7 @@ export function startGame(canvas, gameopts) {
     };
 
     // TODO environment hydration, platforms? moving things? burnings?
-    state.platforms.push({
-        physics: {
-            vel: new Vector2D(0, 0),
-            acc: new Vector2D(0, 0),
-            body: new AABB(new Vector2D(0, 2), 10, 1)
-        },
-        renderX: 0,
-        renderY: 0,
-        renderWidth: 0,
-        renderHeight: 0,
-    });
+    state.platforms.push(Platforms.createPlatform(new AABB(new Vector2D(0, 2), 10, 1)));
     projectStaticObjects(state);
 
     ctx.imageSmoothingEnabled = false;

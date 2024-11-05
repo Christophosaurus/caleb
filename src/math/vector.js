@@ -16,13 +16,12 @@ export class Vector2D {
     }
 
     /**
-   * @param {number} x - The new x component.
-   * @param {number} y - The new y component.
-   * @returns {Vector2D} The current instance for chaining.
+   * @param {Vector2D} other
+   * @returns {Vector2D}
    */
-    set(x, y) {
-        this.x = x;
-        this.y = y;
+    set(other) {
+        this.x = other.x;
+        this.y = other.y;
         return this;
     }
 

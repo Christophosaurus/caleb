@@ -45,31 +45,43 @@ function handleInput(gameState) {
 }
 
 /**
-* @param caleb {Caleb}
-* @param gameState {GameState}
+ * @param state {GameState}
+ * @param nextPos {Vector2D}
+ * @param nextAABB {AABB}
+ */
+function testCollisions(state, nextPos, nextAABB) {
+
+    for (const platform of state.platforms) {
+        const platformAABB = platform.physics.body;
+        if (nextAABB.intersects(platformAABB)) {
+            if (nextPos.y + state.caleb.physics.body.height > platformAABB.pos.y) {
+                nextPos.y = platformAABB.pos.y - state.caleb.physics.body.height;
+            }
+
+            state.caleb.physics.vel.y = 0;
+            break
+        }
+    }
+}
+
+/**
+* @param state {GameState}
 * @param delta {number}
 */
-function updatePosition(caleb, gameState, delta) {
-    /*
-     * I am not going to consider any additional accelerations other than gravity
-    if (caleb.acc.magnituteSquared() != 0) {
-        caleb.vel.add(caleb.acc);
-    }
-    */
-
+function updatePosition(state, delta) {
+    const caleb = state.caleb;
     const pos = caleb.physics.body.pos;
     const vel = caleb.physics.vel;
-
-    // Normalize delta to seconds
     const deltaNorm = delta / 1000;
+    const gravityEffect = state.opts.gravity.multiplyCopy(deltaNorm);
 
-    // Apply gravity to the velocity
-    const gravityEffect = gameState.opts.gravity.multiplyCopy(deltaNorm);
     vel.add(gravityEffect);
+    const nextPos = pos.addCopy(vel.multiplyCopy(deltaNorm));
+    const nextAABB = new AABB(nextPos, caleb.physics.body.width, caleb.physics.body.height);
 
-    // Update the position using the updated velocity
-    const positionChange = vel.multiplyCopy(deltaNorm);
-    pos.add(positionChange);
+    testCollisions(state, nextPos, nextAABB);
+
+    pos.set(nextPos);
 }
 
 /**
@@ -88,7 +100,7 @@ export function render(gameState) {
 export function update(gameState, delta) {
     const caleb = gameState.caleb
     handleInput(gameState);
-    updatePosition(caleb, gameState, delta);
+    updatePosition(gameState, delta);
 
     // techincally i could move this into the engine side not in each update
     Window.project(gameState.ctx.canvas, caleb);

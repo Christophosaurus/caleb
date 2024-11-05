@@ -1,3 +1,5 @@
+import { AABB } from "../math/aabb.js";
+import { Vector2D } from "../math/vector.js";
 
 /** @param state {GameState}
 */
@@ -10,3 +12,20 @@ export function render(state) {
     }
 }
 
+/**
+ * @param aabb {AABB}
+ * @returns {EnvironmentObject}
+*/
+export function createPlatform(aabb) {
+    return {
+        physics: {
+            vel: new Vector2D(0, 0),
+            acc: new Vector2D(0, 0),
+            body: aabb,
+        },
+        renderX: 0,
+        renderY: 0,
+        renderWidth: 0,
+        renderHeight: 0,
+    };
+}
