@@ -27,10 +27,13 @@ declare global {
         key: string,
     }
 
+    type EnvironmentObject = Collidable & CanvasProjectable & { }
+
     type GameState = {
         opts: GameOptions
         caleb: Caleb
         ctx: CanvasRenderingContext2D
+        platforms: EnvironmentObject[]
 
         input: InputState,
         loopStartTime: number,
@@ -50,7 +53,6 @@ declare global {
             body: AABB,
         }
     }
-
 
     type KeyEvent = { type: "keydown" | "keyup", timestamp: number, key: string };
     type Handler = (event: KeyEvent) => void
