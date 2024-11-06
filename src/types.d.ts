@@ -122,7 +122,7 @@ declare global {
     type Handler = (event: KeyEvent) => void
     type InputTiming = {timestamp: number, tickHoldDuration: number, initial: boolean}
     type DIGIT = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
-    type HandlerKey = "h" | "l" | "k" | "j" | "w" | "b"
+    type HandlerKey = "h" | "l" | "k" | "j" | "w" | "b" | "f"
     type InputState = {
         hasInput: boolean,
         inputs: InputMap,
