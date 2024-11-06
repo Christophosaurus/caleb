@@ -1,4 +1,5 @@
 import { debugForCallCount, debugForTickCount } from "../debug.js";
+import * as Ease from "../math/ease.js";
 
 const debugLog = debugForCallCount(100);
 
@@ -7,25 +8,19 @@ const debugLog = debugForCallCount(100);
  * @returns {CalebInputHandlerMapCB}
  */
 function moveK(input) {
-    let activeJump = false;
-    /** @param state {GameState}
-     * @param timing {InputTiming}
-     * @returns {boolean}
-     * */
-    return function(state, timing) {
-        if (timing.tickHoldDuration === 0) {
-            activeJump = false;
-            return;
+    return function(state) {
+        if (state.caleb.noJumpTime > 0) {
+            return false;
         }
 
-        if (activeJump) {
-            return;
-        }
-
-        activeJump = true;
-        let number = +input.join("")
-
-        state.caleb.physics.vel.y = -(Math.max(number, 1) * 3 + 6);
+        const caleb = state.caleb;
+        const opts = caleb.opts;
+        const number = Math.max(1, +input.join(""))
+        caleb.jumping = true;
+        caleb.jumpDistance = number;
+        caleb.jumpStart = caleb.physics.body.pos.clone();
+        caleb.noJumpTime = (number * opts.noJumpMultiplier) + opts.noJumpBase;
+        return true;
     }
 }
 
@@ -88,6 +83,9 @@ function withHold(next) {
     return function(state, timing) {
         const hold = timing.tickHoldDuration;
         if (hold === 0) {
+            if (timing.initial) {
+                console.log("hm... 0 hold..?", timing);
+            }
             return false;
         }
         return next(state, timing);
@@ -113,7 +111,7 @@ export function createCalebInputHandler() {
         9: withHold(addNumericHandler(9, numericInput)),
         h: withHold(moveHL(-1)),
         l: withHold(moveHL(1)),
-        k: clearNumericState(moveK(numericInput), numericInput),
+        k: withHold(clearNumericState(moveK(numericInput), numericInput)),
     };
 
     return inputHandlerMap;

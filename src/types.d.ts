@@ -11,13 +11,27 @@ declare global {
         frameTimeMS: number,
     }
 
+    type CalebJumpEaseCB = (percent: number) => number
     type CalebOpts = {
         normWidthsPerSecond: number,
+        jumpEaseMS: number,
+        jumpEaseFn: CalebJumpEaseCB,
+        jumpEaseRange: number,
+        jumpNormHeight: number,
+        noJumpBase: number,
+        noJumpMultiplier: number,
     }
 
     type Caleb = Collidable & CanvasProjectable & {
         opts: CalebOpts,
         renderColor: string,
+
+        // i don't want "proper" jumping mechanics.  i want linear jump
+        // slow top (for f/F/t/T or w)
+        jumping: boolean,
+        jumpDistance: number,
+        jumpStart: Vector2D,
+        noJumpTime: number,
     }
 
     type InputMessage = {

@@ -5,7 +5,7 @@ import { debugForCallCount, debugForTickCount } from "../debug.js";
 import { createCalebInputHandler } from "./caleb_input.js";
 import * as Input from "../input/input.js";
 
-const debugLog = debugForTickCount(0);
+const debugLog = debugForCallCount(100);
 
 const inputHandlerMap = createCalebInputHandler()
 
@@ -20,6 +20,11 @@ export function createCaleb(opts) {
             vel: new Vector2D(0, 0),
             body: new AABB(new Vector2D(0, 0), 0.5, 1),
         },
+
+        jumping: false,
+        jumpDistance: 0,
+        noJumpTime: 0,
+        jumpStart: new Vector2D(),
 
         renderWidth: 0,
         renderHeight: 0,
@@ -62,6 +67,7 @@ function testCollisions(state, nextPos, nextAABB) {
             }
 
             state.caleb.physics.vel.y = 0;
+            state.caleb.jumping = false;
             break
         }
     }
@@ -75,10 +81,36 @@ function updatePosition(state, delta) {
     const caleb = state.caleb;
     const pos = caleb.physics.body.pos;
     const vel = caleb.physics.vel;
-    const deltaNorm = delta / 1000;
+
+    let deltaNorm = delta / 1000;
     const gravityEffect = state.opts.gravity.multiplyCopy(deltaNorm);
 
-    vel.add(gravityEffect);
+    if (caleb.jumping) {
+        const dist = Math.abs(caleb.physics.body.pos.y - caleb.jumpStart.y);
+        const remaining = caleb.jumpDistance - dist;
+        const easing = remaining <= caleb.opts.jumpEaseRange
+
+        let jump = -caleb.opts.jumpNormHeight;
+        let jumpNormDist = jump * deltaNorm;
+        if (!easing && remaining + jumpNormDist <= caleb.opts.jumpEaseRange) {
+
+            const correctedDist = remaining - caleb.opts.jumpEaseRange;
+            const correctedJump = correctedDist / deltaNorm
+
+            // 0.01 is a bonus to force into easing
+            jump = -(correctedJump + 0.01);
+        } else if (easing) {
+            jump = -caleb.opts.jumpEaseRange * 2;
+        }
+
+        caleb.jumping = remaining > 0;
+        vel.y = jump
+    } else {
+        vel.add(gravityEffect);
+    }
+
+    caleb.noJumpTime -= delta
+
     const nextPos = pos.addCopy(vel.multiplyCopy(deltaNorm));
     const nextAABB = new AABB(nextPos, caleb.physics.body.width, caleb.physics.body.height);
 
@@ -103,7 +135,6 @@ export function render(gameState) {
 export function update(gameState, delta) {
     const caleb = gameState.caleb
     handleInput(gameState);
-    debugLog("update", gameState.caleb.physics.vel);
     updatePosition(gameState, delta);
 
     // techincally i could move this into the engine side not in each update
