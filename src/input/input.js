@@ -1,6 +1,6 @@
 /** @type {(HandlerKey | DIGIT)[]} */
 export const keys = [
-    "h", "l", "k", "j", "w", "b",
+    "h", "l", "k", "j", "w", "b", "f",
     .../** @type DIGIT[] */(new Array(10).fill(0).map((_, i) => i))];
 
 /**
@@ -21,6 +21,7 @@ export function createHandler(key, out) {
             }
             item.timestamp = event.timestamp;
             item.initial = true;
+            item.done = false;
         } else if (event.type === "keyup") {
             const item = out[key];
             if (item.timestamp === 0) {
@@ -29,6 +30,7 @@ export function createHandler(key, out) {
 
             item.tickHoldDuration = event.timestamp - item.timestamp;
             item.timestamp = 0;
+            item.done = true;
         }
     }
 }
@@ -80,17 +82,19 @@ export function tickClear(gameState) {
 export function createInputState() {
     const inputs = /** @type InputMap */(
         keys.reduce((acc, key) => {
-        acc[key] = {timestamp: 0, tickHoldDuration: 0, initial: false}
+        acc[key] = {timestamp: 0, tickHoldDuration: 0, initial: false, done: false}
         return acc;
     }, {}));
     for (let i = /** @type DIGIT */(0); i < 10; ++i) {
-        inputs[i] = {timestamp: 0, tickHoldDuration: 0, initial: false}
+        inputs[i] = {timestamp: 0, tickHoldDuration: 0, initial: false, done: false}
     }
 
     /** @type InputState */
     const inputMap = {
         hasInput: false,
         anykey: false,
+        anykeyCount: 0,
+        lastKey: "",
         inputs,
     };
 
@@ -109,6 +113,19 @@ function keyboardEventToKeyEvent(event) {
         key: event.key,
         type: event.type,
     };
+}
+
+/**
+ * @param {KeyEvent} event
+ * @param {InputState} inputs
+ */
+function anykeyHandler(event, inputs) {
+    if (!inputs.anykey || event.type === "keyup") {
+        return
+    }
+
+    inputs.anykeyCount++
+    inputs.lastKey = event.key
 }
 
 /** @param state {InputState}
@@ -131,6 +148,7 @@ export function listenForKeyboard(state, el) {
         if (event.key in handler) {
             handler[event.key](evt);
         }
+        anykeyHandler(evt, state);
     }
 
     el.addEventListener("keydown", listen)

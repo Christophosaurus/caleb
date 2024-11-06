@@ -52,6 +52,12 @@ declare global {
         noJumpTime: number,
     }
 
+    type fFtTKey = "f" | "F" | "t" | "T"
+    type fFtT = {
+        type: fFtTKey
+        startCount: number,
+    }
+
     type CalebDash = {
         dashing: boolean,
         dashDistance: number,
@@ -68,6 +74,7 @@ declare global {
 
         jump: CalebJump,
         dash: CalebDash,
+        fFtT: fFtT
 
         // i don't want "proper" jumping mechanics.  i want linear jump
         // slow top (for f/F/t/T or w)
@@ -80,13 +87,13 @@ declare global {
     }
 
     type Platform = Collidable & CanvasProjectable & { id: number }
-    type LetteredWall = Platform & { letters: string[] }
+    type LetteredWall = Platform & { letters: string }
 
     type LevelSets = LevelSet[]
     type LevelSet = {
         title: string,
         difficulty: number,
-        platforms: Platform[]
+        platforms: (Platform | LetteredWall)[]
         initialPosition: Vector2D
         letterMap: (string | null)[][]
     }
@@ -124,19 +131,30 @@ declare global {
 
     type KeyEvent = { type: "keydown" | "keyup", timestamp: number, key: string };
     type Handler = (event: KeyEvent) => void
-    type InputTiming = {timestamp: number, tickHoldDuration: number, initial: boolean}
+    type InputTiming = {
+        timestamp: number,
+        tickHoldDuration: number,
+        initial: boolean,
+        done: boolean
+    }
+
     type DIGIT = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
     type HandlerKey = "h" | "l" | "k" | "j" | "w" | "b" | "f"
     type InputState = {
         hasInput: boolean,
         anykey: boolean,
+        anykeyCount: number,
+        lastKey: string,
         inputs: InputMap,
     }
     type CalebInputHandlerMapCB = (state: GameState, timing: InputTiming) => boolean
 
-    type HandlerMap = { [K in HandlerKey | DIGIT]: Handler; } & { total: number }
+    type HandlerMap = {
+        [K in HandlerKey | DIGIT]: Handler; } & { total: number }
     type InputMap = { [K in HandlerKey | DIGIT]: InputTiming };
-    type CalebInputHandlerMap  = { [K in HandlerKey | DIGIT]: CalebInputHandlerMapCB };
+    type CalebInputHandlerMap  = {
+        [K in HandlerKey | DIGIT]: CalebInputHandlerMapCB
+    } & { anykey: CalebInputHandlerMapCB };
 
     type UpdateableModule = {
         update(gameState: GameState, delta: number): void

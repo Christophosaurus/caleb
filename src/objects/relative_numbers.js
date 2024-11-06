@@ -22,6 +22,7 @@ export function tickClear(state) {
  */
 function renderText(ctx, text, x, y) {
     const [_x, _y] = Window.projectAbsoluteCoords(ctx.canvas, x, y)
+    ctx.fillStyle = "black";
     ctx.textAlign = "right"
     ctx.textBaseline = "middle"
     ctx.fillText(text, _x, _y)

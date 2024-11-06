@@ -28,6 +28,7 @@ export function createCaleb(state) {
 
         jump: CalebInput.defaultJumpState(),
         dash: CalebInput.defaultDashStat(),
+        fFtT: CalebInput.defaultfFtT(),
 
         renderWidth: 0,
         renderHeight: 0,

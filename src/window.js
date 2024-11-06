@@ -47,6 +47,22 @@ export function project(canvas, projectable) {
  * @param y {number}
  * @returns [number, number]
  */
+export function projectCoords(canvas, x, y) {
+    const normWidth = canvas.width / FULL_WIDTH
+    const normHeight = canvas.height / FULL_HEIGHT
+    return [
+        xZero(normWidth) + Math.floor(x * normWidth),
+        yZero(normHeight) + Math.floor(y * normHeight),
+    ];
+}
+
+
+/**
+ * @param canvas {HTMLCanvasElement}
+ * @param x {number}
+ * @param y {number}
+ * @returns [number, number]
+ */
 export function projectAbsoluteCoords(canvas, x, y) {
     const normWidth = canvas.width / FULL_WIDTH
     const normHeight = canvas.height / FULL_HEIGHT

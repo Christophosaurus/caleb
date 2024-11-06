@@ -1,30 +1,27 @@
 import { getRow } from "./utils.js";
 
 /**
- * @param key {"f"}
- * @param dir {-1 | 1}
+ * @param {fFtTKey} key
  * @returns {CalebInputHandlerMapCB}
  */
-function movefFtT(key, dir) {
+function movefFtT(key) {
     return function(state) {
-        if (state.caleb.dash.dashing) {
-            return false;
-        }
-
-        const caleb = state.caleb;
-        const dash = caleb.dash;
-        const opts = caleb.opts.dash;
-        const row = getRow(caleb);
-
-        dash.dashing = true;
-        dash.dashDistance = opts.distance
-        dash.dashStart = null
-        dash.dashDir = dir
-
         resetJumpState(state);
+
+        state.caleb.fFtT.type = key
+        state.caleb.fFtT.startCount = state.input.anykeyCount
+        state.input.anykey = true;
 
         return true;
     }
+}
+
+/**
+ * @param {GameState} state
+ * @returns {boolean}
+ */
+function anykeyHandler(state) {
+    if (state.input.anykeyCount
 }
 
 /**
@@ -100,6 +97,15 @@ export function defaultDashStat() {
         noDashTime: 0,
     }
 }
+
+/** @returns {fFtT} */
+export function defaultfFtT() {
+    return {
+        type: "f",
+        startCount: 0,
+    }
+}
+
 
 
 /**
@@ -177,6 +183,20 @@ function onKeyDown(next) {
 
 /**
  * @param next {CalebInputHandlerMapCB}
+ * @returns {CalebInputHandlerMapCB}
+ */
+function onKeyUp(next) {
+    return function(state, timing) {
+        if (timing.done) {
+            return next(state, timing)
+        }
+        return false
+    }
+}
+
+
+/**
+ * @param next {CalebInputHandlerMapCB}
  * @param input {number[]}
  * @returns {CalebInputHandlerMapCB}
  */
@@ -204,12 +224,13 @@ function withHold(next) {
 }
 
 /**
- * @param next {CalebInputHandlerMapCB}
+ * @param {CalebInputHandlerMapCB} next
+ * @param {boolean} anykeyState
  * @returns {CalebInputHandlerMapCB}
  */
-function noAnykey(next) {
+function anykey(next, anykeyState) {
     return function(state, timing) {
-        if (state.input.anykey) {
+        if (state.input.anykey !== anykeyState) {
             return false;
         }
         return next(state, timing);
@@ -220,26 +241,29 @@ function noAnykey(next) {
  * @return {CalebInputHandlerMap}
  */
 export function createCalebInputHandler() {
-    /** @type number[] */
+    /** @type {number[]} */
     const numericInput = []
+
+    /** @type {CalebInputHandlerMap} */
     const inputHandlerMap = {
-        0: noAnykey(withHold(addNumericHandler(0, numericInput))),
-        1: noAnykey(withHold(addNumericHandler(1, numericInput))),
-        2: noAnykey(withHold(addNumericHandler(2, numericInput))),
-        3: noAnykey(withHold(addNumericHandler(3, numericInput))),
-        4: noAnykey(withHold(addNumericHandler(4, numericInput))),
-        5: noAnykey(withHold(addNumericHandler(5, numericInput))),
-        6: noAnykey(withHold(addNumericHandler(6, numericInput))),
-        7: noAnykey(withHold(addNumericHandler(7, numericInput))),
-        8: noAnykey(withHold(addNumericHandler(8, numericInput))),
-        9: noAnykey(withHold(addNumericHandler(9, numericInput))),
-        h: noAnykey(withHold(moveHL(-1))),
-        l: noAnykey(withHold(moveHL(1))),
-        k: noAnykey(onKeyDown(clearNumericState(moveKJ(numericInput, -1), numericInput))),
-        j: noAnykey(onKeyDown(clearNumericState(moveKJ(numericInput, 1), numericInput))),
-        w: noAnykey(onKeyDown(moveWB(1))),
-        b: noAnykey(onKeyDown(moveWB(-1))),
-        f: noAnykey(onKeyDown(movefFtT("f", 1))),
+        0: anykey(withHold(addNumericHandler(0, numericInput)), false),
+        1: anykey(withHold(addNumericHandler(1, numericInput)), false),
+        2: anykey(withHold(addNumericHandler(2, numericInput)), false),
+        3: anykey(withHold(addNumericHandler(3, numericInput)), false),
+        4: anykey(withHold(addNumericHandler(4, numericInput)), false),
+        5: anykey(withHold(addNumericHandler(5, numericInput)), false),
+        6: anykey(withHold(addNumericHandler(6, numericInput)), false),
+        7: anykey(withHold(addNumericHandler(7, numericInput)), false),
+        8: anykey(withHold(addNumericHandler(8, numericInput)), false),
+        9: anykey(withHold(addNumericHandler(9, numericInput)), false),
+        h: anykey(withHold(moveHL(-1)), false),
+        l: anykey(withHold(moveHL(1)), false),
+        k: anykey(onKeyDown(clearNumericState(moveKJ(numericInput, -1), numericInput)), false),
+        j: anykey(onKeyDown(clearNumericState(moveKJ(numericInput, 1), numericInput)), false),
+        w: anykey(onKeyDown(moveWB(1)), false),
+        b: anykey(onKeyDown(moveWB(-1)), false),
+        f: anykey(onKeyDown(movefFtT("f")), false),
+        anykey: anykey(anykeyHandler, true),
     };
 
     return inputHandlerMap;

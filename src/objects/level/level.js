@@ -1,19 +1,46 @@
 import { assert } from "../../assert.js";
 import { AABB } from "../../math/aabb.js";
 import { Vector2D } from "../../math/vector.js";
-import { GAME_HEIGHT, GAME_WIDTH } from "../../window.js";
+import { GAME_HEIGHT, GAME_WIDTH, projectCoords } from "../../window.js";
+import { getRow } from "../caleb/utils.js";
+
+/**
+ * @param ctx {CanvasRenderingContext2D}
+ * @param text {string}
+ * @param x {number}
+ * @param y {number}
+ */
+export function renderText(ctx, text, x, y, calebY) {
+    const [_x, _y] = projectCoords(ctx.canvas, x + 0.25, y + 0.5)
+
+    if (y === calebY) {
+        ctx.fillStyle = "purple";
+    } else {
+        ctx.fillStyle = "white";
+    }
+
+    ctx.textAlign = "left"
+    ctx.textBaseline = "middle"
+    ctx.fillText(text, _x, _y)
+}
+
 
 /** @param state {GameState}
 */
 export function render(state) {
     const plats = state.level.platforms
     const ctx = state.ctx;
+    const calebY = getRow(state.caleb);
 
     for (const p of plats) {
         ctx.fillRect(p.renderX, p.renderY, p.renderWidth, p.renderHeight);
 
         // lettered platform
         if ("letters" in p) {
+            const {x, y} = p.physics.body.pos
+            for (let i = 0; i < p.letters.length; ++i) {
+                renderText(ctx, p.letters[i], x, y + i, calebY);
+            }
         }
     }
 
@@ -42,7 +69,7 @@ export function createPlatform(aabb) {
 
 /**
  * @param aabb {AABB}
- * @param letters {string[]}
+ * @param letters {string}
  * @returns {LetteredWall}
 */
 export function createLetteredWall(aabb, letters) {
