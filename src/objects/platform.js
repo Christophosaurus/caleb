@@ -5,7 +5,7 @@ import { Vector2D } from "../math/vector.js";
 /** @param state {GameState}
 */
 export function render(state) {
-    const plats = state.platforms
+    const plats = state.level.platforms
     const ctx = state.ctx;
 
     for (const p of plats) {
@@ -53,6 +53,7 @@ export function createLetteredWall(aabb, letters) {
     }
 
     return {
+        id: ++_id,
         physics: {
             vel: new Vector2D(0, 0),
             acc: new Vector2D(0, 0),

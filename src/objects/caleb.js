@@ -5,23 +5,26 @@ import { debugForCallCount, debugForTickCount } from "../debug.js";
 import * as CalebInput from "./caleb_input.js";
 import * as CalebPhysics from "./caleb_physics.js";
 import * as Input from "../input/input.js";
+import { now } from "../utils.js";
 
 const debugLog = debugForCallCount(100);
 
 const inputHandlerMap = CalebInput.createCalebInputHandler()
 
-/** @param opts {CalebOpts}
-/** @param pos {Vector2D}
+/** @param state {GameState}
 /** @returns {Caleb} */
-export function createCaleb(opts, pos) {
+export function createCaleb(state) {
     return {
-        opts: opts,
+        opts: state.opts.caleb,
 
         physics: {
             acc: new Vector2D(0, 0),
             vel: new Vector2D(0, 0),
-            body: new AABB(pos, 0.5, 1),
+            body: new AABB(state.level.initialPosition.clone(), 0.5, 1),
         },
+
+        dead: false,
+        deadAt: 0,
 
         jump: CalebInput.defaultJumpState(),
         dash: CalebInput.defaultDashStat(),
@@ -183,6 +186,10 @@ export function render(gameState) {
 */
 export function update(gameState, delta) {
     const caleb = gameState.caleb
+    if (caleb.dead || delta === 0) {
+        return;
+    }
+
     handleInput(gameState);
     updatePosition(gameState, delta);
 
@@ -191,8 +198,14 @@ export function update(gameState, delta) {
 }
 
 /**
-* @param _ {GameState}
+* @param state {GameState}
 */
-export function tickClear(_) { }
+export function tickClear(state) {
+    const caleb = state.caleb
+    if (!caleb.dead && caleb.physics.body.pos.y > Window.FULL_HEIGHT + 3) {
+        caleb.dead = true;
+        caleb.deadAt = now();
+    }
+}
 
 

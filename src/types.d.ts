@@ -10,15 +10,11 @@ declare global {
         gravity: Vector2D,
         frameTimeMS: number,
 
-        dash: {
+        tolerance: {
             topBy: number,
             bottomBy: number,
         }
 
-        jump: {
-            leftBy: number,
-            rightBy: number,
-        }
     }
 
     type CalebJumpEaseCB = (percent: number) => number
@@ -67,6 +63,8 @@ declare global {
     type Caleb = Collidable & CanvasProjectable & {
         opts: CalebOpts,
         renderColor: string,
+        dead: boolean,
+        deadAt: number,
 
         jump: CalebJump,
         dash: CalebDash,
@@ -84,12 +82,22 @@ declare global {
     type Platform = Collidable & CanvasProjectable & { id: number }
     type LetteredWall = Platform & { letters: string[] }
 
+    type Level = {
+        platforms: Platform[]
+        initialPosition: Vector2D
+    }
+
     type GameState = {
         opts: GameOptions
         caleb: Caleb
         ctx: CanvasRenderingContext2D
-        platforms: Platform[]
+        level: Level
 
+        rn: {
+            zero: number
+        }
+
+        gameOver: boolean,
         input: InputState,
         loopStartTime: number,
         loopDelta: number,

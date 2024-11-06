@@ -3,6 +3,7 @@ import * as Caleb from "./objects/caleb.js";
 import * as Debugger from "./debug.js";
 import * as Platforms from "./objects/platform.js";
 import * as Window from "./window.js";
+import * as RN from "./objects/relative_numbers.js";
 import { now as nowFn } from "./utils.js";
 import { Vector2D } from "./math/vector.js";
 import { AABB } from "./math/aabb.js";
@@ -12,21 +13,35 @@ const updateables = [
     Input,
     Caleb,
     Debugger,
+    RN,
 ];
 
 /** @type RenderableModule[] */
 const renderables = [
     Caleb,
     Platforms,
+    RN,
 ];
 
 /**
  * @param state {GameState}
  */
-function projectStaticObjects(state) {
-    for (const p of state.platforms) {
+function projectStaticObjects (state){
+    for (const p of state.level.platforms) {
         Window.project(state.ctx.canvas, p);
     }
+}
+
+/**
+ * @param state {GameState}
+ */
+function reset(state) {
+    state.caleb = Caleb.createCaleb(state)
+    state.gameOver = false;
+    state.loopStartTime = nowFn()
+    state.loopDelta = 0;
+
+    projectStaticObjects(state);
 }
 
 /**
@@ -42,26 +57,20 @@ export function startGame(canvas, gameopts) {
     /** @type {GameState} */
     const state = {
         opts: gameopts,
-        caleb: Caleb.createCaleb(gameopts.caleb, new Vector2D(1, 1)),
-        platforms: [],
+        caleb: null,
+        level: {
+            platforms: [
+                Platforms.createPlatform(new AABB(new Vector2D(0, 10), 10, 1)),
+            ],
+            initialPosition: new Vector2D(10, 1),
+        },
+        gameOver: false,
         loopStartTime: 0,
         loopDelta: 0,
         ctx,
+        rn: {zero: 1},
         input: inputState,
     };
-
-    // TODO environment hydration, platforms? moving things? burnings?
-    state.platforms.push(
-        Platforms.createPlatform(new AABB(new Vector2D(0, 10), 10, 1)),
-        Platforms.createPlatform(new AABB(new Vector2D(13, 8), 10, 1)),
-        Platforms.createPlatform(new AABB(new Vector2D(5, 2), 2, 1)),
-        Platforms.createPlatform(new AABB(new Vector2D(0, 0), 1, Window.WIDTH)),
-        Platforms.createLetteredWall(new AABB(new Vector2D(Window.WIDTH - 1, 6), 1, 3),
-            [" ", "b", " "]
-        ),
-    );
-
-    projectStaticObjects(state);
 
     ctx.imageSmoothingEnabled = false;
 
@@ -69,6 +78,7 @@ export function startGame(canvas, gameopts) {
         projectStaticObjects(state);
     });
 
+    reset(state);
     state.loopStartTime = nowFn();
     gameLoop(state)
 }
@@ -81,6 +91,13 @@ function gameLoop(state) {
     const delta = start - state.loopStartTime;
     state.loopStartTime = start;
     state.loopDelta = delta;
+
+    // TODO: probably need opts?
+    if (state.caleb.dead && start - state.caleb.deadAt > 1000) {
+        reset(state);
+        gameLoop(state);
+        return;
+    }
 
     tick(state, delta);
     const now = nowFn();

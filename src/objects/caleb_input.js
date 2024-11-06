@@ -1,3 +1,5 @@
+import { assert } from "../assert.js";
+
 /**
  * @param dir {-1 | 1}
  * @returns {CalebInputHandlerMapCB}

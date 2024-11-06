@@ -38,14 +38,9 @@ startGame(canvas, {
         }
     },
 
-    dash: {
+    tolerance: {
         topBy: 0.15,
         bottomBy: 0.15,
-    },
-
-    jump: {
-        leftBy: 0.15,
-        rightBy: 0.15,
     },
 
     gravity: new Vector2D(0, 28),

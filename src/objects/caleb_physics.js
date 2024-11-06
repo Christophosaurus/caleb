@@ -12,16 +12,17 @@ export function testCollisions(state, nextPos, nextAABB) {
     const body = physics.body;
     const dash = state.caleb.dash;
     const opts = state.opts;
+    const tolerance = opts.tolerance
 
-    for (const platform of state.platforms) {
+    for (const platform of state.level.platforms) {
         const platformAABB = platform.physics.body;
         if (nextAABB.intersects(platformAABB)) {
             const left = body.leftOf(platformAABB)
             const right = physics.body.rightOf(platformAABB)
             if (left || right) {
-                if (dash.dashing && body.topOverlapBy(platformAABB, opts.dash.topBy)) {
+                if (dash.dashing && body.topOverlapBy(platformAABB, tolerance.topBy)) {
                     nextPos.y = platformAABB.pos.y - body.height
-                } else if (dash.dashing && body.bottomOverlapBy(platformAABB, opts.dash.bottomBy)) {
+                } else if (dash.dashing && body.bottomOverlapBy(platformAABB, tolerance.bottomBy)) {
                     nextPos.y = platformAABB.pos.y + platformAABB.pos.y
                 } else {
                     physics.vel.x = 0;

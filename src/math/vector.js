@@ -1,3 +1,6 @@
+function precision(num) {
+    return Math.floor(num * 100) / 100
+}
 /**
  * A class representing a 2D vector with various methods for game development.
  * @class
@@ -148,7 +151,7 @@ export class Vector2D {
    * @returns {string} The string representation.
    */
     toString() {
-        return `V2(${this.x}, ${this.y})`;
+        return `V2(${precision(this.x)}, ${precision(this.y)})`;
     }
 
     /**
