@@ -3,6 +3,7 @@ import { Vector2D } from "../math/vector.js";
 import * as Window from "../window.js";
 import { debugForCallCount, debugForTickCount } from "../debug.js";
 import * as CalebInput from "./caleb_input.js";
+import * as CalebPhysics from "./caleb_physics.js";
 import * as Input from "../input/input.js";
 
 const debugLog = debugForCallCount(100);
@@ -51,43 +52,6 @@ function handleInput(gameState) {
 }
 
 /**
- * @param state {GameState}
- * @param nextPos {Vector2D}
- * @param nextAABB {AABB}
- */
-function testCollisions(state, nextPos, nextAABB) {
-    const physics = state.caleb.physics;
-
-    for (const platform of state.platforms) {
-        const platformAABB = platform.physics.body;
-        if (nextAABB.intersects(platformAABB)) {
-            if (physics.body.leftOf(platformAABB)) {
-                physics.vel.x = 0;
-                nextPos.x = platformAABB.pos.x - state.caleb.physics.body.width;
-
-                // TODO dashes should allow for a certain % of the body to "step onto" the platform
-                CalebInput.resetDashState(state);
-            } else if (physics.body.rightOf(platformAABB)) {
-                physics.vel.x = 0;
-                nextPos.x = platformAABB.pos.x + platformAABB.width
-
-                // TODO dashes should allow for a certain % of the body to "step onto" the platform
-                CalebInput.resetDashState(state);
-            } else if (physics.body.topOf(platformAABB)) {
-                physics.vel.y = 0;
-                nextPos.y = platformAABB.pos.y - state.caleb.physics.body.height
-                CalebInput.resetJumpState(state);
-            } else if (physics.body.bottomOf(platformAABB)) {
-                physics.vel.y = 0;
-                nextPos.y = platformAABB.pos.y + platformAABB.height
-                CalebInput.resetJumpState(state);
-            }
-            break
-        }
-    }
-}
-
-/**
 * @param state {GameState}
 * @param delta {number}
 * @returns {boolean}
@@ -99,10 +63,6 @@ function updateJump(state, delta) {
     const cJump = caleb.jump;
     const jumpOpts = caleb.opts.jump;
     const jumping = cJump.jumping
-
-    if (jumping && caleb.dash.dashing) {
-        debugLog("help??");
-    }
 
     if (jumping) {
         if (cJump.jumpStart === null) {
@@ -199,7 +159,7 @@ function updatePosition(state, delta) {
     const nextPos = pos.addCopy(vel.multiplyCopy(deltaNorm));
     const nextAABB = new AABB(nextPos, caleb.physics.body.width, caleb.physics.body.height);
 
-    testCollisions(state, nextPos, nextAABB);
+    CalebPhysics.testCollisions(state, nextPos, nextAABB);
 
     pos.set(nextPos);
 }

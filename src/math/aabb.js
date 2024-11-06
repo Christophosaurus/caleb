@@ -92,7 +92,45 @@ export class AABB {
         return this.pos.y >= other.pos.y + other.height;
     }
 
+    /**
+     * @param other {AABB}
+     * @param amount {number}
+     * @returns {boolean}
+     */
+    leftOverlapBy(other, amount) {
+        const leftOverlap = this.pos.x - (other.pos.x + other.width);
+        return leftOverlap <= amount && leftOverlap >= 0
+    }
 
+    /**
+     * @param other {AABB}
+     * @param amount {number}
+     * @returns {boolean}
+     */
+    rightOverlapBy(other, amount) {
+        const rightOverlap = other.pos.x - (this.pos.x + this.width);
+        return rightOverlap <= amount && rightOverlap >= 0
+    }
+
+    /**
+     * @param other {AABB}
+     * @param amount {number}
+     * @returns {boolean}
+     */
+    topOverlapBy(other, amount) {
+        const topOverlap = (this.pos.y + this.height) - other.pos.y
+        return topOverlap <= amount && topOverlap >= 0
+    }
+
+    /**
+     * @param other {AABB}
+     * @param amount {number}
+     * @returns {boolean}
+     */
+    bottomOverlapBy(other, amount) {
+        const bottomOverlap = this.pos.y - (other.pos.y + other.height);
+        return bottomOverlap <= amount && bottomOverlap >= 0
+    }
 
     /**
    * @returns {AABB}

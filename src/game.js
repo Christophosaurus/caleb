@@ -57,7 +57,8 @@ export function startGame(canvas, gameopts) {
     // TODO environment hydration, platforms? moving things? burnings?
     state.platforms.push(
         Platforms.createPlatform(new AABB(new Vector2D(0, 10), 10, 1)),
-        Platforms.createPlatform(new AABB(new Vector2D(15, 8), 10, 1)),
+        Platforms.createPlatform(new AABB(new Vector2D(13, 8), 10, 1)),
+        Platforms.createPlatform(new AABB(new Vector2D(5, 2), 2, 1)),
     );
     state.walls.push(
         Platforms.createLetteredWall(new AABB(new Vector2D(Window.WIDTH - 1, 6), 1, 3),

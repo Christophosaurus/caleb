@@ -19,12 +19,15 @@ export function render(state) {
     }
 }
 
+let _id = 0;
 /**
  * @param aabb {AABB}
  * @returns {Platform}
 */
 export function createPlatform(aabb) {
+    const id = _id++
     return {
+        id,
         physics: {
             vel: new Vector2D(0, 0),
             acc: new Vector2D(0, 0),
