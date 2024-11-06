@@ -1,6 +1,6 @@
-import * as CalebInput from "./caleb_input.js";
-import { Vector2D } from "../math/vector.js";
-import { AABB } from "../math/aabb.js";
+import * as CalebInput from "./input.js";
+import { Vector2D } from "../../math/vector.js";
+import { AABB } from "../../math/aabb.js";
 
 /**
  * @param state {GameState}

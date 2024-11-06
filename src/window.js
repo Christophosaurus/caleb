@@ -41,7 +41,6 @@ export function project(canvas, projectable) {
     projectable.renderHeight = Math.floor(body.height * normHeight);
 }
 
-
 /**
  * @param canvas {HTMLCanvasElement}
  * @param x {number}

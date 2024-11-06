@@ -1,6 +1,4 @@
-import { debugForTickCount } from "../debug.js";
-
-/** @type (HandlerKey | DIGIT)[] */
+/** @type {(HandlerKey | DIGIT)[]} */
 export const keys = [
     "h", "l", "k", "j", "w", "b",
     .../** @type DIGIT[] */(new Array(10).fill(0).map((_, i) => i))];
@@ -92,6 +90,7 @@ export function createInputState() {
     /** @type InputState */
     const inputMap = {
         hasInput: false,
+        anykey: false,
         inputs,
     };
 

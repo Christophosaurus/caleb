@@ -1,13 +1,11 @@
 import * as Window from "../window.js";
-
+import { getRow } from "./caleb/utils.js";
 
 /**
  * @param state {GameState}
  */
 export function update(state) {
-    const body = state.caleb.physics.body;
-    const y = Math.floor(body.pos.y + body.height / 2)
-    state.rn.zero = y
+    state.rn.zero = getRow(state.caleb);
 }
 
 /**

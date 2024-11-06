@@ -1,11 +1,11 @@
-import { AABB } from "../math/aabb.js";
-import { Vector2D } from "../math/vector.js";
-import * as Window from "../window.js";
-import { debugForCallCount, debugForTickCount } from "../debug.js";
-import * as CalebInput from "./caleb_input.js";
-import * as CalebPhysics from "./caleb_physics.js";
-import * as Input from "../input/input.js";
-import { now } from "../utils.js";
+import { AABB } from "../../math/aabb.js";
+import { Vector2D } from "../../math/vector.js";
+import * as Window from "../../window.js";
+import { debugForCallCount, debugForTickCount } from "../../debug.js";
+import * as CalebInput from "./input.js";
+import * as CalebPhysics from "./physics.js";
+import * as Input from "../../input/input.js";
+import { now } from "../../utils.js";
 
 const debugLog = debugForCallCount(100);
 

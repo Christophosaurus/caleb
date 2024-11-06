@@ -1,6 +1,7 @@
-import { assert } from "../assert.js";
-import { AABB } from "../math/aabb.js";
-import { Vector2D } from "../math/vector.js";
+import { assert } from "../../assert.js";
+import { AABB } from "../../math/aabb.js";
+import { Vector2D } from "../../math/vector.js";
+import { GAME_HEIGHT, GAME_WIDTH } from "../../window.js";
 
 /** @param state {GameState}
 */
@@ -65,4 +66,28 @@ export function createLetteredWall(aabb, letters) {
         renderWidth: 0,
         renderHeight: 0,
     };
+}
+
+/**
+ * @param {(Platform | LetteredWall)[]} platforms
+ * @returns {(string | null)[][]}
+ */
+export function createLetterMap(platforms) {
+    const out = [];
+    for (let y = 0; y < GAME_HEIGHT; y++) {
+        out.push(new Array(GAME_WIDTH).fill(null));
+    }
+
+    for (const p of platforms) {
+        if (!("letters" in p)) {
+            continue;
+        }
+
+        const {x, y} = p.physics.body.pos
+        for (let i = 0; i < p.letters.length && y + i < GAME_HEIGHT; ++i) {
+            out[y + i][x] = p.letters[i]
+        }
+    }
+
+    return out;
 }

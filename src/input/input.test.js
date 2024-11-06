@@ -1,4 +1,7 @@
+// @ts-ignore
 import test from "node:test";
+
+// @ts-ignore
 import * as assert from "node:assert";
 import * as Input from "./input.js";
 

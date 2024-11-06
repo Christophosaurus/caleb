@@ -82,16 +82,20 @@ declare global {
     type Platform = Collidable & CanvasProjectable & { id: number }
     type LetteredWall = Platform & { letters: string[] }
 
-    type Level = {
+    type LevelSets = LevelSet[]
+    type LevelSet = {
+        title: string,
+        difficulty: number,
         platforms: Platform[]
         initialPosition: Vector2D
+        letterMap: (string | null)[][]
     }
 
     type GameState = {
         opts: GameOptions
         caleb: Caleb
         ctx: CanvasRenderingContext2D
-        level: Level
+        level: LevelSet,
 
         rn: {
             zero: number
@@ -125,6 +129,7 @@ declare global {
     type HandlerKey = "h" | "l" | "k" | "j" | "w" | "b" | "f"
     type InputState = {
         hasInput: boolean,
+        anykey: boolean,
         inputs: InputMap,
     }
     type CalebInputHandlerMapCB = (state: GameState, timing: InputTiming) => boolean
@@ -142,5 +147,10 @@ declare global {
         render(gameState: GameState): void
     }
 
+    type BehaviorNode = {
+        enter(state: GameState): boolean
+        run(state: GameState): void
+        exit(state: GameState): void
+    }
 }
 
