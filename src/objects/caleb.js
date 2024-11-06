@@ -11,15 +11,16 @@ const debugLog = debugForCallCount(100);
 const inputHandlerMap = CalebInput.createCalebInputHandler()
 
 /** @param opts {CalebOpts}
+/** @param pos {Vector2D}
 /** @returns {Caleb} */
-export function createCaleb(opts) {
+export function createCaleb(opts, pos) {
     return {
         opts: opts,
 
         physics: {
             acc: new Vector2D(0, 0),
             vel: new Vector2D(0, 0),
-            body: new AABB(new Vector2D(0, 0), 0.5, 1),
+            body: new AABB(pos, 0.5, 1),
         },
 
         jump: CalebInput.defaultJumpState(),
@@ -162,6 +163,9 @@ function updatePosition(state, delta) {
     CalebPhysics.testCollisions(state, nextPos, nextAABB);
 
     pos.set(nextPos);
+
+    // TODO let me think about leaving the map...
+    // its almost good to let myself that way i can do a callback
 }
 
 /**

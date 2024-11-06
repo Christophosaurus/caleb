@@ -1,5 +1,24 @@
-export const WIDTH = 32
-export const HEIGHT = 24
+const RELATIVE_LINE_WIDTH = 2
+const GAME_INFO_HEIGHT = 2
+export const WIDTH = 32 + RELATIVE_LINE_WIDTH
+export const HEIGHT = 24 + GAME_INFO_HEIGHT
+
+/**
+ * @param normWidth {number}
+ * @returns {number}
+ */
+function xZero(normWidth) {
+    return normWidth * RELATIVE_LINE_WIDTH;
+}
+
+/**
+ * @param normHeight {number}
+ * @returns {number}
+ */
+function yZero(normHeight) {
+    return normHeight * GAME_INFO_HEIGHT;
+}
+
 
 /**
  * I am positive i can make this better for "efficiency" but i am also using
@@ -15,8 +34,8 @@ export function project(canvas, projectable) {
     const normHeight = canvas.height / HEIGHT
     const body = projectable.physics.body;
 
-    projectable.renderX = Math.floor(body.pos.x * normWidth);
-    projectable.renderY = Math.floor(body.pos.y * normHeight);
+    projectable.renderX = xZero(normWidth) + Math.floor(body.pos.x * normWidth);
+    projectable.renderY = yZero(normHeight) + Math.floor(body.pos.y * normHeight);
     projectable.renderWidth = Math.floor(body.width * normWidth);
     projectable.renderHeight = Math.floor(body.height * normHeight);
 }

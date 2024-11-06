@@ -27,9 +27,6 @@ function projectStaticObjects(state) {
     for (const p of state.platforms) {
         Window.project(state.ctx.canvas, p);
     }
-    for (const w of state.walls) {
-        Window.project(state.ctx.canvas, w);
-    }
 }
 
 /**
@@ -45,9 +42,8 @@ export function startGame(canvas, gameopts) {
     /** @type {GameState} */
     const state = {
         opts: gameopts,
-        caleb: Caleb.createCaleb(gameopts.caleb),
+        caleb: Caleb.createCaleb(gameopts.caleb, new Vector2D(1, 1)),
         platforms: [],
-        walls: [],
         loopStartTime: 0,
         loopDelta: 0,
         ctx,
@@ -59,12 +55,11 @@ export function startGame(canvas, gameopts) {
         Platforms.createPlatform(new AABB(new Vector2D(0, 10), 10, 1)),
         Platforms.createPlatform(new AABB(new Vector2D(13, 8), 10, 1)),
         Platforms.createPlatform(new AABB(new Vector2D(5, 2), 2, 1)),
-    );
-    state.walls.push(
+        Platforms.createPlatform(new AABB(new Vector2D(0, 0), 1, Window.WIDTH)),
         Platforms.createLetteredWall(new AABB(new Vector2D(Window.WIDTH - 1, 6), 1, 3),
             [" ", "b", " "]
         ),
-    )
+    );
 
     projectStaticObjects(state);
 

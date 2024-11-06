@@ -10,13 +10,12 @@ export function render(state) {
 
     for (const p of plats) {
         ctx.fillRect(p.renderX, p.renderY, p.renderWidth, p.renderHeight);
+
+        // lettered platform
+        if ("letters" in p) {
+        }
     }
 
-    const lWalls = state.walls
-    for (const w of lWalls) {
-        ctx.fillRect(w.renderX, w.renderY, w.renderWidth, w.renderHeight);
-        // TODO Letters
-    }
 }
 
 let _id = 0;

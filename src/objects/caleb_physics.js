@@ -12,7 +12,6 @@ export function testCollisions(state, nextPos, nextAABB) {
     const body = physics.body;
     const dash = state.caleb.dash;
     const opts = state.opts;
-    const jump = state.caleb.jump;
 
     for (const platform of state.platforms) {
         const platformAABB = platform.physics.body;
@@ -29,13 +28,13 @@ export function testCollisions(state, nextPos, nextAABB) {
                     if (left) {
                         nextPos.x = platformAABB.pos.x - state.caleb.physics.body.width;
                     } else {
-                        nextPos.x = platformAABB.pos.x + platformAABB.pos.x
+                        nextPos.x = platformAABB.pos.x + platformAABB.width
                     }
 
                     // TODO dashes should allow for a certain % of the body to "step onto" the platform
                     CalebInput.resetDashState(state);
                 }
-                break;
+                continue;
             }
 
             const top = body.topOf(platformAABB)
@@ -52,7 +51,7 @@ export function testCollisions(state, nextPos, nextAABB) {
 
                 CalebInput.resetJumpState(state);
             }
-            break;
+            continue;
         }
     }
 }

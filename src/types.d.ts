@@ -89,7 +89,6 @@ declare global {
         caleb: Caleb
         ctx: CanvasRenderingContext2D
         platforms: Platform[]
-        walls: LetteredWall[]
 
         input: InputState,
         loopStartTime: number,
