@@ -103,6 +103,7 @@ declare global {
         caleb: Caleb
         ctx: CanvasRenderingContext2D
         level: LevelSet,
+        tick: number,
 
         rn: {
             zero: number
@@ -129,8 +130,6 @@ declare global {
         }
     }
 
-    type KeyEvent = { type: "keydown" | "keyup", timestamp: number, key: string };
-    type Handler = (event: KeyEvent) => void
     type InputTiming = {
         timestamp: number,
         tickHoldDuration: number,
@@ -138,23 +137,14 @@ declare global {
         done: boolean
     }
 
-    type DIGIT = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
-    type HandlerKey = "h" | "l" | "k" | "j" | "w" | "b" | "f"
+    type Input = {type: "down-up" | "down" | "hold" | "up", key: string, tick: number}
+    type InputHandler = (state: GameState, input: Input) => boolean
     type InputState = {
-        hasInput: boolean,
-        anykey: boolean,
-        anykeyCount: number,
-        lastKey: string,
-        inputs: InputMap,
+        hasInput: boolean
+        inputs: Input[]
+        tick: number
+        handlers: InputHandler[]
     }
-    type CalebInputHandlerMapCB = (state: GameState, timing: InputTiming) => boolean
-
-    type HandlerMap = {
-        [K in HandlerKey | DIGIT]: Handler; } & { total: number }
-    type InputMap = { [K in HandlerKey | DIGIT]: InputTiming };
-    type CalebInputHandlerMap  = {
-        [K in HandlerKey | DIGIT]: CalebInputHandlerMapCB
-    } & { anykey: CalebInputHandlerMapCB };
 
     type UpdateableModule = {
         update(gameState: GameState, delta: number): void

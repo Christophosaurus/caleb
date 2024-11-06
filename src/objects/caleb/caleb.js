@@ -9,8 +9,6 @@ import { now } from "../../utils.js";
 
 const debugLog = debugForCallCount(100);
 
-const inputHandlerMap = CalebInput.createCalebInputHandler()
-
 /** @param state {GameState}
 /** @returns {Caleb} */
 export function createCaleb(state) {
@@ -38,22 +36,6 @@ export function createCaleb(state) {
         // I don't know wghat the canvas coloring mechanism is yet
         renderColor: "#FFFFFF",
     };
-}
-
-const reducedKeys = Input.keys.filter(k => k !== "l" && k !== "h")
-
-/**
-* @param gameState {GameState}
-*/
-function handleInput(gameState) {
-    const input = gameState.input.inputs;
-    for (const k of reducedKeys) {
-        inputHandlerMap[k](gameState, input[k]);
-    }
-
-    if (!inputHandlerMap.h(gameState, input.h) && !inputHandlerMap.l(gameState, input.l)) {
-        gameState.caleb.physics.vel.x = 0;
-    }
 }
 
 /**
@@ -191,7 +173,6 @@ export function update(gameState, delta) {
         return;
     }
 
-    handleInput(gameState);
     updatePosition(gameState, delta);
 
     // techincally i could move this into the engine side not in each update
@@ -208,5 +189,3 @@ export function tickClear(state) {
         caleb.deadAt = now();
     }
 }
-
-

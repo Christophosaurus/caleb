@@ -22,6 +22,7 @@ export function reset(state) {
     state.gameOver = false;
     state.loopStartTime = Utils.now()
     state.loopDelta = 0;
+    state.tick = 0;
 
     projectStaticObjects(state);
 }
@@ -38,6 +39,8 @@ export function createGameState(opts, input, canvas, level) {
     const state = {
         opts,
         level,
+
+        tick: 0,
 
         caleb: null,
         gameOver: false,

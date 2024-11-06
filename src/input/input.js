@@ -1,157 +1,87 @@
-/** @type {(HandlerKey | DIGIT)[]} */
-export const keys = [
-    "h", "l", "k", "j", "w", "b", "f",
-    .../** @type DIGIT[] */(new Array(10).fill(0).map((_, i) => i))];
-
 /**
- * Note: there cannot be more than 1 of each type of event per frame
- * this should not pose a problem to anyone following the rules as frames are
- * 16 or 33ms.  that would be a keydown, up, then another down over that period of time
- * @param key {HandlerKey | DIGIT}
- * @param out {InputMap}
- * @return Handler
+ * @param {InputState} state
+ * @param {string} key
+ * @returns {Input}
  */
-export function createHandler(key, out) {
-    /** @param event {KeyEvent} */
-    return function(event) {
-        if (event.type === "keydown") {
-            const item = out[key];
-            if (item.timestamp > 0) {
-                return
-            }
-            item.timestamp = event.timestamp;
-            item.initial = true;
-            item.done = false;
-        } else if (event.type === "keyup") {
-            const item = out[key];
-            if (item.timestamp === 0) {
-                return
-            }
-
-            item.tickHoldDuration = event.timestamp - item.timestamp;
-            item.timestamp = 0;
-            item.done = true;
+export function get(state, key) {
+    let idx = -1
+    for (let i = 0; idx === -1 && i < state.inputs.length; ++i) {
+        const input = state.inputs[i]
+        if (input.key === key) {
+            return input
         }
     }
+    return null
 }
+
 
 /** @param gameState {GameState}
 /** @param _ {number} */
 export function update(gameState, _) {
-    const inputs = gameState.input.inputs;
-    for (let i = 0; i < keys.length; ++i) {
-        const item = inputs[keys[i]];
-        if (item.timestamp > 0) {
-            item.tickHoldDuration = gameState.loopStartTime - item.timestamp;
-            item.timestamp = gameState.loopStartTime;
-        }
-    }
-
-    if (inputs.h.tickHoldDuration > 0 && inputs.l.tickHoldDuration > 0) {
-        const h = inputs.h.tickHoldDuration;
-        const l = inputs.l.tickHoldDuration;
-        if (h > l) {
-            inputs.h.tickHoldDuration = h - l;
-            inputs.l.tickHoldDuration = 0;
-        } else {
-            inputs.l.tickHoldDuration = l - h;
-            inputs.h.tickHoldDuration = 0;
-        }
-    }
-
-    let hasInput = false;
-    for (let i = 0; !hasInput && i < keys.length; ++i) {
-        hasInput = inputs[keys[i]].tickHoldDuration > 0
-    }
-
-    gameState.input.hasInput = hasInput;
+    const input = gameState.input
+    input.tick = gameState.tick
+    input.hasInput = input.inputs.length > 0
 }
 
 
 /** @param gameState {GameState} */
 export function tickClear(gameState) {
-    for (let i = 0; i < keys.length; ++i) {
-        const item = gameState.input.inputs[keys[i]]
-        item.tickHoldDuration = 0;
-        item.initial = false;
+    const inputs = gameState.input.inputs
+    for (let i = inputs.length - 1; i >= 0; --i) {
+        const item = inputs[i]
+        if (item.type === "down-up" || item.type === "up") {
+            inputs.splice(i, 1)
+        }
     }
     gameState.input.hasInput = false;
 }
 
-/** @return InputState */
+/**
+ * @returns {InputState}
+ */
 export function createInputState() {
-    const inputs = /** @type InputMap */(
-        keys.reduce((acc, key) => {
-        acc[key] = {timestamp: 0, tickHoldDuration: 0, initial: false, done: false}
-        return acc;
-    }, {}));
-    for (let i = /** @type DIGIT */(0); i < 10; ++i) {
-        inputs[i] = {timestamp: 0, tickHoldDuration: 0, initial: false, done: false}
-    }
-
-    /** @type InputState */
-    const inputMap = {
-        hasInput: false,
-        anykey: false,
-        anykeyCount: 0,
-        lastKey: "",
-        inputs,
-    };
-
-    return inputMap;
-}
-
-/** @param event {KeyboardEvent}
- * @return {KeyEvent | null} */
-function keyboardEventToKeyEvent(event) {
-    if (event.type !== "keydown" && event.type !== "keyup") {
-        return null;
-    }
-
     return {
-        timestamp: event.timeStamp + performance.timeOrigin,
-        key: event.key,
-        type: event.type,
-    };
+        inputs: [],
+        hasInput: true,
+        tick: 0,
+    }
 }
 
 /**
- * @param {KeyEvent} event
- * @param {InputState} inputs
+ * @param {InputState} state
+ * @param {KeyboardEvent} event
  */
-function anykeyHandler(event, inputs) {
-    if (!inputs.anykey || event.type === "keyup") {
-        return
+export function processKey(state, event) {
+    let input = get(state, event.key)
+    if (input !== null && event.type === "keyup") {
+        if (input.tick === state.tick) {
+            input.type = "down-up"
+        } else {
+            input.type = "up"
+        }
+    } else if (input && event.type === "keydown") {
+        if (input.tick !== state.tick) {
+            input.type = "hold"
+        }
+    } else if (input === null && event.type === "keydown") {
+        state.inputs.push({
+            tick: state.tick,
+            type: "down",
+            key: event.key,
+        });
     }
-
-    inputs.anykeyCount++
-    inputs.lastKey = event.key
 }
 
-/** @param state {InputState}
-/** @param el {{addEventListener: (evt: string, cb: (...args: any) => void) => void}} */
-export function listenForKeyboard(state, el) {
-
-    const handler = /** @type HandlerMap */(
-        keys.reduce((acc, key) => {
-        acc[key] = createHandler(key, state.inputs)
-        return acc;
-    }, {}));
-    for (let i = /** @type DIGIT */(0); i < 10; ++i) {
-        handler[i] = createHandler(i, state.inputs)
-    }
-    handler.total = 0;
-
+/**
+ * @param {HTMLElement} el
+ * @param {InputState} state
+ */
+export function listenTo(el, state) {
     /** @param event {KeyboardEvent} */
     function listen(event) {
-        const evt = keyboardEventToKeyEvent(event);
-        if (event.key in handler) {
-            handler[event.key](evt);
-        }
-        anykeyHandler(evt, state);
+        processKey(state, event);
     }
 
     el.addEventListener("keydown", listen)
     el.addEventListener("keyup", listen)
 }
-

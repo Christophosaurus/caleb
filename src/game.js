@@ -1,5 +1,6 @@
 import * as Input from "./input/input.js";
 import * as Caleb from "./objects/caleb/caleb.js";
+import * as CalebInput from "./objects/caleb/input.js";
 import * as Debugger from "./debug.js";
 import * as Level from "./objects/level/level.js"
 import * as Levels from "./objects/level/levels/levels.js";
@@ -10,6 +11,7 @@ import { now as nowFn } from "./utils.js";
 /** @type UpdateableModule[] */
 const updateables = [
     Input,
+    CalebInput,
     Caleb,
     Debugger,
     RN,
@@ -39,7 +41,7 @@ export function startGame(canvas, gameopts) {
     const one = Levels.levels()[0];
     const state = State.createGameState(gameopts, inputState, canvas, one);
 
-    Input.listenForKeyboard(inputState, canvas);
+    Input.listenTo(canvas, inputState);
     State.reset(state);
     configureCanvas(canvas);
 
