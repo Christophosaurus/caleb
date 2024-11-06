@@ -2,7 +2,7 @@ import { debugForTickCount } from "../debug.js";
 
 /** @type (HandlerKey | DIGIT)[] */
 export const keys = [
-    "h", "l", "k",
+    "h", "l", "k", "j", "w", "b",
     .../** @type DIGIT[] */(new Array(10).fill(0).map((_, i) => i))];
 
 /**

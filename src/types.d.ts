@@ -12,8 +12,7 @@ declare global {
     }
 
     type CalebJumpEaseCB = (percent: number) => number
-    type CalebOpts = {
-        normWidthsPerSecond: number,
+    type CalebJumpOpts = {
         jumpEaseMS: number,
         jumpEaseFn: CalebJumpEaseCB,
         jumpEaseRange: number,
@@ -22,16 +21,48 @@ declare global {
         noJumpMultiplier: number,
     }
 
+    type CalebDashOpts = {
+        dashNormWidth: number,
+        distance: number,
+        dashEaseRange: number,
+    }
+
+    type CalebOpts = {
+        normWidthsPerSecond: number,
+        jump: CalebJumpOpts,
+        dash: CalebDashOpts,
+    }
+
+    // TODO maybe i need to refactor this to make sense of the world....
+    // feels like i could have some sort of "action" and just have that
+    // describe what i want
+    //
+    // F and T should be able to help me reduce this... if needed
+    type CalebJump = {
+        jumping: boolean,
+        jumpDistance: number,
+        jumpStart: Vector2D | null,
+        jumpDir: 1 | -1,
+        noJumpTime: number,
+    }
+
+    type CalebDash = {
+        dashing: boolean,
+        dashDistance: number,
+        dashStart: Vector2D | null,
+        dashDir: 1 | -1,
+        noDashTime: number,
+    }
+
     type Caleb = Collidable & CanvasProjectable & {
         opts: CalebOpts,
         renderColor: string,
 
+        jump: CalebJump,
+        dash: CalebDash,
+
         // i don't want "proper" jumping mechanics.  i want linear jump
         // slow top (for f/F/t/T or w)
-        jumping: boolean,
-        jumpDistance: number,
-        jumpStart: Vector2D,
-        noJumpTime: number,
     }
 
     type InputMessage = {
@@ -40,13 +71,17 @@ declare global {
         key: string,
     }
 
-    type EnvironmentObject = Collidable & CanvasProjectable & { }
+    type Platform = Collidable & CanvasProjectable & { }
+    type LetteredWall = Collidable & CanvasProjectable & {
+        letters: string[]
+    }
 
     type GameState = {
         opts: GameOptions
         caleb: Caleb
         ctx: CanvasRenderingContext2D
-        platforms: EnvironmentObject[]
+        platforms: Platform[]
+        walls: LetteredWall[]
 
         input: InputState,
         loopStartTime: number,
@@ -72,7 +107,7 @@ declare global {
     type Handler = (event: KeyEvent) => void
     type InputTiming = {timestamp: number, tickHoldDuration: number, initial: boolean}
     type DIGIT = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
-    type HandlerKey = "h" | "l" | "k"
+    type HandlerKey = "h" | "l" | "k" | "j" | "w" | "b"
     type InputState = {
         hasInput: boolean,
         inputs: InputMap,

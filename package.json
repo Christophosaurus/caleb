@@ -1,6 +1,8 @@
 {
     "type": "module",
     "devDependencies": {
-        "@types/node": "^22.8.7"
+        "@types/node": "^22.8.7",
+        "node-minify": "^3.6.0",
+        "uglify-js": "^3.19.3"
     }
 }

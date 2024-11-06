@@ -61,6 +61,40 @@ export class AABB {
     }
 
     /**
+   * @param other {AABB}
+   * @returns {boolean}
+   */
+    rightOf(other) {
+        return this.pos.x >= other.pos.x + other.width;
+    }
+
+    /**
+   * @param other {AABB}
+   * @returns {boolean}
+   */
+    topOf(other) {
+        return this.pos.y + this.height <= other.pos.y;
+    }
+
+    /**
+   * @param other {AABB}
+   * @returns {boolean}
+   */
+    leftOf(other) {
+        return this.pos.x + this.width <= other.pos.x
+    }
+
+    /**
+   * @param other {AABB}
+   * @returns {boolean}
+   */
+    bottomOf(other) {
+        return this.pos.y >= other.pos.y + other.height;
+    }
+
+
+
+    /**
    * @returns {AABB}
    */
     clone() {

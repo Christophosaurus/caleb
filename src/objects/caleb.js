@@ -2,12 +2,12 @@ import { AABB } from "../math/aabb.js";
 import { Vector2D } from "../math/vector.js";
 import * as Window from "../window.js";
 import { debugForCallCount, debugForTickCount } from "../debug.js";
-import { createCalebInputHandler } from "./caleb_input.js";
+import * as CalebInput from "./caleb_input.js";
 import * as Input from "../input/input.js";
 
 const debugLog = debugForCallCount(100);
 
-const inputHandlerMap = createCalebInputHandler()
+const inputHandlerMap = CalebInput.createCalebInputHandler()
 
 /** @param opts {CalebOpts}
 /** @returns {Caleb} */
@@ -21,10 +21,8 @@ export function createCaleb(opts) {
             body: new AABB(new Vector2D(0, 0), 0.5, 1),
         },
 
-        jumping: false,
-        jumpDistance: 0,
-        noJumpTime: 0,
-        jumpStart: new Vector2D(),
+        jump: CalebInput.defaultJumpState(),
+        dash: CalebInput.defaultDashStat(),
 
         renderWidth: 0,
         renderHeight: 0,
@@ -58,19 +56,127 @@ function handleInput(gameState) {
  * @param nextAABB {AABB}
  */
 function testCollisions(state, nextPos, nextAABB) {
+    const physics = state.caleb.physics;
 
     for (const platform of state.platforms) {
         const platformAABB = platform.physics.body;
         if (nextAABB.intersects(platformAABB)) {
-            if (nextPos.y + state.caleb.physics.body.height > platformAABB.pos.y) {
-                nextPos.y = platformAABB.pos.y - state.caleb.physics.body.height;
-            }
+            if (physics.body.leftOf(platformAABB)) {
+                physics.vel.x = 0;
+                nextPos.x = platformAABB.pos.x - state.caleb.physics.body.width;
 
-            state.caleb.physics.vel.y = 0;
-            state.caleb.jumping = false;
+                // TODO dashes should allow for a certain % of the body to "step onto" the platform
+                CalebInput.resetDashState(state);
+            } else if (physics.body.rightOf(platformAABB)) {
+                physics.vel.x = 0;
+                nextPos.x = platformAABB.pos.x + platformAABB.width
+
+                // TODO dashes should allow for a certain % of the body to "step onto" the platform
+                CalebInput.resetDashState(state);
+            } else if (physics.body.topOf(platformAABB)) {
+                physics.vel.y = 0;
+                nextPos.y = platformAABB.pos.y - state.caleb.physics.body.height
+                CalebInput.resetJumpState(state);
+            } else if (physics.body.bottomOf(platformAABB)) {
+                physics.vel.y = 0;
+                nextPos.y = platformAABB.pos.y + platformAABB.height
+                CalebInput.resetJumpState(state);
+            }
             break
         }
     }
+}
+
+/**
+* @param state {GameState}
+* @param delta {number}
+* @returns {boolean}
+*/
+function updateJump(state, delta) {
+    const deltaNorm = delta / 1000
+    const caleb = state.caleb
+    const vel = state.caleb.physics.vel
+    const cJump = caleb.jump;
+    const jumpOpts = caleb.opts.jump;
+    const jumping = cJump.jumping
+
+    if (jumping && caleb.dash.dashing) {
+        debugLog("help??");
+    }
+
+    if (jumping) {
+        if (cJump.jumpStart === null) {
+            cJump.jumpStart = caleb.physics.body.pos.clone();
+        }
+
+        const dist = Math.abs(caleb.physics.body.pos.y - cJump.jumpStart.y);
+        const remaining = cJump.jumpDistance - dist;
+        const easing = remaining <= jumpOpts.jumpEaseRange
+
+        let jump = cJump.jumpDir * jumpOpts.jumpNormHeight;
+        let jumpNormDist = jump * deltaNorm;
+        if (!easing && remaining - Math.abs(jumpNormDist) <= jumpOpts.jumpEaseRange) {
+
+            const correctedDist = remaining - jumpOpts.jumpEaseRange;
+            const correctedJump = correctedDist / deltaNorm
+
+            // 0.01 is a bonus to force into easing
+            jump = cJump.jumpDir * (correctedJump + 0.01);
+        } else if (easing) {
+            jump = cJump.jumpDir * jumpOpts.jumpEaseRange * 2;
+        }
+
+        cJump.jumping = remaining > 0;
+        vel.y = jump
+    }
+
+    cJump.noJumpTime -= delta
+    return jumping
+}
+
+/**
+* @param state {GameState}
+* @param delta {number}
+* @returns {boolean}
+*/
+function updateDash(state, delta) {
+    const deltaNorm = delta / 1000
+    const caleb = state.caleb
+    const vel = state.caleb.physics.vel
+
+    const dash = caleb.dash;
+    const opts = caleb.opts.dash;
+
+    const dashing = dash.dashing
+    if (dashing) {
+        if (dash.dashStart === null) {
+            dash.dashStart = caleb.physics.body.pos.clone();
+        }
+
+        const dist = Math.abs(caleb.physics.body.pos.x - dash.dashStart.x);
+        const remaining = dash.dashDistance - dist;
+        const easing = remaining <= opts.dashEaseRange
+
+        let dashDist = dash.dashDir * opts.dashNormWidth;
+        let dashNormDist = dashDist * deltaNorm;
+
+        if (!easing && remaining - Math.abs(dashNormDist) <= opts.dashEaseRange) {
+
+            const correctedDist = remaining - opts.dashEaseRange;
+            const correctedJump = correctedDist / deltaNorm
+
+            // 0.01 is a bonus to force into easing
+            dashDist = dash.dashDir * (correctedJump + 0.01);
+        } else if (easing) {
+            dashDist = dash.dashDir * opts.dashEaseRange * 2;
+        }
+
+        dash.dashing = remaining > 0;
+        vel.x = dashDist
+    }
+
+    dash.noDashTime -= delta
+    return dashing
 }
 
 /**
@@ -83,33 +189,12 @@ function updatePosition(state, delta) {
     const vel = caleb.physics.vel;
 
     let deltaNorm = delta / 1000;
-    const gravityEffect = state.opts.gravity.multiplyCopy(deltaNorm);
 
-    if (caleb.jumping) {
-        const dist = Math.abs(caleb.physics.body.pos.y - caleb.jumpStart.y);
-        const remaining = caleb.jumpDistance - dist;
-        const easing = remaining <= caleb.opts.jumpEaseRange
-
-        let jump = -caleb.opts.jumpNormHeight;
-        let jumpNormDist = jump * deltaNorm;
-        if (!easing && remaining + jumpNormDist <= caleb.opts.jumpEaseRange) {
-
-            const correctedDist = remaining - caleb.opts.jumpEaseRange;
-            const correctedJump = correctedDist / deltaNorm
-
-            // 0.01 is a bonus to force into easing
-            jump = -(correctedJump + 0.01);
-        } else if (easing) {
-            jump = -caleb.opts.jumpEaseRange * 2;
-        }
-
-        caleb.jumping = remaining > 0;
-        vel.y = jump
+    if (updateDash(state, delta)) {
+    } else if (updateJump(state, delta)) {
     } else {
-        vel.add(gravityEffect);
+        vel.add(state.opts.gravity.multiplyCopy(deltaNorm));
     }
-
-    caleb.noJumpTime -= delta
 
     const nextPos = pos.addCopy(vel.multiplyCopy(deltaNorm));
     const nextAABB = new AABB(nextPos, caleb.physics.body.width, caleb.physics.body.height);

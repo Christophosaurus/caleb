@@ -24,8 +24,11 @@ const renderables = [
  * @param state {GameState}
  */
 function projectStaticObjects(state) {
-    for (const e of state.platforms) {
-        Window.project(state.ctx.canvas, e);
+    for (const p of state.platforms) {
+        Window.project(state.ctx.canvas, p);
+    }
+    for (const w of state.walls) {
+        Window.project(state.ctx.canvas, w);
     }
 }
 
@@ -44,6 +47,7 @@ export function startGame(canvas, gameopts) {
         opts: gameopts,
         caleb: Caleb.createCaleb(gameopts.caleb),
         platforms: [],
+        walls: [],
         loopStartTime: 0,
         loopDelta: 0,
         ctx,
@@ -55,6 +59,12 @@ export function startGame(canvas, gameopts) {
         Platforms.createPlatform(new AABB(new Vector2D(0, 10), 10, 1)),
         Platforms.createPlatform(new AABB(new Vector2D(15, 8), 10, 1)),
     );
+    state.walls.push(
+        Platforms.createLetteredWall(new AABB(new Vector2D(Window.WIDTH - 1, 6), 1, 3),
+            [" ", "b", " "]
+        ),
+    )
+
     projectStaticObjects(state);
 
     ctx.imageSmoothingEnabled = false;
@@ -80,7 +90,7 @@ function gameLoop(state) {
     const now = nowFn();
     const remaining = state.opts.frameTimeMS - (now - start);
 
-    if (remaining >= 0) {
+    if (remaining <= 0) {
         requestAnimationFrame(() => gameLoop(state));
     } else {
         setTimeout(() => requestAnimationFrame(() => gameLoop(state)), remaining);

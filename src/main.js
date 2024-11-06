@@ -19,15 +19,23 @@ window.addEventListener('click', () => {
 listenToChanges(canvas);
 resizeCanvas(canvas);
 startGame(canvas, {
-    frameTimeMS: 33,
+    frameTimeMS: 16,
     caleb: {
         normWidthsPerSecond: 10,
-        jumpEaseMS: 500,
-        jumpEaseRange: 0.10,
-        jumpNormHeight: 8,
-        jumpEaseFn: Ease.x3,
-        noJumpBase: 400,
-        noJumpMultiplier: 350,
+        dash: {
+            dashNormWidth: 35,
+            distance: 5,
+            dashEaseRange: 0.10
+        },
+
+        jump: {
+            jumpEaseMS: 500,
+            jumpEaseRange: 0.10,
+            jumpNormHeight: 35,
+            jumpEaseFn: Ease.x3,
+            noJumpBase: 450,
+            noJumpMultiplier: 350,
+        }
     },
     gravity: new Vector2D(0, 28),
 })
