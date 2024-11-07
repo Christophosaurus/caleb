@@ -17,104 +17,9 @@ import * as Input from "../../input/input.js"
 //    }
 //}
 //
-///**
-// * @param dir {-1 | 1}
-// * @returns {CalebInputHandlerMapCB}
-// */
-//function moveWB(dir) {
-//    return function(state) {
-//        if (state.caleb.dash.dashing) {
-//            return false;
-//        }
-//
-//        const caleb = state.caleb;
-//        const dash = caleb.dash;
-//        const opts = caleb.opts.dash;
-//
-//        dash.dashing = true;
-//        dash.dashDistance = opts.distance
-//        dash.dashStart = null
-//        dash.dashDir = dir
-//
-//        resetJumpState(state);
-//
-//        return true;
-//    }
-//}
 //
 //
 //
-///** @param i {number}
-//  * @param input {number[]}
-//  */
-//function addNumericHandler(i, input) {
-//    /**
-//     * @param _ {GameState}
-//     * @param timing {InputTiming}
-//     * @returns {boolean}
-//     */
-//    return function(_, timing) {
-//        if (timing.initial) {
-//            input.push(i);
-//        }
-//        return false;
-//    }
-//}
-//
-///**
-// * @param next {CalebInputHandlerMapCB}
-// * @returns {CalebInputHandlerMapCB}
-// */
-//function onKeyDown(next) {
-//    return function(state, timing) {
-//        if (timing.initial) {
-//            return next(state, timing)
-//        }
-//        return false
-//    }
-//}
-//
-///**
-// * @param next {CalebInputHandlerMapCB}
-// * @returns {CalebInputHandlerMapCB}
-// */
-//function onKeyUp(next) {
-//    return function(state, timing) {
-//        if (timing.done) {
-//            return next(state, timing)
-//        }
-//        return false
-//    }
-//}
-//
-//
-///**
-// * @param next {CalebInputHandlerMapCB}
-// * @param input {number[]}
-// * @returns {CalebInputHandlerMapCB}
-// */
-//function clearNumericState(next, input) {
-//    return function(state, timing) {
-//        const out = next(state, timing);
-//        input.length = 0;
-//        return out;
-//    }
-//}
-//
-//
-///**
-// * @param {CalebInputHandlerMapCB} next
-// * @param {boolean} anykeyState
-// * @returns {CalebInputHandlerMapCB}
-// */
-//function anykey(next, anykeyState) {
-//    return function(state, timing) {
-//        if (state.input.anykey !== anykeyState) {
-//            return false;
-//        }
-//        return next(state, timing);
-//    }
-//}
 
 /**
 * @param {string} key
@@ -175,6 +80,31 @@ function numericModifier(state, input) {
  * @param {-1 | 1} dir
  * @returns {InputHandler}
  */
+function moveWB(dir) {
+    return function(state) {
+        if (state.caleb.dash.dashing) {
+            return false;
+        }
+
+        const caleb = state.caleb;
+        const dash = caleb.dash;
+        const opts = caleb.opts.dash;
+
+        dash.dashing = true;
+        dash.dashDistance = opts.distance
+        dash.dashStart = null
+        dash.dashDir = dir
+
+        resetJumpState(state);
+
+        return true;
+    }
+}
+
+/**
+ * @param {-1 | 1} dir
+ * @returns {InputHandler}
+ */
 function moveKJ(dir) {
     return function(state) {
         if (state.caleb.jump.noJumpTime > 0) {
@@ -215,6 +145,8 @@ const h = filter("h", moveHL(-1));
 const l = filter("l", moveHL(1));
 const j = onDown(filter("j", moveKJ(1)));
 const k = onDown(filter("k", moveKJ(-1)));
+const w = onDown(filter("w", moveWB(1)));
+const b = onDown(filter("b", moveWB(-1)));
 const numeric = onDown(isNumeric(numericModifier))
 
 /**
@@ -242,6 +174,8 @@ export function update(state, _) {
         numeric(state, i)
         j(state, i)
         k(state, i)
+        w(state, i)
+        b(state, i)
     }
 }
 
