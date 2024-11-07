@@ -1,80 +1,6 @@
 import * as Input from "../../input/input.js"
-//import { getRow } from "./utils.js";
-//
-///**
-// * @param {fFtTKey} key
-// * @returns {CalebInputHandlerMapCB}
-// */
-//function movefFtT(key) {
-//    return function(state) {
-//        resetJumpState(state);
-//
-//        state.caleb.fFtT.type = key
-//        state.caleb.fFtT.startCount = state.input.anykeyCount
-//        state.input.anykey = true;
-//
-//        return true;
-//    }
-//}
-//
-//
-//
-//
-
-/**
-* @param {string} key
-* @param {InputHandler} next
-* @returns {InputHandler}
-*/
-function filter(key, next) {
-    return function(state, input) {
-        if (key !== input.key) {
-            return false;
-        }
-        return next(state, input);
-    }
-}
-
-/**
-* @param {InputHandler} next
-* @returns {InputHandler}
-*/
-function onDown(next) {
-    return function(state, input) {
-        if (input.type !== "down" && input.type !== "down-up") {
-            return false;
-        }
-        return next(state, input);
-    }
-}
-
-const _0 = "0".charCodeAt(0)
-const _9 = "9".charCodeAt(0)
-
-/**
- * @param {InputHandler} next
- * @returns {InputHandler}
- */
-function isNumeric(next) {
-    return function(state, input) {
-        const code = input.key.charCodeAt(0)
-        if (code < _0 || code > _9) {
-            return false;
-        }
-        return next(state, input);
-    }
-}
-
-/**
- * @param {GameState} state
- * @param {Input} input
- * @returns boolean
- */
-function numericModifier(state, input) {
-    state.input.numericModifier *= 10
-    state.input.numericModifier += +input.key
-    return true;
-}
+import * as Level from "../level/level.js"
+import * as CalebUtils from "./utils.js";
 
 /**
  * @param {-1 | 1} dir
@@ -141,18 +67,148 @@ function moveHL(dir) {
     }
 }
 
+/**
+ * @param {fFtTKey} key
+ * @returns {InputHandler}
+ */
+function movefFtT(key) {
+    return function(state) {
+        state.caleb.fFtT.type = key
+        state.caleb.fFtT.startTick = state.tick
+        state.input.anykey = true;
+
+        // modifies a structure while iterating it...
+        state.input.inputs.length = 0
+
+        return true;
+    }
+}
+
+/**
+ * @param {GameState} state
+ */
+function anykey(state) {
+    const input = state.input.inputs[0]
+    if (!input) {
+        return
+    }
+
+    state.input.inputs.length = 0
+    state.input.anykey = false
+    resetJumpState(state);
+    resetDashState(state);
+
+    const row = CalebUtils.getRow(state.caleb)
+    const letters = Level.getLetters(state, row)
+    let destination = -1
+    for (const {key, idx} of letters) {
+        if (input.key === key) {
+            destination = idx
+            break
+        }
+    }
+
+    if (destination === -1) {
+        return
+    }
+
+
+    const caleb = state.caleb;
+    const fFtT = caleb.fFtT
+    const dash = caleb.dash;
+    if (destination > 0 && (fFtT.type === "F" || fFtT.type === "T") ||
+        destination < 0 && (fFtT.type === "f" || fFtT.type === "t")) {
+        return
+    }
+
+    if (fFtT.type === "t") {
+        destination -= 1
+    } else if (fFtT.type === "T") {
+        destination += 1
+    }
+
+    const distance = destination - CalebUtils.getCol(state.caleb)
+    dash.dashing = true;
+    dash.dashDistance = Math.abs(distance)
+    dash.dashStart = null
+    dash.dashDir = distance > 0 ? 1 : -1
+}
+
+/**
+* @param {string} key
+* @param {InputHandler} next
+* @returns {InputHandler}
+*/
+function filter(key, next) {
+    return function(state, input) {
+        if (key !== input.key) {
+            return false;
+        }
+        return next(state, input);
+    }
+}
+
+/**
+* @param {InputHandler} next
+* @returns {InputHandler}
+*/
+function onDown(next) {
+    return function(state, input) {
+        if (input.type !== "down" && input.type !== "down-up") {
+            return false;
+        }
+        return next(state, input);
+    }
+}
+
+const _0 = "0".charCodeAt(0)
+const _9 = "9".charCodeAt(0)
+
+/**
+ * @param {InputHandler} next
+ * @returns {InputHandler}
+ */
+function isNumeric(next) {
+    return function(state, input) {
+        const code = input.key.charCodeAt(0)
+        if (code < _0 || code > _9) {
+            return false;
+        }
+        return next(state, input);
+    }
+}
+
+/**
+ * @param {GameState} state
+ * @param {Input} input
+ * @returns boolean
+ */
+function numericModifier(state, input) {
+    state.input.numericModifier *= 10
+    state.input.numericModifier += +input.key
+    return true;
+}
+
 const h = filter("h", moveHL(-1));
 const l = filter("l", moveHL(1));
 const j = onDown(filter("j", moveKJ(1)));
 const k = onDown(filter("k", moveKJ(-1)));
 const w = onDown(filter("w", moveWB(1)));
 const b = onDown(filter("b", moveWB(-1)));
+const f = onDown(filter("f", movefFtT("f")));
+const t = onDown(filter("t", movefFtT("t")));
+const F = onDown(filter("F", movefFtT("F")));
+const T = onDown(filter("T", movefFtT("T")));
 const numeric = onDown(isNumeric(numericModifier))
 
 /**
  * @param {GameState} state
  */
 function handleHL(state) {
+    if (state.input.anykey) {
+        state.caleb.physics.vel.x = 0
+        return
+    }
     const hInput = Input.get(state.input, "h")
     const lInput = Input.get(state.input, "l")
     if (hInput && !lInput) {
@@ -170,12 +226,21 @@ function handleHL(state) {
  */
 export function update(state, _) {
     handleHL(state);
+    if (state.input.anykey) {
+        anykey(state)
+        return
+    }
+
     for (const i of state.input.inputs) {
         numeric(state, i)
         j(state, i)
         k(state, i)
         w(state, i)
         b(state, i)
+        f(state, i)
+        F(state, i)
+        t(state, i)
+        T(state, i)
     }
 }
 
@@ -209,7 +274,7 @@ export function defaultDashStat() {
 export function defaultfFtT() {
     return {
         type: "f",
-        startCount: 0,
+        startTick: 0,
     }
 }
 

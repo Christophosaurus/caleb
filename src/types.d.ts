@@ -55,7 +55,7 @@ declare global {
     type fFtTKey = "f" | "F" | "t" | "T"
     type fFtT = {
         type: fFtTKey
-        startCount: number,
+        startTick: number,
     }
 
     type CalebDash = {
@@ -143,8 +143,8 @@ declare global {
         hasInput: boolean
         inputs: Input[]
         tick: number
-        handlers: InputHandler[]
         numericModifier: number
+        anykey: boolean
     }
 
     type UpdateableModule = {

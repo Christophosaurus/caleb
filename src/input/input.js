@@ -47,7 +47,7 @@ export function createInputState() {
         hasInput: true,
         tick: 0,
         numericModifier: 0,
-        handlers: [],
+        anykey: false
     }
 }
 
@@ -56,6 +56,10 @@ export function createInputState() {
  * @param {KeyboardEvent} event
  */
 export function processKey(state, event) {
+    if (event.key.length > 1) {
+        return
+    }
+
     let input = get(state, event.key)
     if (input !== null && event.type === "keyup") {
         if (input.tick === state.tick) {

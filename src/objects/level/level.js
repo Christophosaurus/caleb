@@ -118,3 +118,13 @@ export function createLetterMap(platforms) {
 
     return out;
 }
+
+/**
+ * @param {GameState} state
+ * @param {number} r
+ * @returns {{key: string, idx: number}[]}
+ */
+export function getLetters(state, r) {
+    // TODO this just has to create such garbage...
+    return state.level.letterMap[r].map((key, idx) => ({key, idx})).filter(({key}) => key !== null)
+}
