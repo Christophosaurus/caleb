@@ -84,6 +84,8 @@ function gameLoop(state) {
  * @param delta {number}
  */
 function tick(state, delta) {
+    state.tick++
+
     for (const u of updateables) {
         u.update(state, delta);
     }

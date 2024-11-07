@@ -8,6 +8,7 @@ import * as Level from "../level.js"
 export function createLevel() {
     const platforms = [
         Level.createPlatform(new AABB(new Vector2D(0, 10), 10, 1)),
+        Level.createPlatform(new AABB(new Vector2D(0, 0), 1, 10)),
         Level.createLetteredWall(new AABB(new Vector2D(20, 5), 1, 10), "abcdefghij"),
     ];
     return {

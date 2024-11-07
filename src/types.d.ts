@@ -144,6 +144,7 @@ declare global {
         inputs: Input[]
         tick: number
         handlers: InputHandler[]
+        numericModifier: number
     }
 
     type UpdateableModule = {

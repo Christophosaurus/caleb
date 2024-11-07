@@ -42,34 +42,6 @@ import * as Input from "../../input/input.js"
 //    }
 //}
 //
-///**
-// * @param input {number[]}
-// * @param dir {-1 | 1}
-// * @returns {CalebInputHandlerMapCB}
-// */
-//function moveKJ(input, dir) {
-//    return function(state) {
-//        if (state.caleb.jump.noJumpTime > 0) {
-//            return false;
-//        }
-//
-//        const caleb = state.caleb;
-//        const jump = caleb.jump;
-//        const opts = caleb.opts.jump;
-//        const number = Math.min(Math.max(1, +input.join("")), 15)
-//        jump.jumping = true;
-//        jump.jumpDistance = number;
-//        jump.jumpStart = null
-//        jump.noJumpTime = (number * opts.noJumpMultiplier) + opts.noJumpBase;
-//        jump.jumpDir = dir
-//
-//        resetDashState(state);
-//
-//        return true;
-//    }
-//}
-//
-//
 //
 //
 ///** @param i {number}
@@ -131,20 +103,6 @@ import * as Input from "../../input/input.js"
 //
 //
 ///**
-// * @param next {CalebInputHandlerMapCB}
-// * @returns {CalebInputHandlerMapCB}
-// */
-//function withHold(next) {
-//    return function(state, timing) {
-//        const hold = timing.tickHoldDuration;
-//        if (hold === 0 && !timing.initial) {
-//            return false;
-//        }
-//        return next(state, timing);
-//    }
-//}
-//
-///**
 // * @param {CalebInputHandlerMapCB} next
 // * @param {boolean} anykeyState
 // * @returns {CalebInputHandlerMapCB}
@@ -173,6 +131,76 @@ function filter(key, next) {
 }
 
 /**
+* @param {InputHandler} next
+* @returns {InputHandler}
+*/
+function onDown(next) {
+    return function(state, input) {
+        if (input.type !== "down" && input.type !== "down-up") {
+            return false;
+        }
+        return next(state, input);
+    }
+}
+
+const _0 = "0".charCodeAt(0)
+const _9 = "9".charCodeAt(0)
+
+/**
+ * @param {InputHandler} next
+ * @returns {InputHandler}
+ */
+function isNumeric(next) {
+    return function(state, input) {
+        const code = input.key.charCodeAt(0)
+        if (code < _0 || code > _9) {
+            return false;
+        }
+        return next(state, input);
+    }
+}
+
+/**
+ * @param {GameState} state
+ * @param {Input} input
+ * @returns boolean
+ */
+function numericModifier(state, input) {
+    state.input.numericModifier *= 10
+    state.input.numericModifier += +input.key
+    return true;
+}
+
+/**
+ * @param {-1 | 1} dir
+ * @returns {InputHandler}
+ */
+function moveKJ(dir) {
+    return function(state) {
+        if (state.caleb.jump.noJumpTime > 0) {
+            return false;
+        }
+
+        const input = state.input;
+        const caleb = state.caleb;
+        const jump = caleb.jump;
+        const opts = caleb.opts.jump;
+        const number = Math.max(state.input.numericModifier, 1)
+
+        input.numericModifier = 0
+        jump.jumping = true;
+        jump.jumpDistance = number;
+        jump.jumpStart = null
+        jump.noJumpTime = (number * opts.noJumpMultiplier) + opts.noJumpBase;
+        jump.jumpDir = dir
+
+        resetDashState(state);
+
+        return true;
+    }
+}
+
+/**
  * @param dir {number}
  * @returns {InputHandler}
  */
@@ -185,6 +213,9 @@ function moveHL(dir) {
 
 const h = filter("h", moveHL(-1));
 const l = filter("l", moveHL(1));
+const j = onDown(filter("j", moveKJ(1)));
+const k = onDown(filter("k", moveKJ(-1)));
+const numeric = onDown(isNumeric(numericModifier))
 
 /**
  * @param {GameState} state
@@ -206,12 +237,12 @@ function handleHL(state) {
  * @param {number} _
  */
 export function update(state, _) {
-    const input = state.input
-    if (!input.hasInput) {
-        return
-    }
-
     handleHL(state);
+    for (const i of state.input.inputs) {
+        numeric(state, i)
+        j(state, i)
+        k(state, i)
+    }
 }
 
 /**

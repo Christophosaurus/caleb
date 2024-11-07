@@ -31,6 +31,8 @@ export function tickClear(gameState) {
         const item = inputs[i]
         if (item.type === "down-up" || item.type === "up") {
             inputs.splice(i, 1)
+        } else if (item.type === "down") {
+            item.type = "hold"
         }
     }
     gameState.input.hasInput = false;
@@ -44,6 +46,8 @@ export function createInputState() {
         inputs: [],
         hasInput: true,
         tick: 0,
+        numericModifier: 0,
+        handlers: [],
     }
 }
 
