@@ -7,7 +7,6 @@ import * as Level from "./objects/level/level.js"
 import * as Levels from "./objects/level/levels/levels.js";
 import * as RN from "./objects/relative_numbers.js";
 import * as State from "./state/state.js";
-import { now as nowFn } from "./utils.js";
 
 /** @type UpdateableModule[] */
 const inputs = [
@@ -62,7 +61,7 @@ export function startGame(canvas, gameopts) {
  * @param state {GameState}
  */
 function gameLoop(state) {
-    const start = nowFn();
+    const start = state.now()
     const delta = start - state.loopStartTime;
     state.loopStartTime = start;
     state.loopDelta = delta;
@@ -81,7 +80,7 @@ function gameLoop(state) {
 
     tick(state, delta);
 
-    const now = nowFn();
+    const now = state.now()
     const remaining = state.opts.frameTimeMS - (now - start);
 
     if (remaining <= 0) {

@@ -5,7 +5,6 @@ import { debugForCallCount, debugForTickCount } from "../../debug.js";
 import * as CalebInput from "./input.js";
 import * as CalebPhysics from "./physics.js";
 import * as Input from "../../input/input.js";
-import { now } from "../../utils.js";
 
 const debugLog = debugForCallCount(100);
 
@@ -178,7 +177,7 @@ export function update(gameState, delta) {
     }
 
     // techincally i could move this into the engine side not in each update
-    Window.project(gameState.ctx.canvas, caleb);
+    Window.project(gameState.ctx.canvas, caleb, caleb.physics.body);
 }
 
 /**
@@ -188,6 +187,6 @@ export function tickClear(state) {
     const caleb = state.caleb
     if (!caleb.dead && caleb.physics.body.pos.y > Window.FULL_HEIGHT + 3) {
         caleb.dead = true;
-        caleb.deadAt = now();
+        caleb.deadAt = state.now()
     }
 }

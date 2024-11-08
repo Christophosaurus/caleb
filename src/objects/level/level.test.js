@@ -14,7 +14,7 @@ test("should return an empty map when no platforms are provided", () => {
 
 test("should place letters correctly for a single platform", () => {
     const platforms = [
-        Level.createLetteredWall(new AABB(new Vector2D(2, 1), 1, 3), "ABC"),
+        Level.withLetters(Level.createPlatform(new AABB(new Vector2D(2, 1), 1, 3)), "ABC"),
     ];
     const result = Level.createLetterMap(platforms);
 
@@ -28,7 +28,7 @@ test("should place letters correctly for a single platform", () => {
 
 test("should handle platforms without letters by skipping them", () => {
     const platforms = [
-        Level.createObstacle(new AABB(new Vector2D(3, 2), 2, 2)),
+        Level.createPlatform(new AABB(new Vector2D(3, 2), 2, 2)),
     ];
     const result = Level.createLetterMap(platforms);
     const expected = Array(Window.GAME_HEIGHT).fill(null).map(() => Array(Window.GAME_WIDTH).fill(null));
@@ -38,8 +38,8 @@ test("should handle platforms without letters by skipping them", () => {
 
 test("should handle multiple platforms with letters", () => {
     const platforms = [
-        Level.createLetteredWall(new AABB(new Vector2D(1, 1), 1, 2), "XY"),
-        Level.createLetteredWall(new AABB(new Vector2D(3, 2), 1, 3), "ABC"),
+        Level.withLetters(Level.createPlatform(new AABB(new Vector2D(1, 1), 1, 2)), "XY"),
+        Level.withLetters(Level.createPlatform(new AABB(new Vector2D(3, 2), 1, 3)), "ABC"),
     ];
     const result = Level.createLetterMap(platforms);
 
@@ -55,7 +55,7 @@ test("should handle multiple platforms with letters", () => {
 
 test("should correctly handle platforms that exceed game boundaries", () => {
     const platforms = [
-        Level.createLetteredWall(new AABB(new Vector2D(8, Window.GAME_HEIGHT - 1), 1, 4), "WXYZ"),
+        Level.withLetters(Level.createPlatform(new AABB(new Vector2D(8, Window.GAME_HEIGHT - 1), 1, 4)), "WXYZ"),
     ];
     const result = Level.createLetterMap(platforms);
 

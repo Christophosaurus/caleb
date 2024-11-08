@@ -38,17 +38,22 @@ export function render(state) {
     const calebY = getRow(state.caleb);
 
     for (const p of plats) {
-        if (!("renderX" in p)) {
+        const render = p.behaviors.render
+        if (!render) {
             continue
         }
 
-        ctx.fillRect(p.renderX, p.renderY, p.renderWidth, p.renderHeight);
+        ctx.fillRect(render.renderX,
+            render.renderY,
+            render.renderWidth,
+            render.renderHeight
+        );
 
-        // lettered platform
-        if ("letters" in p) {
+        const letters = p.behaviors.lettered?.letters
+        if (letters) {
             const {x, y} = p.physics.body.pos
-            for (let i = 0; i < p.letters.length; ++i) {
-                renderText(ctx, p.letters[i], x, y + i, calebY);
+            for (let i = 0; i < letters.length; ++i) {
+                renderText(ctx, letters[i], x, y + i, calebY);
             }
         }
     }
@@ -57,52 +62,68 @@ export function render(state) {
 
 /**
  * @param {AABB} aabb
- * @returns {Platform}
+ * @returns {BasedPlatform}
 */
-export function createObstacle(aabb) {
+export function createPlatform(aabb) {
     const id = _id++
     return {
+        behaviors: {},
         id,
-        type: "obstacle",
         physics: {
             vel: new Vector2D(0, 0),
             acc: new Vector2D(0, 0),
             body: aabb,
         },
+    };
+}
+
+/**
+ * @param {BasedPlatform} platform
+ * @returns {BasedPlatform}
+ */
+export function withRender(platform) {
+    platform.behaviors.render = {
         renderX: 0,
         renderY: 0,
         renderWidth: 0,
         renderHeight: 0,
     };
+
+    return platform
 }
 
 /**
- * @param {number} toLevel
- * @param {AABB} aabb
- * @param {Vector2D} toLevelPosition
- * @returns {NextLevelPlatform}
+ * @param {BasedPlatform} platform
+ * @returns {BasedPlatform}
  */
-export function createNextLevel(toLevel, aabb, toLevelPosition) {
-    return {
+export function withObstacle(platform) {
+    assert(platform.behaviors.instaGib === undefined, "cannot have an obsacle that is also instagib")
+    platform.behaviors.obstacle = {type: "obstacle"}
+    return platform
+}
+
+/**
+ * @param {BasedPlatform} platform
+ * @param {number} toLevel
+ * @param {Vector2D} toLevelPosition
+ * @returns {BasedPlatform}
+ */
+export function withNextLevel(platform, toLevel, toLevelPosition) {
+    platform.behaviors.next = {
         toLevel,
         toLevelPosition,
-
-        id: _id++,
         type: "next-level",
-        physics: {
-            body: aabb,
-            acc: new Vector2D(),
-            vel: new Vector2D(),
-        }
-    }
+    };
+    return platform
 }
 
 /**
- * @param {AABB} aabb
+ * @param {BasedPlatform} platform
  * @param {string} letters
- * @returns {LetteredObstacle}
+ * @returns {BasedPlatform}
 */
-export function createLetteredWall(aabb, letters) {
+export function withLetters(platform, letters) {
+    const aabb = platform.physics.body;
     assert(aabb.width >= 1, "aabb width has to be at least 1", aabb)
     if (aabb.width === 1) {
         assert(letters.length === aabb.height, "letters.length must be equal to aabb.height", "letters", letters, "aabb", aabb);
@@ -110,24 +131,25 @@ export function createLetteredWall(aabb, letters) {
         assert(letters.length === aabb.height * 2, "if width of aabb is 2 or more, then letters.length === aabb.height * 2", "letters", letters, "aabb", aabb);
     }
 
-    return {
-        id: ++_id,
-        type: "obstacle",
-        physics: {
-            vel: new Vector2D(0, 0),
-            acc: new Vector2D(0, 0),
-            body: aabb,
-        },
+    platform.behaviors.lettered = {
+        type: "lettered",
         letters: letters,
-        renderX: 0,
-        renderY: 0,
-        renderWidth: 0,
-        renderHeight: 0,
     };
+    return platform
 }
 
 /**
- * @param {Platform[]} platforms
+ * @param {BasedPlatform} platform
+ * @returns {BasedPlatform}
+ */
+export function withInstaGib(platform) {
+    assert(platform.behaviors.obstacle === undefined, "cannot have instagib that is also obstacle")
+    platform.behaviors.instaGib = { type: "insta-gib", };
+    return platform
+}
+
+/**
+ * @param {BasedPlatform[]} platforms
  * @returns {(string | null)[][]}
  */
 export function createLetterMap(platforms) {
@@ -137,13 +159,14 @@ export function createLetterMap(platforms) {
     }
 
     for (const p of platforms) {
-        if (!("letters" in p)) {
-            continue;
+        const letters = p.behaviors.lettered?.letters
+        if (!letters) {
+            continue
         }
 
         const {x, y} = p.physics.body.pos
-        for (let i = 0; i < p.letters.length && y + i < GAME_HEIGHT; ++i) {
-            out[y + i][x] = p.letters[i]
+        for (let i = 0; i < letters.length && y + i < GAME_HEIGHT; ++i) {
+            out[y + i][x] = letters[i]
         }
     }
 

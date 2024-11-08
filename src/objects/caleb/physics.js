@@ -16,10 +16,12 @@ export function testCollisions(state, nextPos, nextAABB) {
 
     const platforms = findCollisions(state, nextAABB)
     for (const p of platforms) {
-        if (p.type === "obstacle") {
+        if (p.behaviors.obstacle) {
             collidePlatform(state, nextPos, p.physics.body)
-        } else if (p.type === "next-level") {
-            collideLevelChange(state, nextPos, p)
+        } else if (p.behaviors.next) {
+            collideLevelChange(state, nextPos, p.behaviors.next)
+        } else if (p.behaviors.instaGib) {
+            collideInstagib(state)
         }
     }
 }
@@ -27,7 +29,7 @@ export function testCollisions(state, nextPos, nextAABB) {
 /**
  * @param {GameState} state
  * @param {AABB} nextAABB
- * @returns {Platform[]}
+ * @returns {BasedPlatform[]}
  */
 function findCollisions(state, nextAABB) {
     const out = []
@@ -90,7 +92,7 @@ function collidePlatform(state, nextPos, platformAABB) {
 /**
  * @param {GameState} state
  * @param {Vector2D} nextPos
- * @param {NextLevelPlatform} platform
+ * @param {NextLevelBehavior} platform
  */
 function collideLevelChange(state, nextPos, platform) {
     const idx = platform.toLevel;
@@ -116,4 +118,10 @@ function collideLevelChange(state, nextPos, platform) {
 
 }
 
-
+/**
+ * @param {GameState} state
+ */
+function collideInstagib(state) {
+    state.caleb.dead = true
+    state.caleb.deadAt = state.now()
+}

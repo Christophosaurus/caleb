@@ -32,4 +32,16 @@ export function render(state) {
     } else if (jump.jumping) {
         stroke(state, jump.jumpStart, CalebUtils.CALEB_WIDTH, jump.jumpDir * jump.jumpDistance)
     }
+
+    state.ctx.strokeStyle = "green";
+
+    for (const p of state.level.activeLevel.platforms) {
+        const next = p.behaviors.next
+        if (!next) {
+            continue
+        }
+
+        const body = p.physics.body
+        stroke(state, body.pos, body.width, body.height)
+    }
 }

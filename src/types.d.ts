@@ -90,20 +90,35 @@ declare global {
         key: string,
     }
 
-    type PlatformType = "obstacle" | "next-level"
-    type NextLevelPlatform = Collidable & {
-        type: "next-level"
-        id: number,
+    type PlatformBehaviors = "obstacle" | "next-level" | "insta-gib" | "lettered" | "circuit"
+    type Lettered = {
+        type: "lettered"
+        letters: string
+    }
+    type Circuit = {
+        type: "circuit"
+        startPos: Vector2D
+        endPos: Vector2D
+        time: number
+    }
+    type NextLevelBehavior = {
+        type: "next-level",
         toLevel: number,
-        toLevelPosition: Vector2D // -1, you ignore it, -69
+        toLevelPosition: Vector2D
     }
-
-    type Obstacle = Collidable & CanvasProjectable & {
-        type: "obstacle"
+    type ObstacleBehavior = { type: "obstacle" }
+    type InstaGib = { type: "insta-gib" }
+    type BasedPlatform = Collidable & {
         id: number,
+        behaviors: {
+            lettered?: Lettered
+            next?: NextLevelBehavior
+            obstacle?: ObstacleBehavior
+            instaGib?: InstaGib
+            circuit?: Circuit
+            render?: CanvasProjectable
+        }
     }
-    type LetteredObstacle = Obstacle & { letters: string }
-    type Platform = LetteredObstacle | NextLevelPlatform | Obstacle
 
     type LevelSet = {
         title: string,
@@ -114,13 +129,14 @@ declare global {
     }
 
     type Level = {
-        platforms: (Platform | LetteredObstacle)[]
+        platforms: BasedPlatform[]
         initialPosition: Vector2D
         letterMap: (string | null)[][]
     }
 
     type GameState = {
         opts: GameOptions
+        now: () => number,
         caleb: Caleb
         ctx: CanvasRenderingContext2D
 
@@ -139,7 +155,7 @@ declare global {
         loopDelta: number,
     }
 
-    type CanvasProjectable = Collidable & {
+    type CanvasProjectable = {
         renderX: number,
         renderY: number,
         renderWidth: number,

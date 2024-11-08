@@ -5,11 +5,13 @@ import * as Caleb from "../objects/caleb/caleb.js"
 /**
  * @param state {GameState}
  */
-export function projectStaticObjects (state){
+export function projectStaticObjects(state) {
     for (const p of state.level.activeLevel.platforms) {
-        if ('renderX' in p) {
-            Window.project(state.ctx.canvas, p);
+        const render = p.behaviors.render
+        if (!render) {
+            continue
         }
+        Window.project(state.ctx.canvas, render, p.physics.body);
     }
 }
 
@@ -36,6 +38,7 @@ export function createGameState(opts, input, canvas, level) {
     /** @type {GameState} */
     const state = {
         opts,
+        now: Utils.now,
         level,
         levelChanged: true,
 

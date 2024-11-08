@@ -28,14 +28,14 @@ function yZero(normHeight) {
  * javascript, lets... deal with that shit later, and by later i mean when
  * i inevitably abondon this project
  *
- * @param canvas {HTMLCanvasElement}
- * @param projectable {CanvasProjectable}
+ * @param {HTMLCanvasElement} canvas
+ * @param {CanvasProjectable} projectable
+ * @param {AABB} body
  * @returns [number, number]
  */
-export function project(canvas, projectable) {
+export function project(canvas, projectable, body) {
     const normWidth = canvas.width / FULL_WIDTH
     const normHeight = canvas.height / FULL_HEIGHT
-    const body = projectable.physics.body;
 
     projectable.renderX = xZero(normWidth) + Math.floor(body.pos.x * normWidth);
     projectable.renderY = yZero(normHeight) + Math.floor(body.pos.y * normHeight);
