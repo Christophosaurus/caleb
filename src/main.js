@@ -20,7 +20,9 @@ listenToChanges(canvas);
 resizeCanvas(canvas);
 startGame(canvas, {
     frameTimeMS: 16,
+    tickTimeMS: 8,
     caleb: {
+        hodlTime: 500,
         normWidthsPerSecond: 10,
         dash: {
             dashNormWidth: 35,

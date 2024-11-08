@@ -1,16 +1,15 @@
 import * as Utils from "../utils.js"
 import * as Window from "../window.js"
 import * as Caleb from "../objects/caleb/caleb.js"
-import * as Level from "../objects/level/level.js"
-import { Vector2D } from "../math/vector.js"
-import { AABB } from "../math/aabb.js"
 
 /**
  * @param state {GameState}
  */
 export function projectStaticObjects (state){
-    for (const p of state.level.platforms) {
-        Window.project(state.ctx.canvas, p);
+    for (const p of state.level.activeLevel.platforms) {
+        if ('renderX' in p) {
+            Window.project(state.ctx.canvas, p);
+        }
     }
 }
 
@@ -23,8 +22,7 @@ export function reset(state) {
     state.loopStartTime = Utils.now()
     state.loopDelta = 0;
     state.tick = 0;
-
-    projectStaticObjects(state);
+    state.levelChanged = true;
 }
 
 /**
@@ -39,6 +37,7 @@ export function createGameState(opts, input, canvas, level) {
     const state = {
         opts,
         level,
+        levelChanged: true,
 
         tick: 0,
 

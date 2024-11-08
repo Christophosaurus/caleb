@@ -56,7 +56,8 @@ export function createInputState() {
  * @param {KeyboardEvent} event
  */
 export function processKey(state, event) {
-    if (event.key.length > 1) {
+    console.log("processKey", event.type, event.repeat, event.key)
+    if (event.key.length > 1 || event.repeat) {
         return
     }
 
@@ -68,9 +69,7 @@ export function processKey(state, event) {
             input.type = "up"
         }
     } else if (input && event.type === "keydown") {
-        if (input.tick !== state.tick) {
-            input.type = "hold"
-        }
+        input.type = "down"
     } else if (input === null && event.type === "keydown") {
         state.inputs.push({
             tick: state.tick,

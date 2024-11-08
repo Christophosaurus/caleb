@@ -9,6 +9,9 @@ import { now } from "../../utils.js";
 
 const debugLog = debugForCallCount(100);
 
+export const CALEB_HEIGHT = 1
+export const CALEB_WIDTH = 0.5
+
 /** @param state {GameState}
 /** @returns {Caleb} */
 export function createCaleb(state) {
@@ -18,12 +21,13 @@ export function createCaleb(state) {
         physics: {
             acc: new Vector2D(0, 0),
             vel: new Vector2D(0, 0),
-            body: new AABB(state.level.initialPosition.clone(), 0.5, 1),
+            body: new AABB(state.level.activeLevel.initialPosition.clone(), 0.5, 1),
         },
 
         dead: false,
         deadAt: 0,
 
+        hodl: CalebInput.defaultHodlState(state.opts.caleb),
         jump: CalebInput.defaultJumpState(),
         dash: CalebInput.defaultDashStat(),
         fFtT: CalebInput.defaultfFtT(),
@@ -149,9 +153,6 @@ function updatePosition(state, delta) {
     CalebPhysics.testCollisions(state, nextPos, nextAABB);
 
     pos.set(nextPos);
-
-    // TODO let me think about leaving the map...
-    // its almost good to let myself that way i can do a callback
 }
 
 /**
@@ -173,7 +174,11 @@ export function update(gameState, delta) {
         return;
     }
 
-    updatePosition(gameState, delta);
+    if (caleb.hodl.hodlTime > 0) {
+        caleb.hodl.hodlTime -= delta
+    } else {
+        updatePosition(gameState, delta);
+    }
 
     // techincally i could move this into the engine side not in each update
     Window.project(gameState.ctx.canvas, caleb);

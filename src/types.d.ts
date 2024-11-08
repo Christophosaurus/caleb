@@ -9,6 +9,7 @@ declare global {
         caleb: CalebOpts,
         gravity: Vector2D,
         frameTimeMS: number,
+        tickTimeMS: number,
 
         tolerance: {
             topBy: number,
@@ -34,16 +35,12 @@ declare global {
     }
 
     type CalebOpts = {
+        hodlTime: number,
         normWidthsPerSecond: number,
         jump: CalebJumpOpts,
         dash: CalebDashOpts,
     }
 
-    // TODO maybe i need to refactor this to make sense of the world....
-    // feels like i could have some sort of "action" and just have that
-    // describe what i want
-    //
-    // F and T should be able to help me reduce this... if needed
     type CalebJump = {
         jumping: boolean,
         jumpDistance: number,
@@ -51,6 +48,11 @@ declare global {
         jumpDir: 1 | -1,
         noJumpTime: number,
     }
+
+    type CalebHodl = {
+        hodlTime: number,
+    }
+
 
     type fFtTKey = "f" | "F" | "t" | "T"
     type fFtT = {
@@ -72,8 +74,9 @@ declare global {
         dead: boolean,
         deadAt: number,
 
-        jump: CalebJump,
-        dash: CalebDash,
+        hodl: CalebHodl
+        jump: CalebJump
+        dash: CalebDash
         fFtT: fFtT
 
         // i don't want "proper" jumping mechanics.  i want linear jump
@@ -86,14 +89,31 @@ declare global {
         key: string,
     }
 
-    type Platform = Collidable & CanvasProjectable & { id: number }
-    type LetteredWall = Platform & { letters: string }
+    type PlatformType = "obstacle" | "next-level"
+    type NextLevelPlatform = Collidable & {
+        type: "next-level"
+        id: number,
+        toLevel: number,
+        toLevelPosition: Vector2D // -1, you ignore it, -69
+    }
 
-    type LevelSets = LevelSet[]
+    type Obstacle = Collidable & CanvasProjectable & {
+        type: "obstacle"
+        id: number,
+    }
+    type LetteredObstacle = Obstacle & { letters: string }
+    type Platform = LetteredObstacle | NextLevelPlatform | Obstacle
+
     type LevelSet = {
         title: string,
         difficulty: number,
-        platforms: (Platform | LetteredWall)[]
+        levels: Level[]
+        activeLevel: Level
+        initialLevel: Level
+    }
+
+    type Level = {
+        platforms: (Platform | LetteredObstacle)[]
         initialPosition: Vector2D
         letterMap: (string | null)[][]
     }
@@ -102,7 +122,10 @@ declare global {
         opts: GameOptions
         caleb: Caleb
         ctx: CanvasRenderingContext2D
+
         level: LevelSet,
+        levelChanged: boolean
+
         tick: number,
 
         rn: {

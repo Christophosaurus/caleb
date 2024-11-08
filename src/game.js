@@ -9,9 +9,13 @@ import * as State from "./state/state.js";
 import { now as nowFn } from "./utils.js";
 
 /** @type UpdateableModule[] */
-const updateables = [
+const inputs = [
     Input,
     CalebInput,
+]
+
+/** @type UpdateableModule[] */
+const updateables = [
     Caleb,
     Debugger,
     RN,
@@ -61,14 +65,20 @@ function gameLoop(state) {
     state.loopStartTime = start;
     state.loopDelta = delta;
 
-    // TODO: probably need opts?
+    // TODO probably need opts?
     if (state.caleb.dead && start - state.caleb.deadAt > 1000) {
         State.reset(state);
         gameLoop(state);
         return;
     }
 
+    if (state.levelChanged) {
+        state.levelChanged = false;
+        State.projectStaticObjects(state)
+    }
+
     tick(state, delta);
+
     const now = nowFn();
     const remaining = state.opts.frameTimeMS - (now - start);
 
@@ -80,20 +90,33 @@ function gameLoop(state) {
 }
 
 /**
- * @param state {GameState}
- * @param delta {number}
+ * @param {GameState} state
+ * @param {number} delta
  */
 function tick(state, delta) {
     state.tick++
 
-    for (const u of updateables) {
-        u.update(state, delta);
+    for (const input of inputs) {
+        input.update(state, delta);
+    }
+
+    let deltaRemaining = delta
+    while (deltaRemaining > 0) {
+        const time = Math.min(state.opts.tickTimeMS, deltaRemaining)
+        for (const u of updateables) {
+            u.update(state, time);
+        }
+        deltaRemaining -= time
     }
 
     state.ctx.clearRect(0, 0, state.ctx.canvas.width, state.ctx.canvas.height);
 
     for (const r of renderables) {
         r.render(state);
+    }
+
+    for (const input of inputs) {
+        input.tickClear(state);
     }
 
     for (const u of updateables) {

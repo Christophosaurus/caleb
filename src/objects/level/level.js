@@ -4,11 +4,16 @@ import { Vector2D } from "../../math/vector.js";
 import { GAME_HEIGHT, GAME_WIDTH, projectCoords } from "../../window.js";
 import { getRow } from "../caleb/utils.js";
 
+export const DO_NOT_USE_FOR_INITIAL_POS_OR_YOU_WILL_BE_FIRED = -69
+
+let _id = 0;
+
 /**
- * @param ctx {CanvasRenderingContext2D}
- * @param text {string}
- * @param x {number}
- * @param y {number}
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {string} text
+ * @param {number} x
+ * @param {number} y
+ * @param {number} calebY
  */
 export function renderText(ctx, text, x, y, calebY) {
     const [_x, _y] = projectCoords(ctx.canvas, x + 0.25, y + 0.5)
@@ -28,11 +33,15 @@ export function renderText(ctx, text, x, y, calebY) {
 /** @param state {GameState}
 */
 export function render(state) {
-    const plats = state.level.platforms
+    const plats = state.level.activeLevel.platforms
     const ctx = state.ctx;
     const calebY = getRow(state.caleb);
 
     for (const p of plats) {
+        if (!("renderX" in p)) {
+            continue
+        }
+
         ctx.fillRect(p.renderX, p.renderY, p.renderWidth, p.renderHeight);
 
         // lettered platform
@@ -46,15 +55,15 @@ export function render(state) {
 
 }
 
-let _id = 0;
 /**
- * @param aabb {AABB}
+ * @param {AABB} aabb
  * @returns {Platform}
 */
-export function createPlatform(aabb) {
+export function createObstacle(aabb) {
     const id = _id++
     return {
         id,
+        type: "obstacle",
         physics: {
             vel: new Vector2D(0, 0),
             acc: new Vector2D(0, 0),
@@ -68,9 +77,30 @@ export function createPlatform(aabb) {
 }
 
 /**
- * @param aabb {AABB}
- * @param letters {string}
- * @returns {LetteredWall}
+ * @param {number} toLevel
+ * @param {AABB} aabb
+ * @param {Vector2D} toLevelPosition
+ * @returns {NextLevelPlatform}
+ */
+export function createNextLevel(toLevel, aabb, toLevelPosition) {
+    return {
+        toLevel,
+        toLevelPosition,
+
+        id: _id++,
+        type: "next-level",
+        physics: {
+            body: aabb,
+            acc: new Vector2D(),
+            vel: new Vector2D(),
+        }
+    }
+}
+
+/**
+ * @param {AABB} aabb
+ * @param {string} letters
+ * @returns {LetteredObstacle}
 */
 export function createLetteredWall(aabb, letters) {
     assert(aabb.width >= 1, "aabb width has to be at least 1", aabb)
@@ -82,6 +112,7 @@ export function createLetteredWall(aabb, letters) {
 
     return {
         id: ++_id,
+        type: "obstacle",
         physics: {
             vel: new Vector2D(0, 0),
             acc: new Vector2D(0, 0),
@@ -96,7 +127,7 @@ export function createLetteredWall(aabb, letters) {
 }
 
 /**
- * @param {(Platform | LetteredWall)[]} platforms
+ * @param {Platform[]} platforms
  * @returns {(string | null)[][]}
  */
 export function createLetterMap(platforms) {
@@ -126,5 +157,5 @@ export function createLetterMap(platforms) {
  */
 export function getLetters(state, r) {
     // TODO this just has to create such garbage...
-    return state.level.letterMap[r].map((key, idx) => ({key, idx})).filter(({key}) => key !== null)
+    return state.level.activeLevel.letterMap[r].map((key, idx) => ({key, idx})).filter(({key}) => key !== null)
 }

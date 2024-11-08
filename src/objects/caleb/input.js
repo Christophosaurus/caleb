@@ -184,6 +184,7 @@ function isNumeric(next) {
  * @returns boolean
  */
 function numericModifier(state, input) {
+    console.log("numeric", input)
     state.input.numericModifier *= 10
     state.input.numericModifier += +input.key
     return true;
@@ -209,8 +210,11 @@ function handleHL(state) {
         state.caleb.physics.vel.x = 0
         return
     }
+
     const hInput = Input.get(state.input, "h")
     const lInput = Input.get(state.input, "l")
+
+    console.log("handleHL", !!hInput, !!lInput);
     if (hInput && !lInput) {
         h(state, hInput)
     } else if (!hInput && lInput) {
@@ -258,6 +262,15 @@ export function defaultJumpState() {
         jumpStart: null,
     }
 }
+
+/** @param {CalebOpts} opts
+/** @returns {CalebHodl} */
+export function defaultHodlState(opts) {
+    return {
+        hodlTime: opts.hodlTime
+    }
+}
+
 
 /** @returns {CalebDash} */
 export function defaultDashStat() {
