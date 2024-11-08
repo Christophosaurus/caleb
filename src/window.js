@@ -1,3 +1,5 @@
+import { AABB } from "./math/aabb.js"
+
 export const RELATIVE_LINE_WIDTH = 2
 export const GAME_INFO_HEIGHT = 2
 export const GAME_WIDTH = 32
@@ -39,6 +41,23 @@ export function project(canvas, projectable) {
     projectable.renderY = yZero(normHeight) + Math.floor(body.pos.y * normHeight);
     projectable.renderWidth = Math.floor(body.width * normWidth);
     projectable.renderHeight = Math.floor(body.height * normHeight);
+}
+
+/**
+ * @param {HTMLCanvasElement} canvas
+ * @param {AABB} body
+ * @returns {[number, number, number, number]}
+ */
+export function projectAABB(canvas, body) {
+    const normWidth = canvas.width / FULL_WIDTH
+    const normHeight = canvas.height / FULL_HEIGHT
+
+    return [
+        xZero(normWidth) + Math.floor(body.pos.x * normWidth),
+        yZero(normHeight) + Math.floor(body.pos.y * normHeight),
+        Math.floor(body.width * normWidth),
+        Math.floor(body.height * normHeight),
+    ]
 }
 
 /**

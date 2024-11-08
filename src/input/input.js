@@ -56,7 +56,6 @@ export function createInputState() {
  * @param {KeyboardEvent} event
  */
 export function processKey(state, event) {
-    console.log("processKey", event.type, event.repeat, event.key)
     if (event.key.length > 1 || event.repeat) {
         return
     }

@@ -2,6 +2,7 @@ import * as Input from "./input/input.js";
 import * as Caleb from "./objects/caleb/caleb.js";
 import * as CalebInput from "./objects/caleb/input.js";
 import * as Debugger from "./debug.js";
+import * as DebugRender from "./debug-render.js";
 import * as Level from "./objects/level/level.js"
 import * as Levels from "./objects/level/levels/levels.js";
 import * as RN from "./objects/relative_numbers.js";
@@ -26,6 +27,7 @@ const renderables = [
     Caleb,
     Level,
     RN,
+    DebugRender,
 ];
 
 /**

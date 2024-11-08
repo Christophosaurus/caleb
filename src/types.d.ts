@@ -6,6 +6,7 @@ export {};
 declare global {
 
     type GameOptions = {
+        debug: boolean,
         caleb: CalebOpts,
         gravity: Vector2D,
         frameTimeMS: number,

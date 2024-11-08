@@ -9,9 +9,6 @@ import { now } from "../../utils.js";
 
 const debugLog = debugForCallCount(100);
 
-export const CALEB_HEIGHT = 1
-export const CALEB_WIDTH = 0.5
-
 /** @param state {GameState}
 /** @returns {Caleb} */
 export function createCaleb(state) {

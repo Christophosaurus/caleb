@@ -11,6 +11,9 @@ canvas.addEventListener('blur', () => {
     canvas.focus();
 });
 
+const urlParams = new URLSearchParams(window.location.search);
+const debug = urlParams.get("debug") === "1";
+
 // TODO: this will probably need to fixed
 window.addEventListener('click', () => {
     canvas.focus();
@@ -19,13 +22,15 @@ window.addEventListener('click', () => {
 listenToChanges(canvas);
 resizeCanvas(canvas);
 startGame(canvas, {
+    debug,
+
     frameTimeMS: 16,
     tickTimeMS: 8,
     caleb: {
         hodlTime: 500,
         normWidthsPerSecond: 10,
         dash: {
-            dashNormWidth: 35,
+            dashNormWidth: 5,
             distance: 5,
             dashEaseRange: 0.10
         },
@@ -33,7 +38,7 @@ startGame(canvas, {
         jump: {
             jumpEaseMS: 500,
             jumpEaseRange: 0.10,
-            jumpNormHeight: 35,
+            jumpNormHeight: 5,
             jumpEaseFn: Ease.x3,
             noJumpBase: 450,
             noJumpMultiplier: 350,

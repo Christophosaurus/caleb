@@ -1,3 +1,5 @@
+export const CALEB_HEIGHT = 1
+export const CALEB_WIDTH = 0.5
 
 /**
  * @param caleb {Caleb}

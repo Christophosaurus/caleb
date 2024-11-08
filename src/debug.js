@@ -18,7 +18,6 @@ export function tickClear(_) {
     }
 }
 
-
 /**
  * @param count {number}
  * @return (...args: any) => void
@@ -59,5 +58,3 @@ export function debugForTickCount(count) {
         }
     }
 }
-
-

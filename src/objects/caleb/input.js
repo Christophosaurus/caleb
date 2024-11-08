@@ -18,6 +18,10 @@ function moveWB(dir) {
 
         dash.dashing = true;
         dash.dashDistance = opts.distance
+        if (dir === 1) {
+            dash.dashDistance - CalebUtils.CALEB_WIDTH
+        }
+
         dash.dashStart = null
         dash.dashDir = dir
 
@@ -49,6 +53,10 @@ function moveKJ(dir) {
         jump.jumpStart = null
         jump.noJumpTime = (number * opts.noJumpMultiplier) + opts.noJumpBase;
         jump.jumpDir = dir
+
+        if (dir === -1) {
+            jump.jumpDistance -= CalebUtils.CALEB_HEIGHT
+        }
 
         resetDashState(state);
 
@@ -112,7 +120,6 @@ function anykey(state) {
         return
     }
 
-
     const caleb = state.caleb;
     const fFtT = caleb.fFtT
     const dash = caleb.dash;
@@ -132,6 +139,9 @@ function anykey(state) {
     dash.dashDistance = Math.abs(distance)
     dash.dashStart = null
     dash.dashDir = distance > 0 ? 1 : -1
+    if (dash.dashDir === 1) {
+        dash.dashDistance -= CalebUtils.CALEB_WIDTH
+    }
 }
 
 /**
@@ -184,7 +194,6 @@ function isNumeric(next) {
  * @returns boolean
  */
 function numericModifier(state, input) {
-    console.log("numeric", input)
     state.input.numericModifier *= 10
     state.input.numericModifier += +input.key
     return true;
@@ -214,7 +223,6 @@ function handleHL(state) {
     const hInput = Input.get(state.input, "h")
     const lInput = Input.get(state.input, "l")
 
-    console.log("handleHL", !!hInput, !!lInput);
     if (hInput && !lInput) {
         h(state, hInput)
     } else if (!hInput && lInput) {
