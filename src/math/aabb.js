@@ -24,7 +24,7 @@ export class AABB {
    * @returns {AABB}
    */
     set(other) {
-        this.pos = other.pos.clone();
+        this.pos.set(other.pos)
         this.width = other.width;
         this.height = other.height;
         return this;
@@ -203,7 +203,7 @@ export class AABB {
    * @returns {AABB}
    */
     clone() {
-        return new AABB(this.pos, this.width, this.height);
+        return new AABB(this.pos.clone(), this.width, this.height);
     }
 
     /**

@@ -11,7 +11,7 @@ export function projectStaticObjects(state) {
         if (!render) {
             continue
         }
-        Window.project(state.ctx.canvas, render, p.physics.body);
+        Window.project(state.ctx.canvas, render, p.physics.current.body);
     }
 }
 
@@ -37,6 +37,12 @@ export function reset(state) {
 export function createGameState(opts, input, canvas, level) {
     /** @type {GameState} */
     const state = {
+        debug: {
+            previous: {
+                platforms: [],
+                caleb: null,
+            },
+        },
         opts,
         now: Utils.now,
         level,

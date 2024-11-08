@@ -70,7 +70,7 @@ function moveKJ(dir) {
  */
 function moveHL(dir) {
     return function(state) {
-        state.caleb.physics.vel.x = state.opts.caleb.normWidthsPerSecond * dir
+        state.caleb.physics.next.vel.x = state.opts.caleb.normWidthsPerSecond * dir
         return true;
     }
 }
@@ -106,7 +106,7 @@ function anykey(state) {
     resetJumpState(state);
     resetDashState(state);
 
-    const row = CalebUtils.getRow(state.caleb)
+    const row = CalebUtils.getNextRow(state.caleb)
     const letters = Level.getLetters(state, row)
     let destination = -1
     for (const {key, idx} of letters) {
@@ -134,7 +134,7 @@ function anykey(state) {
         destination += 1
     }
 
-    const distance = destination - CalebUtils.getCol(state.caleb)
+    const distance = destination - CalebUtils.getNextCol(state.caleb)
     dash.dashing = true;
     dash.dashDistance = Math.abs(distance)
     dash.dashStart = null
@@ -216,7 +216,7 @@ const numeric = onDown(isNumeric(numericModifier))
  */
 function handleHL(state) {
     if (state.input.anykey) {
-        state.caleb.physics.vel.x = 0
+        state.caleb.physics.next.vel.x = 0
         return
     }
 
@@ -228,9 +228,15 @@ function handleHL(state) {
     } else if (!hInput && lInput) {
         l(state, lInput)
     } else if (!state.caleb.dash.dashing) {
-        state.caleb.physics.vel.x = 0
+        state.caleb.physics.next.vel.x = 0
     }
 }
+
+/**
+ * @param {GameState} state
+ * @param {number} _
+ */
+export function apply(state, _) { }
 
 /**
  * @param {GameState} state
@@ -304,7 +310,7 @@ export function defaultfFtT() {
  */
 export function resetJumpState(state) {
     const jump = state.caleb.jump
-    state.caleb.physics.vel.y = 0
+    state.caleb.physics.next.vel.y = 0
     jump.jumping = false;
     jump.jumpDistance = 0;
     jump.noJumpTime = 0;

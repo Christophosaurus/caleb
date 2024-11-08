@@ -139,6 +139,13 @@ declare global {
 
     type GameState = {
         opts: GameOptions
+        debug: {
+            previous: {
+                caleb: Collidable,
+                platforms: BasedPlatform[],
+            }
+        },
+
         now: () => number,
         caleb: Caleb
         ctx: CanvasRenderingContext2D
@@ -165,11 +172,16 @@ declare global {
         renderHeight: number,
     }
 
+    type PhysicsBody = {
+        vel: Vector2D,
+        acc: Vector2D,
+        body: AABB,
+    }
+
     type Collidable = {
         physics: {
-            vel: Vector2D,
-            acc: Vector2D,
-            body: AABB,
+            current: PhysicsBody
+            next: PhysicsBody
         }
     }
 
@@ -194,6 +206,13 @@ declare global {
         update(gameState: GameState, delta: number): void
         tickClear(gameState: GameState): void
     }
+
+    type UpdateAndApplyModule = {
+        update(gameState: GameState, delta: number): void
+        apply(gameState: GameState, delta: number): void
+        tickClear(gameState: GameState): void
+    }
+
 
     type RenderableModule = {
         render(gameState: GameState): void

@@ -4,7 +4,6 @@ import * as Window from "../../window.js";
 import { debugForCallCount, debugForTickCount } from "../../debug.js";
 import * as CalebInput from "./input.js";
 import * as CalebPhysics from "./physics.js";
-import * as Input from "../../input/input.js";
 
 const debugLog = debugForCallCount(100);
 
@@ -15,9 +14,16 @@ export function createCaleb(state) {
         opts: state.opts.caleb,
 
         physics: {
-            acc: new Vector2D(0, 0),
-            vel: new Vector2D(0, 0),
-            body: new AABB(state.level.activeLevel.initialPosition.clone(), 0.5, 1),
+            current: {
+                acc: new Vector2D(0, 0),
+                vel: new Vector2D(0, 0),
+                body: new AABB(state.level.activeLevel.initialPosition.clone(), 0.5, 1),
+            },
+            next: {
+                acc: new Vector2D(0, 0),
+                vel: new Vector2D(0, 0),
+                body: new AABB(state.level.activeLevel.initialPosition.clone(), 0.5, 1),
+            }
         },
 
         dead: false,
@@ -46,17 +52,19 @@ export function createCaleb(state) {
 function updateJump(state, delta) {
     const deltaNorm = delta / 1000
     const caleb = state.caleb
-    const vel = state.caleb.physics.vel
+    const next = state.caleb.physics.next;
+    const body = next.body
+    const vel = next.vel
     const cJump = caleb.jump;
     const jumpOpts = caleb.opts.jump;
     const jumping = cJump.jumping
 
     if (jumping) {
         if (cJump.jumpStart === null) {
-            cJump.jumpStart = caleb.physics.body.pos.clone();
+            cJump.jumpStart = body.pos.clone();
         }
 
-        const dist = Math.abs(caleb.physics.body.pos.y - cJump.jumpStart.y);
+        const dist = Math.abs(body.pos.y - cJump.jumpStart.y);
         const remaining = cJump.jumpDistance - dist;
         const easing = remaining <= jumpOpts.jumpEaseRange
 
@@ -89,7 +97,9 @@ function updateJump(state, delta) {
 function updateDash(state, delta) {
     const deltaNorm = delta / 1000
     const caleb = state.caleb
-    const vel = state.caleb.physics.vel
+    const next = caleb.physics.next;
+    const body = next.body
+    const vel = next.vel
 
     const dash = caleb.dash;
     const opts = caleb.opts.dash;
@@ -97,10 +107,10 @@ function updateDash(state, delta) {
     const dashing = dash.dashing
     if (dashing) {
         if (dash.dashStart === null) {
-            dash.dashStart = caleb.physics.body.pos.clone();
+            dash.dashStart = body.pos.clone();
         }
 
-        const dist = Math.abs(caleb.physics.body.pos.x - dash.dashStart.x);
+        const dist = Math.abs(body.pos.x - dash.dashStart.x);
         const remaining = dash.dashDistance - dist;
         const easing = remaining <= opts.dashEaseRange
 
@@ -132,8 +142,9 @@ function updateDash(state, delta) {
 */
 function updatePosition(state, delta) {
     const caleb = state.caleb;
-    const pos = caleb.physics.body.pos;
-    const vel = caleb.physics.vel;
+    const next = caleb.physics.next;
+    const pos = next.body.pos
+    const vel = next.vel
 
     let deltaNorm = delta / 1000;
 
@@ -143,12 +154,25 @@ function updatePosition(state, delta) {
         vel.add(state.opts.gravity.multiplyCopy(deltaNorm));
     }
 
-    const nextPos = pos.addCopy(vel.multiplyCopy(deltaNorm));
-    const nextAABB = new AABB(nextPos, caleb.physics.body.width, caleb.physics.body.height);
+    next.body.pos = pos.add(vel.clone().multiply(deltaNorm));
+}
 
-    CalebPhysics.testCollisions(state, nextPos, nextAABB);
+/**
+* @param state {GameState}
+* @param _ {number}
+*/
+export function apply(state, _) {
+    CalebPhysics.testCollisions(state);
 
-    pos.set(nextPos);
+    const next = state.caleb.physics.next;
+    const curr = state.caleb.physics.current;
+
+    curr.body.set(next.body)
+    curr.vel.set(next.vel)
+    curr.acc.set(next.acc)
+
+    // techincally i could move this into the engine side not in each update
+    Window.project(state.ctx.canvas, state.caleb, next.body);
 }
 
 /**
@@ -177,8 +201,6 @@ export function update(gameState, delta) {
         updatePosition(gameState, delta);
     }
 
-    // techincally i could move this into the engine side not in each update
-    Window.project(gameState.ctx.canvas, caleb, caleb.physics.body);
 }
 
 /**
@@ -186,7 +208,7 @@ export function update(gameState, delta) {
 */
 export function tickClear(state) {
     const caleb = state.caleb
-    if (!caleb.dead && caleb.physics.body.pos.y > Window.FULL_HEIGHT + 3) {
+    if (!caleb.dead && caleb.physics.current.body.pos.y > Window.FULL_HEIGHT + 3) {
         caleb.dead = true;
         caleb.deadAt = state.now()
     }

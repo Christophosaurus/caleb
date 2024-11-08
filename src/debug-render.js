@@ -2,6 +2,8 @@ import { Vector2D } from "./math/vector.js";
 import { AABB } from "./math/aabb.js";
 import * as CalebUtils from "./objects/caleb/utils.js"
 import * as Window from "./window.js"
+import { clonePlatform } from "./objects/level/level.js";
+import { clonePhysics } from "./utils.js";
 
 /**
  * @param {GameState} state
@@ -37,12 +39,13 @@ export function render(state) {
 
     for (const p of state.level.activeLevel.platforms) {
         const next = p.behaviors.next
+        const body = p.physics.current.body
         if (next) {
-            const body = p.physics.body
+            const body = p.physics.current.body
             stroke(state, body.pos, body.width, body.height)
         }
 
-        renderText(state, "" + p.id, p.physics.body.pos)
+        renderText(state, "" + p.id, body.pos)
     }
 }
 
@@ -62,3 +65,33 @@ function renderText(state, text, body) {
     ctx.fillText(text, _x, _y)
 }
 
+/**
+ * @param {GameState} state
+ * @param {number} _
+*/
+export function update(state, _) { }
+
+/**
+ * @param {GameState} state
+*/
+export function tickClear(state) { }
+
+/**
+ * @param {GameState} state
+ * @param {number} _
+*/
+export function apply(state, _) {
+    if (state.opts.debug) {
+        if (state.debug.previous.caleb) {
+            console.log("prev", state.debug.previous.caleb.physics.current.body.pos === state.caleb.physics.current.body.pos)
+        }
+        const prev = state.debug.previous.platforms
+        state.debug.previous.platforms.length = 0
+        const platforms = state.level.activeLevel.platforms
+        for (const p of platforms) {
+            prev.push(clonePlatform(p))
+        }
+
+        state.debug.previous.caleb = clonePhysics(state.caleb)
+    }
+}

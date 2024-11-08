@@ -1,6 +1,7 @@
 import { assert } from "../../assert.js";
 import { AABB } from "../../math/aabb.js";
 import { Vector2D } from "../../math/vector.js";
+import { clonePhysics } from "../../utils.js";
 import { GAME_HEIGHT, GAME_WIDTH, projectCoords, project } from "../../window.js";
 import { getRow } from "../caleb/utils.js";
 
@@ -53,7 +54,7 @@ export function render(state) {
 
         const letters = p.behaviors.lettered?.letters
         if (letters) {
-            const {x, y} = p.physics.body.pos
+            const {x, y} = p.physics.current.body.pos
             for (let i = 0; i < letters.length; ++i) {
                 renderText(ctx, letters[i], x, y + i, calebY);
             }
@@ -72,10 +73,17 @@ export function createPlatform(aabb) {
         behaviors: {},
         id,
         physics: {
-            vel: new Vector2D(0, 0),
-            acc: new Vector2D(0, 0),
-            body: aabb,
-        },
+            current: {
+                vel: new Vector2D(0, 0),
+                acc: new Vector2D(0, 0),
+                body: aabb,
+            },
+            next: {
+                vel: new Vector2D(0, 0),
+                acc: new Vector2D(0, 0),
+                body: aabb.clone(),
+            },
+        }
     };
 }
 
@@ -125,7 +133,7 @@ export function withNextLevel(platform, toLevel, toLevelPosition) {
  * @returns {BasedPlatform}
 */
 export function withLetters(platform, letters) {
-    const aabb = platform.physics.body;
+    const aabb = platform.physics.current.body;
     assert(aabb.width >= 1, "aabb width has to be at least 1", aabb)
     if (aabb.width === 1) {
         assert(letters.length === aabb.height, "letters.length must be equal to aabb.height", "letters", letters, "aabb", aabb);
@@ -162,7 +170,7 @@ export function withCircuit(platform, time, endPos) {
         time,
         currentTime: 0,
         currentDir: 1,
-        startPos: platform.physics.body.pos.clone(),
+        startPos: platform.physics.current.body.pos.clone(),
         endPos,
     }
 
@@ -186,7 +194,7 @@ export function createLetterMap(platforms) {
             continue
         }
 
-        const {x, y} = p.physics.body.pos
+        const {x, y} = p.physics.current.body.pos
         for (let i = 0; i < letters.length && y + i < GAME_HEIGHT; ++i) {
             out[y + i][x] = letters[i]
         }
@@ -207,6 +215,28 @@ export function getLetters(state, r) {
 
 /**
  * @param {GameState} state
+ * @param {number} _
+ */
+export function apply(state, _) {
+    for (const p of state.level.activeLevel.platforms) {
+        const render = p.behaviors.render
+        if (render) {
+            project(state.ctx.canvas, render, p.physics.next.body)
+        }
+
+
+        const next = p.physics.next;
+        const curr = p.physics.current;
+
+        curr.body.set(next.body)
+        curr.vel.set(next.vel)
+        curr.acc.set(next.acc)
+    }
+
+}
+
+/**
+ * @param {GameState} state
  * @param {number} delta
  */
 export function update(state, delta) {
@@ -216,6 +246,7 @@ export function update(state, delta) {
             continue
         }
 
+        // TODO: probably calculate out the velocity instead of updating position
         circuit.currentTime += delta
 
         let percentDone = Math.min(1, circuit.currentTime / circuit.time)
@@ -226,19 +257,13 @@ export function update(state, delta) {
         const x = circuit.startPos.x + (circuit.startPos.x - circuit.endPos.x) * percentDone
         const y = circuit.startPos.y + (circuit.startPos.y - circuit.endPos.y) * percentDone
 
-        p.physics.body.pos.x = x
-        p.physics.body.pos.y = y
+        p.physics.next.body.pos.x = x
+        p.physics.next.body.pos.y = y
 
         if (circuit.currentDir === 1 && percentDone === 1 ||
             circuit.currentDir === -1 && percentDone === 0) {
             circuit.currentDir *= -1
             circuit.currentTime = 0
-        }
-
-
-        const render = p.behaviors.render
-        if (render) {
-            project(state.ctx.canvas, render, p.physics.body)
         }
     }
 }
@@ -247,4 +272,14 @@ export function update(state, delta) {
  * @param {GameState} state
  */
 export function tickClear(state) {
+}
+
+/**
+ * @param {BasedPlatform} platform
+ * @returns {BasedPlatform}
+ */
+export function clonePlatform(platform) {
+    const out = {...platform}
+    out.physics = clonePhysics(out).physics
+    return out
 }

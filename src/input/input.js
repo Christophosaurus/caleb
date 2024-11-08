@@ -14,6 +14,10 @@ export function get(state, key) {
     return null
 }
 
+/** @param gameState {GameState}
+/** @param _ {number} */
+export function apply(gameState, _) {
+}
 
 /** @param gameState {GameState}
 /** @param _ {number} */

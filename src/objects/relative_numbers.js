@@ -1,11 +1,11 @@
 import * as Window from "../window.js";
-import { getRow } from "./caleb/utils.js";
+import { getNextRow } from "./caleb/utils.js";
 
 /**
  * @param state {GameState}
  */
 export function update(state) {
-    state.rn.zero = getRow(state.caleb);
+    state.rn.zero = getNextRow(state.caleb);
 }
 
 /**
@@ -42,6 +42,6 @@ export function render(state) {
         renderText(ctx, String(Math.abs(i - zero)), x, y);
     }
 
-    const pos = state.caleb.physics.body.pos;
+    const pos = state.caleb.physics.current.body.pos;
     renderText(ctx, `C(${pos})`, 10, 1);
 }

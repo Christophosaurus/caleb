@@ -32,7 +32,7 @@ export function createLevel() {
     const a = {
         platforms: aPlatforms,
         letterMap: Level.createLetterMap(aPlatforms),
-        initialPosition: new Vector2D(10, 1),
+        initialPosition: new Vector2D(7, 1),
     }
 
     const bPlatforms = [

@@ -12,14 +12,15 @@ import * as State from "./state/state.js";
 const inputs = [
     Input,
     CalebInput,
+    Debugger,
+    RN,
 ]
 
-/** @type UpdateableModule[] */
+/** @type UpdateAndApplyModule[] */
 const updateables = [
     Caleb,
-    Debugger,
     Level,
-    RN,
+    DebugRender,
 ];
 
 /** @type RenderableModule[] */
@@ -107,6 +108,9 @@ function tick(state, delta) {
         const time = Math.min(state.opts.tickTimeMS, deltaRemaining)
         for (const u of updateables) {
             u.update(state, time);
+        }
+        for (const u of updateables) {
+            u.apply(state, time);
         }
         deltaRemaining -= time
     }
