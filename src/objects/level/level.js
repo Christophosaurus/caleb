@@ -1,7 +1,7 @@
 import { assert } from "../../assert.js";
 import { AABB } from "../../math/aabb.js";
 import { Vector2D } from "../../math/vector.js";
-import { GAME_HEIGHT, GAME_WIDTH, projectCoords } from "../../window.js";
+import { GAME_HEIGHT, GAME_WIDTH, projectCoords, project } from "../../window.js";
 import { getRow } from "../caleb/utils.js";
 
 export const DO_NOT_USE_FOR_INITIAL_POS_OR_YOU_WILL_BE_FIRED = -69
@@ -15,7 +15,7 @@ let _id = 0;
  * @param {number} y
  * @param {number} calebY
  */
-export function renderText(ctx, text, x, y, calebY) {
+function renderText(ctx, text, x, y, calebY) {
     const [_x, _y] = projectCoords(ctx.canvas, x + 0.25, y + 0.5)
 
     if (y === calebY) {
@@ -33,6 +33,8 @@ export function renderText(ctx, text, x, y, calebY) {
 /** @param state {GameState}
 */
 export function render(state) {
+    state.ctx.fillStyle = "black";
+
     const plats = state.level.activeLevel.platforms
     const ctx = state.ctx;
     const calebY = getRow(state.caleb);
@@ -149,6 +151,26 @@ export function withInstaGib(platform) {
 }
 
 /**
+ * @param {BasedPlatform} platform
+ * @param {number} time
+ * @param {Vector2D} endPos
+ * @returns {BasedPlatform}
+ */
+export function withCircuit(platform, time, endPos) {
+    platform.behaviors.circuit = {
+        type: "circuit",
+        time,
+        currentTime: 0,
+        currentDir: 1,
+        startPos: platform.physics.body.pos.clone(),
+        endPos,
+    }
+
+    return platform
+}
+
+
+/**
  * @param {BasedPlatform[]} platforms
  * @returns {(string | null)[][]}
  */
@@ -181,4 +203,48 @@ export function createLetterMap(platforms) {
 export function getLetters(state, r) {
     // TODO this just has to create such garbage...
     return state.level.activeLevel.letterMap[r].map((key, idx) => ({key, idx})).filter(({key}) => key !== null)
+}
+
+/**
+ * @param {GameState} state
+ * @param {number} delta
+ */
+export function update(state, delta) {
+    for (const p of state.level.activeLevel.platforms) {
+        const circuit = p.behaviors.circuit
+        if (!circuit) {
+            continue
+        }
+
+        circuit.currentTime += delta
+
+        let percentDone = Math.min(1, circuit.currentTime / circuit.time)
+        if (circuit.currentDir === -1) {
+            percentDone = 1 - percentDone
+        }
+
+        const x = circuit.startPos.x + (circuit.startPos.x - circuit.endPos.x) * percentDone
+        const y = circuit.startPos.y + (circuit.startPos.y - circuit.endPos.y) * percentDone
+
+        p.physics.body.pos.x = x
+        p.physics.body.pos.y = y
+
+        if (circuit.currentDir === 1 && percentDone === 1 ||
+            circuit.currentDir === -1 && percentDone === 0) {
+            circuit.currentDir *= -1
+            circuit.currentTime = 0
+        }
+
+
+        const render = p.behaviors.render
+        if (render) {
+            project(state.ctx.canvas, render, p.physics.body)
+        }
+    }
+}
+
+/**
+ * @param {GameState} state
+ */
+export function tickClear(state) {
 }

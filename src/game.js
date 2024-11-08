@@ -18,6 +18,7 @@ const inputs = [
 const updateables = [
     Caleb,
     Debugger,
+    Level,
     RN,
 ];
 

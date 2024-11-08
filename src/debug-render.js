@@ -37,11 +37,28 @@ export function render(state) {
 
     for (const p of state.level.activeLevel.platforms) {
         const next = p.behaviors.next
-        if (!next) {
-            continue
+        if (next) {
+            const body = p.physics.body
+            stroke(state, body.pos, body.width, body.height)
         }
 
-        const body = p.physics.body
-        stroke(state, body.pos, body.width, body.height)
+        renderText(state, "" + p.id, p.physics.body.pos)
     }
 }
+
+/**
+ * @param {GameState} state
+ * @param {string} text
+ * @param {Vector2D} body
+ */
+function renderText(state, text, body) {
+    const ctx = state.ctx
+    const {x, y} = body
+    const [_x, _y] = Window.projectCoords(ctx.canvas, x + 0.25, y + 0.5)
+
+    ctx.fillStyle = "white";
+    ctx.textAlign = "left"
+    ctx.textBaseline = "middle"
+    ctx.fillText(text, _x, _y)
+}
+

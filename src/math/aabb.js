@@ -1,4 +1,10 @@
+import { assert, never } from "../assert.js";
 import { Vector2D } from "./vector.js";
+
+/**
+ * @param {AABB} a
+ * @param {AABB} b
+ */
 
 export class AABB {
     /**
@@ -48,6 +54,67 @@ export class AABB {
                 point.y >= this.pos.y &&
                 point.y <= this.pos.y + this.height
         );
+    }
+
+    /**
+     * ASSUMES THERE IS ALREADY AN INTERSECTION
+     * @param {AABB} other
+     * @returns {Vector2D}
+     */
+    firstInsidePoint(other) {
+        const tl = other.pos.clone()
+        const tr = other.pos.clone().addComponents(other.width, 0)
+        const bl = other.pos.clone().addComponents(0, other.height)
+        const br = other.pos.clone().addComponents(other.width, other.height)
+
+        if (this.contains(tl)) {
+            return tl
+        }
+
+        if (this.contains(tr)) {
+            return tr
+        }
+
+        if (this.contains(br)) {
+            return br
+        }
+
+        if (this.contains(bl)) {
+            return bl
+        }
+
+        never("cannot have this condition", "this", this, "other", other)
+        return null
+    }
+
+    /**
+     * @param {Vector2D} point
+     * @returns {Vector2D}
+     */
+    closestPoint(point) {
+        let tl = this.pos.clone()
+        const tr = this.pos.clone().addComponents(this.width, 0)
+        const bl = this.pos.clone().addComponents(0, this.height)
+        const br = this.pos.clone().addComponents(this.width, this.height)
+
+        let min = tl.clone().subtract(point)
+        let minPoint = tl
+        if (min.magnituteSquared() > tr.magnituteSquared()) {
+            min = tr.clone().subtract(point)
+            minPoint = tr
+        }
+
+        if (min.magnituteSquared() > br.magnituteSquared()) {
+            min = br.clone().subtract(point)
+            minPoint = br
+        }
+
+        if (min.magnituteSquared() > bl.magnituteSquared()) {
+            min = bl.clone().subtract(point)
+            minPoint = bl
+        }
+
+        return min
     }
 
     /**

@@ -100,7 +100,10 @@ declare global {
         startPos: Vector2D
         endPos: Vector2D
         time: number
+        currentTime: number
+        currentDir: -1 | 1
     }
+
     type NextLevelBehavior = {
         type: "next-level",
         toLevel: number,

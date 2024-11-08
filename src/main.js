@@ -26,11 +26,12 @@ startGame(canvas, {
 
     frameTimeMS: 16,
     tickTimeMS: 8,
+
     caleb: {
         hodlTime: 500,
         normWidthsPerSecond: 10,
         dash: {
-            dashNormWidth: 5,
+            dashNormWidth: 30,
             distance: 5,
             dashEaseRange: 0.10
         },
@@ -38,7 +39,7 @@ startGame(canvas, {
         jump: {
             jumpEaseMS: 500,
             jumpEaseRange: 0.10,
-            jumpNormHeight: 5,
+            jumpNormHeight: 30,
             jumpEaseFn: Ease.x3,
             noJumpBase: 450,
             noJumpMultiplier: 350,

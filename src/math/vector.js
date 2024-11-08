@@ -39,6 +39,17 @@ export class Vector2D {
     }
 
     /**
+   * @param {number} x
+   * @param {number} y
+   * @returns {Vector2D} The current instance for chaining.
+   */
+    addComponents(x, y) {
+        this.x += x;
+        this.y += y;
+        return this;
+    }
+
+    /**
    * @param {Vector2D} v - The vector to add.
    * @returns {Vector2D} The current instance for chaining.
    */
@@ -56,15 +67,6 @@ export class Vector2D {
         this.y -= v.y;
         return this;
     }
-
-    /**
-   * @param {Vector2D} v - The vector to subtract.
-   * @returns {Vector2D} The current instance for chaining.
-   */
-    subtractCopy(v) {
-        return new Vector2D(this.x - v.x, this.y - v.y);
-    }
-
 
     /**
    * @param {number} scalar - The scalar to multiply by.

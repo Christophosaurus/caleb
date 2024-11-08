@@ -152,11 +152,12 @@ function updatePosition(state, delta) {
 }
 
 /**
-* @param gameState {GameState}
+* @param {GameState} state
 */
-export function render(gameState) {
-    const caleb = gameState.caleb
-    const ctx = gameState.ctx;
+export function render(state) {
+    state.ctx.fillStyle = "black";
+    const caleb = state.caleb
+    const ctx = state.ctx;
     ctx.fillRect(caleb.renderX, caleb.renderY, caleb.renderWidth, caleb.renderHeight);
 }
 
