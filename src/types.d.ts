@@ -73,6 +73,10 @@ declare global {
         opts: CalebOpts,
         renderColor: string,
         dead: boolean,
+        platform: {
+            tick: number,
+            platform: BasedPlatform | null,
+        },
         deadAt: number,
 
         hodl: CalebHodl
@@ -173,6 +177,7 @@ declare global {
     }
 
     type PhysicsBody = {
+        vel2?: Vector2D,
         vel: Vector2D,
         acc: Vector2D,
         body: AABB,
@@ -209,6 +214,7 @@ declare global {
 
     type UpdateAndApplyModule = {
         update(gameState: GameState, delta: number): void
+        check(gameState: GameState, delta: number): void
         apply(gameState: GameState, delta: number): void
         tickClear(gameState: GameState): void
     }

@@ -50,6 +50,7 @@ function collidePlatform(state, platform) {
     const next = state.caleb.physics.next;
     const body = next.body;
     const dash = state.caleb.dash;
+    const jump = state.caleb.jump;
     const opts = state.opts;
     const tolerance = opts.tolerance
 
@@ -80,13 +81,22 @@ function collidePlatform(state, platform) {
 
         if (top) {
             body.pos.y = platformAABB.pos.y - body.height
+            if (!dash.dashing && !jump.jumping) {
+                const x = platform.physics.next.body.pos.x - platform.physics.current.body.pos.x
+                next.body.pos.x += x
+                state.caleb.platform.platform = platform
+                state.caleb.platform.tick = state.tick
+            } else {
+                state.caleb.platform.platform = null
+                state.caleb.platform.tick = state.tick
+            }
         } else {
             body.pos.y = platformAABB.pos.y + platformAABB.height
         }
 
         CalebInput.resetJumpState(state);
     } else {
-        collideInstagib(state)
+        console.log("here again")
     }
 }
 

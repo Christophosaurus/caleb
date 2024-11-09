@@ -69,6 +69,13 @@ function renderText(state, text, body) {
  * @param {GameState} state
  * @param {number} _
 */
+export function check(state, _) { }
+
+
+/**
+ * @param {GameState} state
+ * @param {number} _
+*/
 export function update(state, _) { }
 
 /**
@@ -82,9 +89,6 @@ export function tickClear(state) { }
 */
 export function apply(state, _) {
     if (state.opts.debug) {
-        if (state.debug.previous.caleb) {
-            console.log("prev", state.debug.previous.caleb.physics.current.body.pos === state.caleb.physics.current.body.pos)
-        }
         const prev = state.debug.previous.platforms
         state.debug.previous.platforms.length = 0
         const platforms = state.level.activeLevel.platforms

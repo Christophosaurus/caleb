@@ -1,6 +1,7 @@
 function precision(num) {
     return Math.floor(num * 100) / 100
 }
+
 /**
  * A class representing a 2D vector with various methods for game development.
  * @class
@@ -165,4 +166,5 @@ export class Vector2D {
     }
 }
 
+export const ZERO = new Vector2D(0, 0)
 

@@ -71,6 +71,13 @@ export function processKey(state, event) {
         } else {
             input.type = "up"
         }
+    } else if (input === null && event.type === "keyup") {
+        input = get(state, event.key.toLowerCase())
+        if (input && input.tick === state.tick) {
+            input.type = "down-up"
+        } else if (input) {
+            input.type = "up"
+        }
     } else if (input && event.type === "keydown") {
         input.type = "down"
     } else if (input === null && event.type === "keydown") {

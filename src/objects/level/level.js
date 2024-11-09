@@ -4,6 +4,7 @@ import { Vector2D } from "../../math/vector.js";
 import { clonePhysics } from "../../utils.js";
 import { GAME_HEIGHT, GAME_WIDTH, projectCoords, project } from "../../window.js";
 import { getRow } from "../caleb/utils.js";
+import * as Easing from "../../math/ease.js"
 
 export const DO_NOT_USE_FOR_INITIAL_POS_OR_YOU_WILL_BE_FIRED = -69
 
@@ -217,6 +218,12 @@ export function getLetters(state, r) {
  * @param {GameState} state
  * @param {number} _
  */
+export function check(state, _) { }
+
+/**
+ * @param {GameState} state
+ * @param {number} _
+ */
 export function apply(state, _) {
     for (const p of state.level.activeLevel.platforms) {
         const render = p.behaviors.render
@@ -250,15 +257,27 @@ export function update(state, delta) {
         circuit.currentTime += delta
 
         let percentDone = Math.min(1, circuit.currentTime / circuit.time)
+        percentDone = Easing.x3(percentDone)
+
         if (circuit.currentDir === -1) {
             percentDone = 1 - percentDone
         }
 
+
+        // TODO: here is the problem
         const x = circuit.startPos.x + (circuit.startPos.x - circuit.endPos.x) * percentDone
         const y = circuit.startPos.y + (circuit.startPos.y - circuit.endPos.y) * percentDone
 
-        p.physics.next.body.pos.x = x
-        p.physics.next.body.pos.y = y
+        const next = p.physics.next
+        const pos = next.body.pos
+        const dNorm = (delta / 1000)
+        const xDiff = (x - pos.x) / dNorm
+        const yDiff = (y - pos.y) / dNorm
+
+        next.vel.x = xDiff
+        next.vel.y = yDiff
+        pos.x = x
+        pos.y = y
 
         if (circuit.currentDir === 1 && percentDone === 1 ||
             circuit.currentDir === -1 && percentDone === 0) {

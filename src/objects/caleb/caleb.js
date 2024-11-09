@@ -3,6 +3,7 @@ import { Vector2D } from "../../math/vector.js";
 import * as Window from "../../window.js";
 import { debugForCallCount, debugForTickCount } from "../../debug.js";
 import * as CalebInput from "./input.js";
+import {CALEB_HEIGHT as HEIGHT, CALEB_WIDTH as WIDTH} from "./utils.js";
 import * as CalebPhysics from "./physics.js";
 
 const debugLog = debugForCallCount(100);
@@ -12,6 +13,11 @@ const debugLog = debugForCallCount(100);
 export function createCaleb(state) {
     return {
         opts: state.opts.caleb,
+
+        platform: {
+            platform: null,
+            tick: 0,
+        },
 
         physics: {
             current: {
@@ -140,6 +146,31 @@ function updateDash(state, delta) {
 * @param state {GameState}
 * @param delta {number}
 */
+function forceRemainingOnMovingPlatform(state, delta) {
+    const plat = state.caleb.platform
+
+    if (
+        plat.platform && state.tick - 1 > plat.tick ||
+        !plat.platform ||
+        state.caleb.dash.dashing || state.caleb.jump.jumping
+    ) {
+        return
+    }
+
+    const pphys = plat.platform.physics.next
+    const cphys = state.caleb.physics.next
+    if (pphys.body.intersects(cphys.body)) {
+        return
+    }
+
+    const diff = pphys.body.pos.y - (cphys.body.pos.y + HEIGHT)
+    cphys.body.pos.y += diff
+}
+
+/**
+* @param state {GameState}
+* @param delta {number}
+*/
 function updatePosition(state, delta) {
     const caleb = state.caleb;
     const next = caleb.physics.next;
@@ -152,9 +183,21 @@ function updatePosition(state, delta) {
     } else if (updateJump(state, delta)) {
     } else {
         vel.add(state.opts.gravity.multiplyCopy(deltaNorm));
+        forceRemainingOnMovingPlatform(state, delta)
     }
 
     next.body.pos = pos.add(vel.clone().multiply(deltaNorm));
+    if (next.vel2) {
+        next.body.pos = pos.add(next.vel2.clone().multiply(deltaNorm));
+    }
+}
+
+/**
+ * @param {GameState} state
+ * @param {number} _
+ */
+export function check(state, _) {
+    CalebPhysics.testCollisions(state);
 }
 
 /**
@@ -162,7 +205,6 @@ function updatePosition(state, delta) {
 * @param _ {number}
 */
 export function apply(state, _) {
-    CalebPhysics.testCollisions(state);
 
     const next = state.caleb.physics.next;
     const curr = state.caleb.physics.current;

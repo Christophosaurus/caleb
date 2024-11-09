@@ -45,7 +45,7 @@ function moveKJ(dir) {
         const caleb = state.caleb;
         const jump = caleb.jump;
         const opts = caleb.opts.jump;
-        const number = Math.max(state.input.numericModifier, 1)
+        const number = Math.min(Math.max(state.input.numericModifier, 1), 15)
 
         input.numericModifier = 0
         jump.jumping = true;

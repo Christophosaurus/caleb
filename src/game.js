@@ -18,8 +18,8 @@ const inputs = [
 
 /** @type UpdateAndApplyModule[] */
 const updateables = [
-    Caleb,
     Level,
+    Caleb,
     DebugRender,
 ];
 
@@ -47,6 +47,9 @@ export function startGame(canvas, gameopts) {
     const inputState = Input.createInputState();
     const one = Levels.levels()[0];
     const state = State.createGameState(gameopts, inputState, canvas, one);
+
+    // @ts-ignore
+    window.state = state
 
     Input.listenTo(canvas, inputState);
     State.reset(state);
@@ -108,6 +111,9 @@ function tick(state, delta) {
         const time = Math.min(state.opts.tickTimeMS, deltaRemaining)
         for (const u of updateables) {
             u.update(state, time);
+        }
+        for (const u of updateables) {
+            u.check(state, time);
         }
         for (const u of updateables) {
             u.apply(state, time);
