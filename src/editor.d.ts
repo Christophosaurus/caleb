@@ -33,6 +33,7 @@ declare global {
 
     type EditorPlatform = {
         AABB: AABB,
+        selected: boolean,
         behaviors: {
             lettered?: Lettered
             next?: NextLevelBehavior

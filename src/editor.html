@@ -7,6 +7,7 @@
         }
         #editor {
             display: grid;
+            z-index: 69000;
             grid-template-columns: repeat(32, 1fr);
             grid-template-rows: repeat(24, 1fr);
             gap: 0;
@@ -30,7 +31,13 @@
         .platform {
             position: absolute;
             box-sizing: border-box;
-            border: 1px solid #3498db;
+            border: 3px solid #3498db;
+        }
+
+        .platform.selected {
+            position: absolute;
+            box-sizing: border-box;
+            border: 3px solid #FF4C4C;
         }
 
         .grid-item.selected:hover {

@@ -12,6 +12,7 @@ function createPlatform(elements) {
 
     console.log("start", start.pos, "end", end.pos)
     return {
+        selected: false,
         AABB: from2Vecs(start.pos, end.pos),
         behaviors: {},
         el: null,
@@ -80,16 +81,50 @@ function isDown(next) {
 }
 
 /**
- * @param {any} target
+ * @param {Window | HTMLElement | ((evt: Event) => boolean)} target
  * @param {EventCB} next
  * @returns {EventCB}
  */
 function is(target, next) {
     return function(evt) {
-        if (evt.target === target) {
+        if (typeof target === "function" && target(evt) ||
+            evt.target === target) {
             next(evt)
         }
     }
+}
+
+/**
+ * @param {EditorState} state
+ * @param {EventCB} next
+ * @returns {EventCB}
+ */
+function isPlatform(state, next) {
+    return is(function(evt) {
+        for (const p of state.platforms) {
+            if (p.el === evt.target) {
+                return true
+            }
+        }
+        return false
+    }, next)
+}
+
+/**
+ * @param {HTMLElement} editor
+ * @param {EventCB} next
+ * @returns {EventCB}
+ */
+function isEditor(editor, next) {
+    return is(function(evt) {
+        let curr = /** @type HTMLElement */(evt.target)
+        do {
+            if (editor === curr) {
+                return true
+            }
+        } while((curr = curr.parentElement))
+        return false
+    }, next)
 }
 
 /**
@@ -135,17 +170,11 @@ export function listen(state, editor, panel, render) {
         createPlatform,
     }, render)
 
-    editor.addEventListener("mousedown", takeAction)
-    editor.addEventListener("mouseup", takeAction)
-    editor.addEventListener("mouseover", takeAction)
-    editor.addEventListener("mouseout", takeAction)
-
-    panel.addEventListener("mouseover", takeAction)
-    assert(!!createPlatform, "expected create platform to exist")
-
-    createPlatform.addEventListener("click", takeAction)
-
-    window.addEventListener("mouseup", takeAction);
+    window.addEventListener("mousedown", takeAction)
+    window.addEventListener("mouseup", takeAction)
+    window.addEventListener("mouseover", takeAction)
+    window.addEventListener("mouseout", takeAction)
+    window.addEventListener("click", takeAction)
     window.addEventListener("blur", takeAction);
 }
 
@@ -240,17 +269,36 @@ function handleCreatePlatform(state) {
     clear(state)
 }
 
+/**
+ * @param {EditorState} state
+ * @param {Event} evt
+ */
+function handleSelectPlatform(state, evt) {
+    let found = null
+    for (const p of state.platforms) {
+        if (evt.target === p.el) {
+            found = p
+            break
+        }
+    }
+
+    console.log("found!!", found)
+    assert(found !== null, "unable to find the platform")
+    found.selected = true
+}
+
 /** @param {EditorState} state
 /** @param {any} editor
 /** @param {PanelItems} panel
 /** @param {(state: EditorState) => void} render
  */
 export function createActionTaken(state, editor, panel, render) {
-    const eDown = type("mousedown", withElement(state, handleEditorDown));
-    const eOver = type("mouseover", withElement(state, isDown(handleEditorOver)));
-    const eUp = type("mouseup", withElement(state, isDown(handleEditorUp)));
+    const eDown = isEditor(editor, type("mousedown", withElement(state, handleEditorDown)))
+    const eOver = isEditor(editor, type("mouseover", withElement(state, isDown(handleEditorOver))))
+    const eUp = isEditor(editor, type("mouseup", withElement(state, isDown(handleEditorUp))))
     const eOut = is(panel.panel, type("mouseover", withState(state, handleEditorOut)))
     const createPlatform = is(panel.createPlatform, type("click", withState(state, handleCreatePlatform)))
+    const selectPlatform = isPlatform(state, type("mousedown", withState(state, handleSelectPlatform)))
 
     const handlers = [
         eDown,
@@ -258,6 +306,7 @@ export function createActionTaken(state, editor, panel, render) {
         eUp,
         eOut,
         createPlatform,
+        selectPlatform,
     ]
 
     /** @param {Event} event */
@@ -323,6 +372,18 @@ function renderPlatform(state, platform, app) {
     platform.el.style.height = `${Math.ceil(pH)}px`
     platform.el.style.top = `${Math.ceil(rect.top)}px`
     platform.el.style.left = `${Math.ceil(rect.left)}px`
+
+    if (state.mouse.state === "down") {
+        platform.el.style.pointerEvents = "none"
+    } else {
+        platform.el.style.pointerEvents = "auto"
+    }
+
+    if (platform.selected) {
+        platform.el.classList.add("selected")
+    } else {
+        platform.el.classList.remove("selected")
+    }
 }
 
 
