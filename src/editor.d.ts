@@ -12,6 +12,8 @@ declare global {
     }
 
     type EditorState = {
+        editor: HTMLElement
+        panel: HTMLElement
         platforms: EditorPlatform[]
         mouse: {
             startingEl: ElementState | null
@@ -23,17 +25,20 @@ declare global {
     }
 
     type PanelItems = {
-        panel: any,
         createPlatform: any,
     }
 
     type EventCB = (event: Event) => void
     type StateCB = (s: EditorState, evt: Event) => void
+    type PlatformCB = (s: EditorState, p: EditorPlatform, evt: Event) => void
     type ElementCB = (s: EditorState, es: ElementState, evt: Event) => void
 
     type EditorPlatform = {
         AABB: AABB,
-        selected: boolean,
+        selected: {
+            offset: Vector2D,
+            starting: Vector2D,
+        } | null
         behaviors: {
             lettered?: Lettered
             next?: NextLevelBehavior

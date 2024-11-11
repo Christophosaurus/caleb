@@ -9,12 +9,12 @@ const editor = document.querySelector("#editor")
 /** @type {HTMLElement} */
 const panel = document.querySelector("#panel")
 
-const state = Editor.createEditorState()
+const state = Editor.createEditorState(editor, panel)
 let id = 0
-for (let r = 0; r < GAME_HEIGHT; ++r) {
+for (let r = 0; r < GAME_HEIGHT + 10; ++r) {
     /** @type {ElementState[]} */
     const row = []
-    for (let c = 0; c < GAME_WIDTH; ++c) {
+    for (let c = 0; c < GAME_WIDTH + 10; ++c) {
         const el = document.createElement("div")
         editor.appendChild(el)
         el.id = `gi${id++}`;
@@ -33,6 +33,6 @@ for (let r = 0; r < GAME_HEIGHT; ++r) {
     state.elements.push(row);
 }
 
-Editor.listen(state, editor, panel, Editor.createRender(app))
+Editor.listen(state, Editor.createRender(app))
 
 
