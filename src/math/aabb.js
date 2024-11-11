@@ -214,3 +214,17 @@ export class AABB {
     }
 }
 
+/**
+ * @param {Vector2D} start
+ * @param {Vector2D} end
+ * @returns {AABB}
+ */
+export function from2Vecs(start, end) {
+    const width = end.x - start.x
+    const height = end.y - start.y
+
+    assert(width > 0, "cannot have negative width")
+    assert(height > 0, "cannot have negative height")
+
+    return new AABB(start.clone(), width, height)
+}

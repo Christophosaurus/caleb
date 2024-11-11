@@ -27,6 +27,12 @@
             background-color: #DDD;
         }
 
+        .platform {
+            position: absolute;
+            box-sizing: border-box;
+            border: 1px solid #3498db;
+        }
+
         .grid-item.selected:hover {
             background-color: #CCC;
         }
@@ -34,10 +40,10 @@
         .grid-item:hover {
             background-color: #EEE;
         }
-        /* Flex container for the layout */
+        /* Flex container for the app */
 
 
-        #layout {
+        #app {
           display: flex;
           height: 100vh; /* Full viewport height */
           overflow: hidden;
@@ -53,15 +59,22 @@
           overflow-y: auto; /* Allows scrolling if content overflows */
         }
 
+        #panel button {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
 
 	    </style>
 	</head>
 	<body>
-        <div id="layout">
-            <div id="panel"></div>
+        <div id="app">
+            <div id="panel">
+                <button class="create-platform">create platform</button>
+            </div>
             <div id="editor"></div>
         </div>
-		<script type="module" src="./editor/editor.js"></script>
+		<script type="module" src="./editor/app.js"></script>
 	</body>
 </html>
 

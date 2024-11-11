@@ -1,19 +1,18 @@
+import { AABB } from "./math/aabb.js";
+import { Vector2D } from "./math/vector.js";
+
 export {};
 
 declare global {
     type ElementState = {
         id: number
-        pos: Position
+        pos: Vector2D
         el: HTMLDivElement
         selected: boolean
     }
 
-    type Position = {
-        row: number
-        col: number
-    }
-
     type EditorState = {
+        platforms: EditorPlatform[]
         mouse: {
             startingEl: ElementState | null
             state: "invalid" | "down"
@@ -23,7 +22,25 @@ declare global {
 
     }
 
+    type PanelItems = {
+        panel: any,
+        createPlatform: any,
+    }
+
     type EventCB = (event: Event) => void
     type StateCB = (s: EditorState, evt: Event) => void
     type ElementCB = (s: EditorState, es: ElementState, evt: Event) => void
+
+    type EditorPlatform = {
+        AABB: AABB,
+        behaviors: {
+            lettered?: Lettered
+            next?: NextLevelBehavior
+            obstacle?: ObstacleBehavior
+            instaGib?: InstaGib
+            circuit?: Circuit
+            render?: CanvasProjectable
+        }
+        el: HTMLElement | null
+    }
 }
