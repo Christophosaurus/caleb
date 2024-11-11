@@ -23,5 +23,7 @@ declare global {
 
     }
 
+    type EventCB = (event: Event) => void
+    type StateCB = (s: EditorState, evt: Event) => void
     type ElementCB = (s: EditorState, es: ElementState, evt: Event) => void
 }

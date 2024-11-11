@@ -3,7 +3,8 @@ import * as Editor from "./level.js";
 
 /** @type {HTMLElement} */
 const editor = document.querySelector("#editor")
-
+/** @type {HTMLElement} */
+const panel = document.querySelector("#panel")
 
 const state = Editor.createEditorState()
 let id = 0
@@ -32,6 +33,6 @@ for (let r = 0; r < GAME_HEIGHT; ++r) {
     state.elements.push(row);
 }
 
-Editor.listen(state, editor)
+Editor.listen(state, editor, panel)
 
 

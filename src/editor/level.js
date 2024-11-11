@@ -1,10 +1,20 @@
 import { assert } from "../assert.js";
-import * as Position from "./pos.js"
+
+/**
+ * @param {EditorState} state
+ * @param {StateCB} next
+ * @returns {EventCB}
+ */
+function withState(state, next) {
+    return function(event) {
+        next(state, event)
+    }
+}
 
 /**
  * @param {EditorState} state
  * @param {ElementCB} next
- * @returns {(event: Event) => void}
+ * @returns {EventCB}
  */
 function withElement(state, next) {
     return function(event) {
@@ -16,24 +26,24 @@ function withElement(state, next) {
         const row = parseInt(t.dataset.row)
         const col = parseInt(t.dataset.col)
         if (isNaN(row) || isNaN(col)) {
-            state.mouse.state = "invalid"
             return
         }
+
         next(state, state.elements[row][col], event)
     }
 }
 
 /**
  * @param {string} t
- * @param {ElementCB} next
- * @returns {ElementCB}
+ * @param {EventCB} next
+ * @returns {EventCB}
  */
 function type(t, next) {
-    return function(s, es, evt) {
+    return function(evt) {
         if (evt.type !== t) {
             return
         }
-        next(s, es, evt)
+        next(evt)
     }
 }
 
@@ -51,18 +61,34 @@ function isDown(next) {
     }
 }
 
-
 /**
- * @param {ElementCB} next
- * @returns {ElementCB}
+ * @param {any} target
+ * @param {EventCB} next
+ * @returns {EventCB}
  */
-function isWindow(next) {
-    return function(state, es, evt) {
-        if (evt.currentTarget === window) {
-            next(state, es, evt)
+function is(target, next) {
+    return function(evt) {
+        if (evt.target === target) {
+            next(evt)
         }
     }
 }
+
+/**
+ * @param {any} target
+ * @param {EventCB} next
+ * @returns {EventCB}
+ */
+function not(target, next) {
+    return function(evt) {
+        if (evt.currentTarget !== target) {
+            next(evt)
+        }
+    }
+}
+
+
+
 
 /** @returns {EditorState} */
 export function createEditorState() {
@@ -79,12 +105,16 @@ export function createEditorState() {
 /**
  * @param {EditorState} state
  * @param {HTMLElement} editor
+ * @param {HTMLElement} panel
  */
-export function listen(state, editor) {
-    const takeAction = createActionTaken(state)
+export function listen(state, editor, panel) {
+    const takeAction = createActionTaken(state, editor, panel)
     editor.addEventListener("mousedown", takeAction)
     editor.addEventListener("mouseup", takeAction)
     editor.addEventListener("mouseover", takeAction)
+    editor.addEventListener("mouseout", takeAction)
+
+    panel.addEventListener("mouseover", takeAction)
     window.addEventListener("mouseup", takeAction);
     window.addEventListener("blur", takeAction);
 }
@@ -147,6 +177,16 @@ function handleEditorDown(state, es) {
 function handleEditorOver(state, es) {
     createSelected(state, es)
 }
+
+/**
+ * @param {EditorState} state
+ */
+function handleEditorOut(state) {
+    //clear(state)
+    //clearSelected(state)
+}
+
+
 /**
  * @param {EditorState} state
  * @param {ElementState} es
@@ -161,7 +201,7 @@ function handleEditorUp(state, es) {
  * @param {ElementState} es
  */
 function handleWindowOver(state, es) {
-    //clearSelected(state)
+    clearSelected(state)
 }
 
 /**
@@ -169,7 +209,7 @@ function handleWindowOver(state, es) {
  * @param {ElementState} es
  */
 function handleWindowUp(state, es) {
-    //clear(state)
+    clear(state)
     state.mouse.state = "invalid"
 }
 
@@ -182,22 +222,21 @@ function handleWindowBlur(state, es) {
     state.mouse.state = "invalid"
 }
 
-/** @param {EditorState} state */
-export function createActionTaken(state) {
-    const eDown = withElement(state, type("mousedown", handleEditorDown));
-    const eOver = withElement(state, isDown(type("mouseover", handleEditorOver)));
-    const eUp = withElement(state, isDown(type("mouseup", handleEditorUp)));
-    const wOver = withElement(state, isWindow(isDown(type("mouseover", handleWindowOver))));
-    const wUp = withElement(state, isWindow(isDown(type("mouseup", handleWindowUp))));
-    const wBlur = withElement(state, isWindow(isDown(type("blur", handleWindowBlur))));
+/** @param {EditorState} state
+/** @param {any} editor
+/** @param {any} panel
+ */
+export function createActionTaken(state, editor, panel) {
+    const eDown = type("mousedown", withElement(state, handleEditorDown));
+    const eOver = type("mouseover", withElement(state, isDown(handleEditorOver)));
+    const eUp = type("mouseup", withElement(state, isDown(handleEditorUp)));
+    const eOut = is(panel, type("mouseover", withState(state, handleEditorOut)))
 
     const handlers = [
         eDown,
         eOver,
         eUp,
-        wOver,
-        wUp,
-        wBlur,
+        eOut,
     ]
 
     /** @param {Event} event */
