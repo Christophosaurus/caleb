@@ -8,8 +8,9 @@ export class PlatformControls extends HTMLElement {
     controls = null
     constructor() {
         super();
+        // TODO can i have multiple of these??
         Bus.listen("show-platform", (platform) => this.revealControls(platform))
-        Bus.listen("hide-platform", (platform) => this.hideControls(platform))
+        Bus.listen("hide-platform", () => this.hideControls())
         Bus.listen("move-platform", (platform) => this.moveControls(platform))
         Bus.listen("release-platform", (platform) => this.save(platform))
 
@@ -31,8 +32,7 @@ export class PlatformControls extends HTMLElement {
         this.moveControls(platform)
     }
 
-    /** @param {EditorPlatform} platform */
-    hideControls(platform) {
+    hideControls() {
         this.controls.classList.remove("show")
     }
 
@@ -45,6 +45,7 @@ export class PlatformControls extends HTMLElement {
 
     /** @param {EditorPlatform} platform */
     save(platform) {
+        this.hideControls()
     }
 }
 

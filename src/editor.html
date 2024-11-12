@@ -94,12 +94,12 @@
     </head>
     <body>
         <div id="app">
-            <div id="editor">
-                <div id="world-outline"></div>
-            </div>
             <div id="overlay">
                 <platform-controls></platform-controls>
                 <div id="loading">Jabascript Loading</div>
+            </div>
+            <div id="editor">
+                <div id="world-outline"></div>
             </div>
         </div>
         <template id="platform-controls">
@@ -111,6 +111,7 @@
 
 .platform-controls.show {
     display: flex;
+    z-index: 69420;
 }
 </style>
             <div class="platform-controls">
