@@ -2,7 +2,7 @@ import { assert } from "../../assert.js";
 import { AABB } from "../../math/aabb.js";
 import { Vector2D } from "../../math/vector.js";
 import { clonePhysics } from "../../utils.js";
-import { GAME_HEIGHT, GAME_WIDTH, projectCoords, project } from "../../window.js";
+import { GAME_HEIGHT, GAME_WIDTH, projectCoords, projectInto } from "../../window.js";
 import { getRow } from "../caleb/utils.js";
 import * as Easing from "../../math/ease.js"
 
@@ -35,10 +35,10 @@ function renderText(ctx, text, x, y, calebY) {
 /** @param state {GameState}
 */
 export function render(state) {
-    state.ctx.fillStyle = "black";
+    const ctx = state.getCtx();
+    ctx.fillStyle = "black";
 
     const plats = state.level.activeLevel.platforms
-    const ctx = state.ctx;
     const calebY = getRow(state.caleb);
 
     for (const p of plats) {
@@ -228,7 +228,7 @@ export function apply(state, _) {
     for (const p of state.level.activeLevel.platforms) {
         const render = p.behaviors.render
         if (render) {
-            project(state.ctx.canvas, render, p.physics.next.body)
+            projectInto(state.getDim(), render, p.physics.next.body)
         }
 
 

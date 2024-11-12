@@ -1,3 +1,5 @@
+import { never } from "../assert.js"
+
 /**
  * @param {EditorState} state
  * @param {StateCB} next
@@ -137,9 +139,11 @@ export function noActivePlatform(state, next) {
  * @returns {EventCB}
  */
 export function notControls(state, next) {
-    return is(function(_) {
-        return state.overlay
-    }, next)
+    never("implement")
+    //return is(function(_) {
+    //    return state.overlay
+    //}, next)
+    return is(() => true, next)
 }
 
 

@@ -121,10 +121,46 @@ function tick(state, delta) {
         deltaRemaining -= time
     }
 
-    state.ctx.clearRect(0, 0, state.ctx.canvas.width, state.ctx.canvas.height);
+    const ctx = state.getCtx()
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
     for (const r of renderables) {
         r.render(state);
+    }
+
+    for (const input of inputs) {
+        input.tickClear(state);
+    }
+
+    for (const u of updateables) {
+        u.tickClear(state);
+    }
+}
+
+/**
+ * @param {GameState} state
+ * @param {number} delta
+ */
+export function renderlessTick(state, delta) {
+    state.tick++
+
+    for (const input of inputs) {
+        input.update(state, delta);
+    }
+
+    let deltaRemaining = delta
+    while (deltaRemaining > 0) {
+        const time = Math.min(state.opts.tickTimeMS, deltaRemaining)
+        for (const u of updateables) {
+            u.update(state, time);
+        }
+        for (const u of updateables) {
+            u.check(state, time);
+        }
+        for (const u of updateables) {
+            u.apply(state, time);
+        }
+        deltaRemaining -= time
     }
 
     for (const input of inputs) {

@@ -6,12 +6,18 @@ import * as Caleb from "../objects/caleb/caleb.js"
  * @param state {GameState}
  */
 export function projectStaticObjects(state) {
+    const ctx = state.getCtx();
+    if (ctx === null) {
+        return
+    }
+
     for (const p of state.level.activeLevel.platforms) {
         const render = p.behaviors.render
         if (!render) {
             continue
         }
-        Window.project(state.ctx.canvas, render, p.physics.current.body);
+
+        Window.projectInto(ctx.canvas, render, p.physics.current.body);
     }
 }
 
@@ -30,11 +36,12 @@ export function reset(state) {
 /**
  * @param {GameOptions} opts
  * @param {InputState} input
- * @param {HTMLCanvasElement} canvas
+ * @param {() => Dimension} getDim
+ * @param {() => CanvasRenderingContext2D | null} getCtx
  * @param {LevelSet} level
  * @returns {GameState}
  */
-export function createGameState(opts, input, canvas, level) {
+export function createGameState(opts, input, getDim, getCtx, level) {
     /** @type {GameState} */
     const state = {
         debug: {
@@ -48,13 +55,15 @@ export function createGameState(opts, input, canvas, level) {
         level,
         levelChanged: true,
 
+        getDim,
+        getCtx,
+
         tick: 0,
 
         caleb: null,
         gameOver: false,
         loopStartTime: 0,
         loopDelta: 0,
-        ctx: canvas.getContext("2d"),
         rn: {zero: 1},
         input,
     };

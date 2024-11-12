@@ -28,14 +28,14 @@ function yZero(normHeight) {
  * javascript, lets... deal with that shit later, and by later i mean when
  * i inevitably abondon this project
  *
- * @param {HTMLCanvasElement} canvas
+ * @param {Dimension} dim
  * @param {CanvasProjectable} projectable
  * @param {AABB} body
- * @returns [number, number]
+ * @returns {void}
  */
-export function project(canvas, projectable, body) {
-    const normWidth = canvas.width / FULL_WIDTH
-    const normHeight = canvas.height / FULL_HEIGHT
+export function projectInto(dim, projectable, body) {
+    const normWidth = dim.width / FULL_WIDTH
+    const normHeight = dim.height / FULL_HEIGHT
 
     projectable.renderX = xZero(normWidth) + Math.floor(body.pos.x * normWidth);
     projectable.renderY = yZero(normHeight) + Math.floor(body.pos.y * normHeight);
@@ -44,13 +44,13 @@ export function project(canvas, projectable, body) {
 }
 
 /**
- * @param {HTMLCanvasElement} canvas
+ * @param {Dimension} dim
  * @param {AABB} body
  * @returns {[number, number, number, number]}
  */
-export function projectAABB(canvas, body) {
-    const normWidth = canvas.width / FULL_WIDTH
-    const normHeight = canvas.height / FULL_HEIGHT
+export function projectAABB(dim, body) {
+    const normWidth = dim.width / FULL_WIDTH
+    const normHeight = dim.height / FULL_HEIGHT
 
     return [
         xZero(normWidth) + Math.floor(body.pos.x * normWidth),
@@ -61,10 +61,10 @@ export function projectAABB(canvas, body) {
 }
 
 /**
- * @param canvas {HTMLCanvasElement}
- * @param x {number}
- * @param y {number}
- * @returns [number, number]
+ * @param {Dimension} canvas
+ * @param {number} x
+ * @param {number} y
+ * @returns {[number, number]}
  */
 export function projectCoords(canvas, x, y) {
     const normWidth = canvas.width / FULL_WIDTH
@@ -77,29 +77,29 @@ export function projectCoords(canvas, x, y) {
 
 
 /**
- * @param canvas {HTMLCanvasElement}
- * @param x {number}
- * @param y {number}
- * @returns [number, number]
+ * @param  {Dimension} dim
+ * @param {number} x
+ * @param {number} y
+ * @returns {[number, number]}
  */
-export function projectAbsoluteCoords(canvas, x, y) {
-    const normWidth = canvas.width / FULL_WIDTH
-    const normHeight = canvas.height / FULL_HEIGHT
+export function projectAbsoluteCoords(dim, x, y) {
+    const normWidth = dim.width / FULL_WIDTH
+    const normHeight = dim.height / FULL_HEIGHT
     return [Math.floor(x * normWidth), Math.floor(y * normHeight)];
 }
 
 /**
- * @param canvas {HTMLCanvasElement}
- * @returns number
+ * @param {Dimension} dim
+ * @returns {number}
  */
-export function getFontSize(canvas) {
-    return Math.floor(canvas.height / (FULL_HEIGHT * 1.3))
+export function getFontSize(dim) {
+    return Math.floor(dim.height / (FULL_HEIGHT * 1.3))
 }
 
 /**
- * @param canvas {HTMLCanvasElement}
+ * @param {Dimension} dim
  */
-export function resizeCanvas(canvas) {
+export function resize(dim) {
     let width = window.innerWidth;
     let height = window.innerHeight;
 
@@ -112,16 +112,7 @@ export function resizeCanvas(canvas) {
         height -= (hRatio - wRatio) * FULL_HEIGHT
     }
 
-    canvas.width = Math.floor(width)
-    canvas.height = Math.floor(height)
-}
-
-/**
- * @param canvas {HTMLCanvasElement}
- */
-export function listenToChanges(canvas) {
-    window.addEventListener("resize", function() {
-        resizeCanvas(canvas);
-    });
+    dim.width = Math.floor(width)
+    dim.height = Math.floor(height)
 }
 

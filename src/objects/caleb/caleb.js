@@ -214,16 +214,17 @@ export function apply(state, _) {
     curr.acc.set(next.acc)
 
     // techincally i could move this into the engine side not in each update
-    Window.project(state.ctx.canvas, state.caleb, next.body);
+    Window.projectInto(state.getDim(), state.caleb, next.body);
 }
 
 /**
 * @param {GameState} state
 */
 export function render(state) {
-    state.ctx.fillStyle = "black";
+    const ctx = state.getCtx();
+
+    ctx.fillStyle = "black";
     const caleb = state.caleb
-    const ctx = state.ctx;
     ctx.fillRect(caleb.renderX, caleb.renderY, caleb.renderWidth, caleb.renderHeight);
 }
 

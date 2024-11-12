@@ -1,7 +1,7 @@
 import { startGame } from "./game.js";
 import { Vector2D } from "./math/vector.js";
 import * as Ease from "./math/ease.js";
-import { resizeCanvas, listenToChanges } from "./window.js"
+import { resize } from "./window.js"
 
 const canvas = /** @type {HTMLCanvasElement} */ (document.getElementById("game_canvas"))
 canvas.tabIndex = 0;
@@ -19,8 +19,11 @@ window.addEventListener('click', () => {
     canvas.focus();
 });
 
-listenToChanges(canvas);
-resizeCanvas(canvas);
+window.addEventListener("resize", function() {
+    resize(canvas);
+});
+resize(canvas);
+
 startGame(canvas, {
     debug,
 

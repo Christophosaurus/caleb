@@ -141,6 +141,11 @@ declare global {
         letterMap: (string | null)[][]
     }
 
+    type Dimension = {
+        width: number
+        height: number
+    }
+
     type GameState = {
         opts: GameOptions
         debug: {
@@ -152,8 +157,8 @@ declare global {
 
         now: () => number,
         caleb: Caleb
-        ctx: CanvasRenderingContext2D
-
+        getCtx(): CanvasRenderingContext2D | null
+        getDim(): Dimension
         level: LevelSet,
         levelChanged: boolean
 

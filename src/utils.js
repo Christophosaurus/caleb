@@ -1,3 +1,6 @@
+import { Vector2D } from "./math/vector.js";
+import * as Ease from "./math/ease.js"
+
 let nowFn = Date.now;
 
 /** @param fn {() => number} */
@@ -29,5 +32,57 @@ export function clonePhysics(coll) {
                 vel: physics.next.vel.clone(),
             }
         }
+    }
+}
+
+/**
+ * @param {number} seed
+ * @returns {() => number}
+ */
+export function mulberry32(seed) {
+    return function() {
+        let t = seed += 0x6D2B79F5;
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+}
+
+/**
+ * @param {() => number} rand
+ * @returns {GameOptions}
+ */
+export function getSimulationConfig(rand) {
+    return {
+        debug: false,
+
+        frameTimeMS: 16,
+        tickTimeMS: 8,
+
+        caleb: {
+            hodlTime: 500,
+            normWidthsPerSecond: 10,
+            dash: {
+                dashNormWidth: 30,
+                distance: 5,
+                dashEaseRange: 0.10
+            },
+
+            jump: {
+                jumpEaseMS: 500,
+                jumpEaseRange: 0.10,
+                jumpNormHeight: 30,
+                jumpEaseFn: Ease.x3,
+                noJumpBase: 450,
+                noJumpMultiplier: 350,
+            }
+        },
+
+        tolerance: {
+            topBy: 0.15,
+            bottomBy: 0.15,
+        },
+
+        gravity: new Vector2D(0, 28),
     }
 }
