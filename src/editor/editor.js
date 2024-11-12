@@ -1,17 +1,15 @@
 import { assert } from "../assert.js";
-import { Vector2D } from "../math/vector.js";
-import { GAME_HEIGHT, GAME_WIDTH } from "../window.js";
 import * as Utils from "./utils.js"
 import * as T from "./transforms.js"
 import * as Platform from "./platform.js"
 import * as Bus from "../bus.js"
+import * as Renderer from "./render.js"
 
 /**
  * @param {EditorState} state
- * @param {(state: EditorState) => void} render
  */
-export function listen(state, render) {
-    const takeAction = createActionTaken(state, render)
+export function listen(state) {
+    const takeAction = createActionTaken(state)
 
     window.addEventListener("mousedown", takeAction)
     window.addEventListener("mouseup", takeAction)
@@ -88,9 +86,9 @@ function handleEditorOver(state, es) {
 
 /**
  * @param {EditorState} state
- * @param {ElementState} es
+ * @param {ElementState} _
  */
-function handleEditorUp(state, es) {
+function handleEditorUp(state, _) {
     //clear(state)
     state.mouse.state = "invalid"
 }
@@ -166,9 +164,8 @@ function handleReleasePlatform(state, platform, event) {
 }
 
 /** @param {EditorState} state
-/** @param {(state: EditorState) => void} render
  */
-export function createActionTaken(state, render) {
+export function createActionTaken(state) {
     const createPlatform = T.type("keydown", T.key("a", T.withState(state, handleCreatePlatform)))
     const selectPlatform = T.isPlatform(state, T.type("mousedown", T.withState(state, handleSelectPlatform)))
     const movePlatform = T.type("mousemove", T.withSelectedPlatform(state, handleMovePlatform))
@@ -178,7 +175,7 @@ export function createActionTaken(state, render) {
     const eOver = T.noActivePlatform(state, T.isEditor(state.editor, T.type("mouseover", T.withElement(state, T.isDown(handleEditorOver)))))
     const eUp = T.noActivePlatform(state, T.isEditor(state.editor, T.type("mouseup", T.withElement(state, T.isDown(handleEditorUp)))))
 
-    const debug = T.type("mousemove", function(evt) { })
+    const debug = T.type("mousemove", function(_) { })
 
     const handlers = [
         debug,
@@ -196,83 +193,7 @@ export function createActionTaken(state, render) {
         for (const h of handlers) {
             h(event)
         }
-        render(state)
-    }
-}
-
-/**
- * TODO perf
- * easy win would be to put a tick on each platform every time it changes and only recalc / re-render when i need to
- * @param {HTMLElement} app
- */
-export function createRender(app) {
-    /**
-     * @param {EditorState} state
-     */
-    return function(state) {
-        for (const row of state.elements) {
-            for (const el of row) {
-                if (el.selected) {
-                    el.el.classList.add("selected")
-                } else {
-                    el.el.classList.remove("selected")
-                }
-            }
-        }
-
-        for (const plat of state.platforms) {
-            renderPlatform(state, plat)
-        }
-
-        // TODO configure?
-        const start = Utils.unproject(state, new Vector2D(5, 5))
-        const dims = Utils.unproject(state, new Vector2D(5 + GAME_WIDTH, 5 + GAME_HEIGHT)).subtract(start)
-        state.worldOutline.style.width = `${Math.ceil(dims.x)}px`
-        state.worldOutline.style.height = `${Math.ceil(dims.y)}px`
-        state.worldOutline.style.top = `${Math.ceil(start.y)}px`
-        state.worldOutline.style.left = `${Math.ceil(start.x)}px`
-    }
-}
-
-/**
- * @param {EditorState} state
-* @param {EditorPlatform} platform
-*/
-function renderPlatform(state, platform) {
-    const editor = state.editor
-    assert(!!editor, "editor has to exist in the app")
-
-    if (platform.el === null) {
-        platform.el = document.createElement("div")
-        editor.appendChild(platform.el)
-        platform.el.classList.add("platform")
-    }
-
-    const aabb = platform.AABB
-    const pos = aabb.pos
-    const start = state.elements[pos.y][pos.x]
-
-    const rect = start.el.getBoundingClientRect()
-    const w = rect.width
-    const h = rect.height
-    const pW = w * (aabb.width + 1)
-    const pH = h * (aabb.height + 1)
-
-    platform.el.style.width = `${Math.ceil(pW)}px`
-    platform.el.style.height = `${Math.ceil(pH)}px`
-    platform.el.style.top = `${Math.ceil(rect.top)}px`
-    platform.el.style.left = `${Math.ceil(rect.left)}px`
-
-    if (state.mouse.state === "down") {
-        platform.el.style.pointerEvents = "none"
-    } else {
-        platform.el.style.pointerEvents = "auto"
-    }
-
-    if (platform.selected) {
-        platform.el.classList.add("selected")
-    } else {
-        platform.el.classList.remove("selected")
+        Renderer.render(state)
     }
 }
 

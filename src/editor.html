@@ -66,9 +66,14 @@
 
 
         #app {
+          position: relative;
           display: flex;
           height: 100vh; /* Full viewport height */
           overflow: hidden;
+        }
+
+        #overlay {
+          position: absolute;
         }
 
         /* Side panel styling */
@@ -93,6 +98,8 @@
         <div id="app">
             <div id="editor">
                 <div id="world-outline"></div>
+            </div>
+            <div id="overlay">
             </div>
         </div>
         <template id="panel-controls">

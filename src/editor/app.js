@@ -5,9 +5,9 @@ import * as EditorState from "./state.js";
 import { PlatformControls } from "./platform.js";
 
 /** @type {HTMLElement} */
-const app = document.querySelector("#app")
-/** @type {HTMLElement} */
 const editor = document.querySelector("#editor")
+/** @type {HTMLElement} */
+const overlay = document.querySelector("#overlay")
 
 const state = EditorState.createEditorState(editor)
 let id = 0
@@ -34,6 +34,6 @@ for (let r = 0; r < GAME_HEIGHT + 10; ++r) {
 }
 
 customElements.define("platform-controls", PlatformControls);
-Editor.listen(state, Editor.createRender(app))
+Editor.listen(state)
 
 
