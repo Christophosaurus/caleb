@@ -136,13 +136,23 @@ export function noActivePlatform(state, next) {
  * @param {EventCB} next
  * @returns {EventCB}
  */
+export function notControls(state, next) {
+    return is(function(_) {
+        return state.overlay
+    }, next)
+}
+
+
+/**
+ * @param {EditorState} state
+ * @param {EventCB} next
+ * @returns {EventCB}
+ */
 export function activePlatform(state, next) {
     return is(function() {
         return state.activePlatform !== null
     }, next)
 }
-
-
 
 /**
  * @param {HTMLElement} editor
@@ -152,6 +162,9 @@ export function activePlatform(state, next) {
 export function isEditor(editor, next) {
     return is(function(evt) {
         let curr = /** @type HTMLElement */(evt.target)
+        if (curr == null) {
+            return false
+        }
         do {
             if (editor === curr) {
                 return true
@@ -160,20 +173,4 @@ export function isEditor(editor, next) {
         return false
     }, next)
 }
-
-/**
- * @param {any} target
- * @param {EventCB} next
- * @returns {EventCB}
- */
-export function not(target, next) {
-    return function(evt) {
-        if (evt.currentTarget !== target) {
-            next(evt)
-        }
-    }
-}
-
-
-
 

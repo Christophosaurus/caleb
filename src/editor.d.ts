@@ -15,6 +15,7 @@ declare global {
         tick: number
         editor: HTMLElement
         overlay: HTMLElement
+        platformControls: HTMLElement
         worldOutline: HTMLElement
         platforms: EditorPlatform[]
         activePlatform: null | EditorPlatform

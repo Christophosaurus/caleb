@@ -46,6 +46,13 @@ export class PlatformControls extends HTMLElement {
     /** @param {EditorPlatform} platform */
     save(platform) {
         this.hideControls()
+        console.log(this.values())
+    }
+
+    values() {
+        return {
+            obstacle: /** @type {HTMLInputElement} */(this.controls.querySelector("#obstacle")).value
+        };
     }
 }
 

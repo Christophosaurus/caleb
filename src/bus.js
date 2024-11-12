@@ -3,8 +3,9 @@
 let listeners = {};
 
 /**
- * @param {BusType} type
- * @param {BusArg} args
+ * @template {keyof BusArgMap} T
+ * @param {T} type
+ * @param {BusArgMap[T]} args
  */
 export function emit(type, args) {
     for (const cb of listeners[type] || []) {
@@ -44,4 +45,15 @@ export function remove(type, cb) {
 
 export function clear() {
     listeners = {}
+}
+
+class Render extends Event {
+    constructor() {
+        super("render")
+    }
+}
+
+export function render() {
+    const render = /** @type {RenderEvent} */(new Render())
+    emit("render", render)
 }

@@ -230,18 +230,20 @@ declare global {
         exit(state: GameState): void
     }
 
-    type BusType = "hide-platform" | "show-platform" | "move-platform" | "release-platform"
+    type RenderEvent = Event & {type: "render"}
+    type BusType = "hide-platform" | "show-platform" | "move-platform" | "release-platform" | "render"
     type BusArgMap = {
         "move-platform": EditorPlatform;
         "hide-platform": EditorPlatform;
         "show-platform": EditorPlatform;
         "release-platform": EditorPlatform;
+        "render": RenderEvent
     };
 
     type BusArg = EditorPlatform
-    type BusCB<T extends BusArg> = (args: T) => void;
+    type BusCB<K extends BusType> = (args: BusArgMap[K]) => void;
     type BusListeners = {
-        [K in keyof BusArgMap]?: BusCB<BusArgMap[K]>[];
+        [K in BusType]?: BusCB<K>[];
     };
 }
 

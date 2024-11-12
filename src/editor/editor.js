@@ -6,7 +6,8 @@ import * as Bus from "../bus.js"
 import * as Renderer from "./render.js"
 
 const behaviors = {
-    fastClickTimeMS: 250
+    fastClickTimeMS: 250,
+    toBeMovingPxs: 144,
 }
 
 /**
@@ -24,6 +25,8 @@ export function listen(state) {
     window.addEventListener("blur", takeAction);
     window.addEventListener("resize", takeAction);
     window.addEventListener("keydown", takeAction);
+    Bus.listen("render", takeAction)
+    Bus.render()
 }
 
 /**
@@ -182,11 +185,7 @@ function handleMovePlatform(state, platform, event) {
     const projected = Utils.project(state, Utils.toVec(evt).subtract(platform.selected.offset), Math.round)
     const moved = platform.selected.starting.clone().add(projected)
 
-    // move is 12 pixels or more
-    if (moved.magnituteSquared() > 144) {
-        platform.selected.moving = true
-    }
-
+    platform.selected.moving ||= moved.magnituteSquared() > behaviors.toBeMovingPxs
     platform.AABB.pos = Utils.bound(moved)
     Bus.emit("hide-platform", platform)
 }
@@ -206,7 +205,7 @@ function handleReleasePlatform(state, platform) {
  */
 export function createActionTaken(state) {
     const createPlatform = T.type("keydown", T.key("a", T.withState(state, handleCreatePlatform)))
-    const selectPlatform = T.isPlatform(state, T.type("mousedown", T.withState(state, handleSelectPlatform)))
+    const selectPlatform = T.notControls(state, T.isPlatform(state, T.type("mousedown", T.withState(state, handleSelectPlatform))))
     const movePlatform = T.type("mousemove", T.withSelectedPlatform(state, handleMovePlatform))
     const releasePlatform = T.type("keydown", T.key("o", T.withSelectedPlatform(state, handleReleasePlatform)))
     const upPlatform = T.activePlatform(state, T.type("mouseup", T.withSelectedPlatform(state, handleUpPlatform)))
