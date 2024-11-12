@@ -230,11 +230,12 @@ declare global {
         exit(state: GameState): void
     }
 
-    type BusType = "select-platform" | "release-platform" | "move-platform"
+    type BusType = "hide-platform" | "show-platform" | "move-platform" | "release-platform"
     type BusArgMap = {
-        "select-platform": EditorPlatform;
-        "release-platform": EditorPlatform;
         "move-platform": EditorPlatform;
+        "hide-platform": EditorPlatform;
+        "show-platform": EditorPlatform;
+        "release-platform": EditorPlatform;
     };
 
     type BusArg = EditorPlatform

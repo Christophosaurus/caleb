@@ -12,7 +12,9 @@ declare global {
     }
 
     type EditorState = {
+        tick: number
         editor: HTMLElement
+        overlay: HTMLElement
         worldOutline: HTMLElement
         platforms: EditorPlatform[]
         activePlatform: null | EditorPlatform
@@ -31,10 +33,14 @@ declare global {
     type ElementCB = (s: EditorState, es: ElementState, evt: Event) => void
 
     type EditorPlatform = {
+        state: EditorState,
         AABB: AABB,
         selected: {
             offset: Vector2D,
             starting: Vector2D,
+            down: boolean,
+            moving: boolean,
+            tick: number,
         } | null
         behaviors: {
             lettered?: Lettered

@@ -131,6 +131,18 @@ export function noActivePlatform(state, next) {
     }, next)
 }
 
+/**
+ * @param {EditorState} state
+ * @param {EventCB} next
+ * @returns {EventCB}
+ */
+export function activePlatform(state, next) {
+    return is(function() {
+        return state.activePlatform !== null
+    }, next)
+}
+
+
 
 /**
  * @param {HTMLElement} editor

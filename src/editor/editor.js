@@ -5,6 +5,10 @@ import * as Platform from "./platform.js"
 import * as Bus from "../bus.js"
 import * as Renderer from "./render.js"
 
+const behaviors = {
+    fastClickTimeMS: 250
+}
+
 /**
  * @param {EditorState} state
  */
@@ -97,9 +101,8 @@ function handleEditorUp(state, _) {
  * @param {EditorState} state
  */
 function handleCreatePlatform(state) {
-    const selected = state.selectedElements
-    if (selected.length > 0) {
-        const p = Platform.createPlatform(selected)
+    if (state.selectedElements.length > 0) {
+        const p = Platform.createPlatform(state)
         state.platforms.push(p)
     }
 
@@ -123,12 +126,43 @@ function handleSelectPlatform(state, event) {
     }
 
     assert(found !== null, "unable to find the platform")
+
+    if (found.selected) {
+        found.selected = {
+            ...found.selected,
+            moving: false,
+            offset: Utils.toVec(evt),
+            starting: found.AABB.pos,
+            down: true,
+        }
+        Bus.emit("show-platform", found)
+        return
+    }
+
     found.selected = {
         offset: Utils.toVec(evt),
         starting: found.AABB.pos,
+        down: true,
+        moving: false,
+        tick: state.tick
     }
     state.activePlatform = found
-    Bus.emit("select-platform", found)
+    Bus.emit("show-platform", found)
+}
+
+/**
+ * @param {EditorState} state
+ * @param {EditorPlatform} platform
+ */
+function handleUpPlatform(state, platform) {
+    const s = platform.selected
+    s.down = false
+
+    if (!s.moving && s.tick + behaviors.fastClickTimeMS < state.tick) {
+        handleReleasePlatform(state, platform)
+    } else {
+        Bus.emit("show-platform", platform)
+    }
 }
 
 /**
@@ -140,24 +174,29 @@ function handleMovePlatform(state, platform, event) {
     const evt = /** @type {MouseEvent} */(event)
     assert(evt instanceof MouseEvent, "selection of platform without mouse event")
     assert(!!platform.selected, "platform is not selected")
-    const projected = Utils.project(state, Utils.toVec(evt).subtract(platform.selected.offset))
 
-    platform.AABB.pos = Utils.bound(platform.selected.starting.clone().add(projected))
-    Bus.emit("move-platform", platform)
+    if (!platform.selected.down) {
+        return
+    }
+
+    const projected = Utils.project(state, Utils.toVec(evt).subtract(platform.selected.offset), Math.round)
+    const moved = platform.selected.starting.clone().add(projected)
+
+    // move is 12 pixels or more
+    if (moved.magnituteSquared() > 144) {
+        platform.selected.moving = true
+    }
+
+    platform.AABB.pos = Utils.bound(moved)
+    Bus.emit("hide-platform", platform)
 }
 
 /**
  * @param {EditorState} state
  * @param {EditorPlatform} platform
- * @param {Event} event
  */
-function handleReleasePlatform(state, platform, event) {
-    const evt = /** @type {MouseEvent} */(event)
-    assert(evt instanceof MouseEvent, "selection of platform without mouse event")
+function handleReleasePlatform(state, platform) {
     assert(!!platform.selected, "platform is not selected")
-
-    const projected = Utils.project(state, Utils.toVec(evt).subtract(platform.selected.offset))
-    platform.AABB.pos = platform.selected.starting.clone().add(projected)
     platform.selected = null
     state.activePlatform = null
     Bus.emit("release-platform", platform)
@@ -169,7 +208,8 @@ export function createActionTaken(state) {
     const createPlatform = T.type("keydown", T.key("a", T.withState(state, handleCreatePlatform)))
     const selectPlatform = T.isPlatform(state, T.type("mousedown", T.withState(state, handleSelectPlatform)))
     const movePlatform = T.type("mousemove", T.withSelectedPlatform(state, handleMovePlatform))
-    const releasePlatform = T.type("mouseup", T.withSelectedPlatform(state, handleReleasePlatform))
+    const releasePlatform = T.type("keydown", T.key("o", T.withSelectedPlatform(state, handleReleasePlatform)))
+    const upPlatform = T.activePlatform(state, T.type("mouseup", T.withSelectedPlatform(state, handleUpPlatform)))
 
     const eDown = T.noActivePlatform(state, T.isEditor(state.editor, T.type("mousedown", T.withElement(state, handleEditorDown))))
     const eOver = T.noActivePlatform(state, T.isEditor(state.editor, T.type("mouseover", T.withElement(state, T.isDown(handleEditorOver)))))
@@ -183,6 +223,7 @@ export function createActionTaken(state) {
         eOver,
         eUp,
         createPlatform,
+        upPlatform,
         selectPlatform,
         movePlatform,
         releasePlatform,
@@ -190,6 +231,7 @@ export function createActionTaken(state) {
 
     /** @param {Event} event */
     return function(event) {
+        state.tick = Date.now()
         for (const h of handlers) {
             h(event)
         }

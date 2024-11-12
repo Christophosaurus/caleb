@@ -74,24 +74,22 @@
 
         #overlay {
           position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
         }
 
-        /* Side panel styling */
-        #panel {
-          width: 300px; /* Adjust this to control the side panel width */
-          background-color: #f4f4f4;
-          padding: 20px;
-          box-sizing: border-box;
-          border-right: 1px solid #ddd; /* Optional: border to separate panel from grid */
-          overflow-y: auto; /* Allows scrolling if content overflows */
+        #loading {
+            display: flex;
+            font-size: 8em;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            pointer-events: none;
+            background-color: #EEE;
         }
-
-        #panel button {
-            font-size: 24px;
-            line-height: 1.6;
-        }
-
-
         </style>
     </head>
     <body>
@@ -100,33 +98,47 @@
                 <div id="world-outline"></div>
             </div>
             <div id="overlay">
+                <platform-controls></platform-controls>
+                <div id="loading">Jabascript Loading</div>
             </div>
         </div>
-        <template id="panel-controls">
-            <button class="create-level">create level</button>
-            <button class="create-platform">create platform</button>
-            <div class="type">
-                <div class="title">type</div>
-                <div class="obstacle">
-                    <input id="obstacle" type="checkbox"></input> <label>Obstacle</label><br>
+        <template id="platform-controls">
+<style>
+.platform-controls {
+    display: none;
+    position: absolute;
+}
+
+.platform-controls.show {
+    display: flex;
+}
+</style>
+            <div class="platform-controls">
+                <button class="create-level">create level</button>
+                <button class="create-platform">create platform</button>
+                <div class="type">
+                    <div class="title">type</div>
+                    <div class="obstacle">
+                        <input id="obstacle" type="checkbox"></input> <label>Obstacle</label><br>
+                    </div>
+                    <div class="instagib">
+                        <input id="instagib" type="checkbox"></input> <label>Instagib</label><br>
+                    </div>
+                    <div class="circuit">
+                        <input id="circuit" type="checkbox"></input> <label>Circuit</label><br>
+                        <label>Start X,Y</label> <input id="circuit-sx" min="-5" max="37" type="number" value="0"></input> <input id="circuit-sy" min="-5" max="29" type="number" value="0"></input> <br>
+                        <label>End X,Y</label> <input id="circuit-ex" min="-5" max="37" type="number" value="0"></input> <input id="circuit-ey" min="-5" max="29" type="number" value="0"></input> <br>
+                    </div>
+                    <div class="next-level">
+                        <input id="next-level" type="checkbox"></input> <label>Next Level</label><br>
+                        <label>Next Level ID</label> <input id="nl-id" min="0" max="1000" type="number" value="0"></input><br>
+                    </div>
+                    <div class="render">
+                        <input id="render" type="checkbox"></input> <label>Render</label><br>
+                    </div>
                 </div>
-                <div class="instagib">
-                    <input id="instagib" type="checkbox"></input> <label>Instagib</label><br>
-                </div>
-                <div class="circuit">
-                    <input id="circuit" type="checkbox"></input> <label>Circuit</label><br>
-                    <label>Start X,Y</label> <input id="circuit-sx" min="-5" max="37" type="number" value="0"></input> <input id="circuit-sy" min="-5" max="29" type="number" value="0"></input> <br>
-                    <label>End X,Y</label> <input id="circuit-ex" min="-5" max="37" type="number" value="0"></input> <input id="circuit-ey" min="-5" max="29" type="number" value="0"></input> <br>
-                </div>
-                <div class="next-level">
-                    <input id="next-level" type="checkbox"></input> <label>Next Level</label><br>
-                    <label>Next Level ID</label> <input id="nl-id" min="0" max="1000" type="number" value="0"></input><br>
-                </div>
-                <div class="render">
-                    <input id="render" type="checkbox"></input> <label>Render</label><br>
-                </div>
+                <button class="delete-level">delete level</button>
             </div>
-            <button class="delete-level">delete level</button>
         </template>
         <script type="module" src="./editor/app.js"></script>
     </body>

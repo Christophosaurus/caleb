@@ -1,3 +1,7 @@
+// TODO should i have this contain the current state of the board?
+// Or do i pass in the current state?
+//
+// The reason why is the project and unproject require state object to be passed in which causes the platform to have back reference to the state it belongs to... which is weird
 import { Vector2D } from "../math/vector.js";
 import { GAME_HEIGHT, GAME_WIDTH } from "../window.js";
 
@@ -19,15 +23,15 @@ export function bound(pos) {
 /**
  * @param {EditorState} state
  * @param {Vector2D} pos
+ * @param {(n: number) => number} zero
  * @returns {Vector2D}
  */
-export function project(state, pos) {
+export function project(state, pos, zero = Math.floor) {
     const rect = state.elements[0][0].el.getBoundingClientRect()
     const w = rect.width
     const h = rect.height
-    return new Vector2D(Math.floor(pos.x / w), Math.floor(pos.y / h));
+    return new Vector2D(zero(pos.x / w), zero(pos.y / h));
 }
-
 
 /**
  * @param {EditorState} state
