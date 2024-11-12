@@ -147,6 +147,10 @@ declare global {
     }
 
     type GameState = {
+        updateables: UpdateableModule[]
+        renderables: RenderableModule[]
+        applyables: UpdateAndApplyModule[]
+
         opts: GameOptions
         debug: {
             previous: {

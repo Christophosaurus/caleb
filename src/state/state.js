@@ -44,6 +44,10 @@ export function reset(state) {
 export function createGameState(opts, input, getDim, getCtx, level) {
     /** @type {GameState} */
     const state = {
+        applyables: [],
+        updateables: [],
+        renderables: [],
+
         debug: {
             previous: {
                 platforms: [],

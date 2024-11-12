@@ -7,15 +7,6 @@ import * as Level from "./objects/level/level.js"
 import * as RN from "./objects/relative_numbers.js";
 import * as State from "./state/state.js";
 
-/** @type UpdateableModule[] */
-const updateables = [ ]
-
-/** @type UpdateAndApplyModule[] */
-const applyables = [ ];
-
-/** @type RenderableModule[] */
-const renderables = [ ];
-
 /**
  * @param {GameState} state
  * @param {GameLoop} loop
@@ -23,7 +14,7 @@ const renderables = [ ];
  * @param {() => void} done
  * @param {number} until
  */
-export function gameRunner(
+export function run(
     state,
     loop,
     ticks,
@@ -35,7 +26,7 @@ export function gameRunner(
             tick(state)
         }
 
-        if (until === 0 && state.tick <= until) {
+        if (until === 0 || state.tick <= until) {
             loop(onLoop)
         } else {
             done()
@@ -45,40 +36,56 @@ export function gameRunner(
     loop(onLoop)
 }
 
-export function clear() {
-    applyables.length = 0
-    renderables.length = 0
-    updateables.length = 0
+/**
+ * @param {GameState} state
+ */
+export function clear(state) {
+    state.applyables.length = 0
+    state.renderables.length = 0
+    state.updateables.length = 0
 }
 
-export function addStandardBehaviors() {
-    updateables.push(Input, CalebInput, Debugger, RN)
-    applyables.push(Level, Caleb, DebugRender)
-    renderables.push(Caleb, Level, RN, DebugRender)
-}
 
-/** @param {UpdateableModule} update */
-export function addUpdater(update) {
-    updateables.push(update)
-}
-
-/** @param {UpdateAndApplyModule} apply */
-export function addApplyer(apply) {
-    applyables.push(apply)
-}
-
-/** @param {RenderableModule} render */
-export function addRenderer(render) {
-    renderables.push(render)
+/**
+ * @param {GameState} state
+ */
+export function addStandardBehaviors(state) {
+    state.updateables.push(Input, CalebInput, Debugger, RN)
+    state.applyables.push(Level, Caleb, DebugRender)
+    state.renderables.push(Caleb, Level, RN, DebugRender)
 }
 
 /**
  * @param {GameState} state
- * @param {number} delta
+ * @param {UpdateableModule} update
+ * */
+export function addUpdater(state, update) {
+    state.updateables.push(update)
+}
+
+/**
+ * @param {GameState} state
+ * @param {UpdateAndApplyModule} apply */
+export function addApplyer(state, apply) {
+    state.applyables.push(apply)
+}
+
+/**
+ * @param {GameState} state
+ * @param {RenderableModule} render
+ * */
+export function addRenderer(state, render) {
+    state.renderables.push(render)
+}
+
+/**
+ * @param {GameState} state
  */
-export function tickWithRender(state, delta) {
+export function tickWithRender(state) {
+    const delta = state.loopDelta
     state.tick++
 
+    console.log("caleb", state.caleb.dead, state.loopStartTime, state.caleb.deadAt, state.loopStartTime - state.caleb.deadAt)
     // TODO probably need opts?
     if (state.caleb.dead && state.loopStartTime - state.caleb.deadAt > 1000) {
         State.reset(state);
@@ -90,20 +97,20 @@ export function tickWithRender(state, delta) {
         State.projectStaticObjects(state)
     }
 
-    for (const input of updateables) {
+    for (const input of state.updateables) {
         input.update(state, delta);
     }
 
     let deltaRemaining = delta
     while (deltaRemaining > 0) {
         const time = Math.min(state.opts.tickTimeMS, deltaRemaining)
-        for (const u of applyables) {
+        for (const u of state.applyables) {
             u.update(state, time);
         }
-        for (const u of applyables) {
+        for (const u of state.applyables) {
             u.check(state, time);
         }
-        for (const u of applyables) {
+        for (const u of state.applyables) {
             u.apply(state, time);
         }
         deltaRemaining -= time
@@ -112,24 +119,25 @@ export function tickWithRender(state, delta) {
     const ctx = state.getCtx()
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    for (const r of renderables) {
+    for (const r of state.renderables) {
         r.render(state);
     }
 
-    for (const input of updateables) {
+    for (const input of state.updateables) {
         input.tickClear(state);
     }
 
-    for (const u of applyables) {
+    for (const u of state.applyables) {
         u.tickClear(state);
     }
 }
 
 /**
  * @param {GameState} state
- * @param {number} delta
  */
-export function tickWithoutRender(state, delta) {
+export function tickWithoutRender(state) {
+    const delta = state.loopDelta
+
     state.tick++
 
     // TODO probably need opts?
@@ -142,30 +150,30 @@ export function tickWithoutRender(state, delta) {
         state.levelChanged = false;
     }
 
-    for (const input of updateables) {
+    for (const input of state.updateables) {
         input.update(state, delta);
     }
 
     let deltaRemaining = delta
     while (deltaRemaining > 0) {
         const time = Math.min(state.opts.tickTimeMS, deltaRemaining)
-        for (const u of applyables) {
+        for (const u of state.applyables) {
             u.update(state, time);
         }
-        for (const u of applyables) {
+        for (const u of state.applyables) {
             u.check(state, time);
         }
-        for (const u of applyables) {
+        for (const u of state.applyables) {
             u.apply(state, time);
         }
         deltaRemaining -= time
     }
 
-    for (const input of updateables) {
+    for (const input of state.updateables) {
         input.tickClear(state);
     }
 
-    for (const u of applyables) {
+    for (const u of state.applyables) {
         u.tickClear(state);
     }
 }

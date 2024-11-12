@@ -1,52 +1,31 @@
-import { Vector2D } from "./math/vector.js";
-import * as Ease from "./math/ease.js";
-import { resize } from "./window.js"
+import * as Config from "./game-config.js"
+import * as Levels from "./objects/level/levels/levels.js"
+import { assert } from "./assert.js";
+import * as Runner from "./game-runner.js";
 
 const canvas = /** @type {HTMLCanvasElement} */ (document.getElementById("game_canvas"))
+assert(!!canvas, "expected canvas to exist")
+
 const urlParams = new URLSearchParams(window.location.search);
 const debug = urlParams.get("debug") === "1";
 
-// TODO: this will probably need to fixed
-window.addEventListener('click', () => {
-    canvas.focus();
-});
+// TODO level selection will likely need to be passed in
+const level = Levels.levels()[0]
+const state = Config.createCanvasGame(canvas, Config.getGameConfig(debug), level)
+Config.addBrowserListeners(state, canvas)
 
-window.addEventListener("resize", function() {
-    resize(canvas);
-});
-resize(canvas);
+const ticks = [Runner.tickWithRender]
+const loop = Runner.createGameLoop(state)
+Runner.clear(state)
+Runner.addStandardBehaviors(state)
+Runner.run(
+    state,
+    loop,
+    ticks,
+    () => {
+        console.log("game finished")
+    });
 
-startGame(canvas, {
-    debug,
 
-    frameTimeMS: 16,
-    tickTimeMS: 8,
-
-    caleb: {
-        hodlTime: 500,
-        normWidthsPerSecond: 10,
-        dash: {
-            dashNormWidth: 30,
-            distance: 5,
-            dashEaseRange: 0.10
-        },
-
-        jump: {
-            jumpEaseMS: 500,
-            jumpEaseRange: 0.10,
-            jumpNormHeight: 30,
-            jumpEaseFn: Ease.x3,
-            noJumpBase: 450,
-            noJumpMultiplier: 350,
-        }
-    },
-
-    tolerance: {
-        topBy: 0.15,
-        bottomBy: 0.15,
-    },
-
-    gravity: new Vector2D(0, 28),
-})
 
 

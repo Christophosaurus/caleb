@@ -135,6 +135,8 @@ function collideLevelChange(state, p) {
  * @param {GameState} state
  */
 function collideInstagib(state) {
+    if (!state.caleb.dead) {
+        state.caleb.deadAt = state.now()
+    }
     state.caleb.dead = true
-    state.caleb.deadAt = state.now()
 }

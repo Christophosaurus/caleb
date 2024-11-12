@@ -1,9 +1,4 @@
-import * as Input from "./input/input.js";
-import * as Levels from "./objects/level/levels/levels.js";
-import { tick } from "./simulation/input.js";
-import * as State from "./state/state.js";
 import * as Utils from "./utils.js";
-import * as Simulation from "./simulation/state.js";
 import { GAME_HEIGHT, GAME_WIDTH } from "./window.js";
 import { tickWithoutRender } from "./game2.js";
 
