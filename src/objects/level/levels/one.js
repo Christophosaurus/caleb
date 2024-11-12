@@ -35,26 +35,10 @@ export function createLevel() {
         initialPosition: new Vector2D(7, 1),
     }
 
-    const bPlatforms = [
-        Level.withRender(Level.withObstacle(Level.createPlatform(new AABB(new Vector2D(5, 10), 10, 1)))),
-        Level.withRender(Level.withInstaGib(Level.createPlatform(new AABB(new Vector2D(GAME_WIDTH - 1, 0), 1, 10)))),
-        Level.withNextLevel(Level.createPlatform(new AABB(new Vector2D(1, 0), 5, 1)), 0, new Vector2D(
-            Level.DO_NOT_USE_FOR_INITIAL_POS_OR_YOU_WILL_BE_FIRED,
-            GAME_HEIGHT - 1 - CalebUtils.CALEB_HEIGHT
-        )),
-    ];
-
-    /** @type {Level} */
-    const b = {
-        platforms: bPlatforms,
-        letterMap: Level.createLetterMap(bPlatforms),
-        initialPosition: new Vector2D(3, 1),
-    }
-
     return {
         title: "one",
         difficulty: 1,
-        levels: [a, b],
+        levels: [a],
         activeLevel: a,
         initialLevel: a,
     }

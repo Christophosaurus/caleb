@@ -50,6 +50,40 @@ export function mulberry32(seed) {
 
 /**
  * @param {() => number} rand
+ * @returns {(max: number, min?: number) => number}
+ */
+export function randRange(rand) {
+    return function(max, min = 0) {
+        const r = rand()
+        return Math.floor(min + r * (max - min))
+    }
+}
+
+/**
+ * @param {() => number} rand
+ * @returns {(range: SimRange) => number}
+ */
+export function randRangR(rand) {
+    return function(range) {
+        const r = rand()
+        return Math.floor(range.start + r * (range.stop - range.start))
+    }
+}
+
+
+/**
+ * @param {() => number} rand
+ * @returns {() => number}
+ */
+export function randInt(rand) {
+    return function() {
+        return Math.floor(rand() * 4294967296)
+    }
+}
+
+
+/**
+ * @param {() => number} rand
  * @returns {GameOptions}
  */
 export function getSimulationConfig(rand) {

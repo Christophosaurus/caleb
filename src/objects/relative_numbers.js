@@ -32,7 +32,7 @@ function renderText(ctx, text, x, y) {
  * @param state {GameState}
 */
 export function render(state) {
-    const ctx = state.ctx;
+    const ctx = state.getCtx();
     ctx.font = `${Window.getFontSize(ctx.canvas)}px Consolas, "Courier New", monospace`;
 
     const x = 1.9

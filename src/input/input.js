@@ -55,9 +55,11 @@ export function createInputState() {
     }
 }
 
+
+
 /**
  * @param {InputState} state
- * @param {KeyboardEvent} event
+ * @param {KeyEvent} event
  */
 export function processKey(state, event) {
     if (event.key.length > 1 || event.repeat) {
@@ -90,13 +92,25 @@ export function processKey(state, event) {
 }
 
 /**
+ * @param {KeyboardEvent} event
+ * @returns {KeyEvent}
+ */
+function toKeyEvent(event) {
+    return {
+        type: /** @type {"keydown" | "keyup"}*/(event.type),
+        key: event.key,
+        repeat: event.repeat,
+    }
+}
+
+/**
  * @param {HTMLElement} el
  * @param {InputState} state
  */
 export function listenTo(el, state) {
     /** @param event {KeyboardEvent} */
     function listen(event) {
-        processKey(state, event);
+        processKey(state, toKeyEvent(event));
     }
 
     el.addEventListener("keydown", listen)

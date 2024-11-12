@@ -216,6 +216,17 @@ export function getLetters(state, r) {
 
 /**
  * @param {GameState} state
+ * @param {number} r
+ * @returns {string[]}
+ */
+export function getLettersByRow(state, r) {
+    // TODO this just has to create such garbage...
+    return state.level.activeLevel.letterMap[r]
+}
+
+
+/**
+ * @param {GameState} state
  * @param {number} _
  */
 export function check(state, _) { }

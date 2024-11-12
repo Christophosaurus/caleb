@@ -1,3 +1,4 @@
+import * as Utils from "./utils.js";
 import * as Input from "./input/input.js";
 import * as Caleb from "./objects/caleb/caleb.js";
 import * as CalebInput from "./objects/caleb/input.js";
@@ -7,6 +8,7 @@ import * as Level from "./objects/level/level.js"
 import * as Levels from "./objects/level/levels/levels.js";
 import * as RN from "./objects/relative_numbers.js";
 import * as State from "./state/state.js";
+import * as Simulation from "./simulation/state.js";
 
 /** @type UpdateableModule[] */
 const inputs = [
@@ -46,7 +48,7 @@ export function startGame(canvas, gameopts) {
 
     const inputState = Input.createInputState();
     const one = Levels.levels()[0];
-    const state = State.createGameState(gameopts, inputState, canvas, one);
+    const state = State.createGameState(gameopts, inputState, () => canvas, () => canvas.getContext("2d"), one);
 
     // @ts-ignore
     window.state = state
@@ -63,13 +65,43 @@ export function startGame(canvas, gameopts) {
 }
 
 /**
- * @param state {GameState}
+ * @param {number} seed
+ * @param {HTMLCanvasElement} canvas
+ * @param {GameOptions} gameopts
  */
-function gameLoop(state) {
+export function simulateGame(seed, canvas, gameopts) {
+    const rand = Utils.mulberry32(seed)
+    const one = Levels.levels()[0];
+    const iS = Input.createInputState()
+    const state = State.createGameState(gameopts, iS, () => canvas, () => canvas.getContext("2d"), one);
+
+    // probably need better sims
+    const simState = Simulation.createSimState(state, {
+        maxJump: 15,
+        waitRange: {start: 100, stop: 500},
+        holdRange: {start: 100, stop: 1500},
+    }, {
+        rand,
+        randRange: Utils.randRange(rand),
+        randInt: Utils.randInt(rand),
+        randRangeR: Utils.randRangR(rand),
+    });
+
+}
+
+/**
+ * @param {GameState} state
+ * @param {number} until
+ */
+export function gameLoop(state, until = 0) {
     const start = state.now()
     const delta = start - state.loopStartTime;
     state.loopStartTime = start;
     state.loopDelta = delta;
+
+    if (until > 0 && state.tick > until) {
+        return
+    }
 
     // TODO probably need opts?
     if (state.caleb.dead && start - state.caleb.deadAt > 1000) {

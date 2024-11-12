@@ -250,5 +250,44 @@ declare global {
     type BusListeners = {
         [K in BusType]?: BusCB<K>[];
     };
+
+    type SimRand = {
+        randInt: () =>  number,
+        randRange: (max: number, min?: number) =>  number,
+        randRangeR: (r: SimRange) =>  number,
+        rand: () => number
+    }
+
+    type SimState = {
+        opts: SimOptions
+        rand: SimRand
+        state: GameState
+        action: {
+            actions: SimKeyAction[]
+            idx: number
+            start: number
+        } | null
+    }
+
+    type SimKeyAction = {
+        key: string
+        held: number
+        wait: number
+        downPerformed: boolean
+        upPerformed: boolean
+    }
+
+    type SimRange = {start: number, stop: number}
+    type SimOptions = {
+        holdRange: SimRange
+        waitRange: SimRange
+        maxJump: number
+    }
+
+    type KeyEvent = {
+        type: "keydown" | "keyup"
+        key: string
+        repeat: boolean
+    }
 }
 
