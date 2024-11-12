@@ -1,16 +1,15 @@
 import { Vector2D } from "../math/vector.js";
 import { GAME_WIDTH, GAME_HEIGHT } from "../window.js";
 import * as Editor from "./editor.js";
-import { PlatformControls } from "./panel.js";
+import * as EditorState from "./state.js";
+import { PlatformControls } from "./platform.js";
 
 /** @type {HTMLElement} */
 const app = document.querySelector("#app")
 /** @type {HTMLElement} */
 const editor = document.querySelector("#editor")
-/** @type {HTMLElement} */
-const panel = document.querySelector("#panel")
 
-const state = Editor.createEditorState(editor, panel)
+const state = EditorState.createEditorState(editor)
 let id = 0
 for (let r = 0; r < GAME_HEIGHT + 10; ++r) {
     /** @type {ElementState[]} */
@@ -34,7 +33,7 @@ for (let r = 0; r < GAME_HEIGHT + 10; ++r) {
     state.elements.push(row);
 }
 
-customElements.define("panel-platform-controls", PlatformControls);
+customElements.define("platform-controls", PlatformControls);
 Editor.listen(state, Editor.createRender(app))
 
 

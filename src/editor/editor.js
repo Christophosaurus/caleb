@@ -1,261 +1,17 @@
 import { assert } from "../assert.js";
-import { from2Vecs } from "../math/aabb.js";
 import { Vector2D } from "../math/vector.js";
 import { GAME_HEIGHT, GAME_WIDTH } from "../window.js";
-
-const MIN_W = 0
-const MAX_W = 10 + GAME_WIDTH
-const MIN_H = 0
-const MAX_H = 10 + GAME_HEIGHT
-
-/**
- * @param {Vector2D} pos
- * @returns {Vector2D}
- */
-export function bound(pos) {
-    pos.x = Math.min(MAX_W, Math.max(MIN_W, pos.x))
-    pos.y = Math.min(MAX_H, Math.max(MIN_H, pos.y))
-    return pos
-}
-
-/**
- * @param {EditorState} state
- * @param {Vector2D} pos
- * @returns {Vector2D}
- */
-export function project(state, pos) {
-    const rect = state.elements[0][0].el.getBoundingClientRect()
-    const w = rect.width
-    const h = rect.height
-    return new Vector2D(Math.floor(pos.x / w), Math.floor(pos.y / h));
-}
-
-
-/**
- * @param {EditorState} state
- * @param {Vector2D} pos
- * @returns {Vector2D}
- */
-export function unproject(state, pos) {
-    const editorRect = state.editor.getBoundingClientRect()
-    const rect = state.elements[0][0].el.getBoundingClientRect()
-
-    const w = rect.width
-    const h = rect.height
-
-    return new Vector2D(Math.floor(pos.x * w + editorRect.left), Math.floor(pos.y * h + editorRect.top));
-}
-
-/**
- * @param {MouseEvent} evt
- * @returns Vector2D
- */
-function toVec(evt) {
-    return new Vector2D(evt.clientX, evt.clientY)
-}
-
-/**
- * @param {ElementState[]} elements
- * @returns {EditorPlatform}
- */
-function createPlatform(elements) {
-    const start = elements[0]
-    const end = elements[elements.length - 1]
-
-    return {
-        selected: null,
-        AABB: from2Vecs(start.pos, end.pos),
-        behaviors: {},
-        el: null,
-    }
-}
-
-/**
- * @param {EditorState} state
- * @param {StateCB} next
- * @returns {EventCB}
- */
-function withState(state, next) {
-    return function(event) {
-        next(state, event)
-    }
-}
-
-/**
- * @param {EditorState} state
- * @param {PlatformCB} next
- * @returns {EventCB}
- */
-function withSelectedPlatform(state, next) {
-    return function(event) {
-        for (const p of state.platforms) {
-            if (p.selected) {
-                next(state, p, event)
-                return
-            }
-        }
-    }
-}
-
-
-/**
- * @param {EditorState} state
- * @param {ElementCB} next
- * @returns {EventCB}
- */
-function withElement(state, next) {
-    return function(event) {
-        const t = /** @type {HTMLElement} */(event.target);
-        if (!t.dataset) {
-            return
-        }
-
-        const row = parseInt(t.dataset.row)
-        const col = parseInt(t.dataset.col)
-        if (isNaN(row) || isNaN(col)) {
-            return
-        }
-
-        next(state, state.elements[row][col], event)
-    }
-}
-
-/**
- * @param {string} t
- * @param {EventCB} next
- * @returns {EventCB}
- */
-function type(t, next) {
-    return function(evt) {
-        if (evt.type !== t) {
-            return
-        }
-        next(evt)
-    }
-}
-
-/**
- * @param {ElementCB} next
- * @returns {ElementCB}
- */
-function isDown(next) {
-    return function(state, es, type) {
-        if (state.mouse.state !== "down") {
-            return
-        }
-
-        next(state, es, type)
-    }
-}
-
-/**
- * @param {Window | HTMLElement | ((evt: Event) => boolean)} target
- * @param {EventCB} next
- * @returns {EventCB}
- */
-function is(target, next) {
-    return function(evt) {
-        if (typeof target === "function" && target(evt) ||
-            evt.target === target) {
-            next(evt)
-        }
-    }
-}
-
-/**
- * @param {EditorState} state
- * @param {EventCB} next
- * @returns {EventCB}
- */
-function isPlatform(state, next) {
-    return is(function(evt) {
-        for (const p of state.platforms) {
-            if (p.el === evt.target) {
-                return true
-            }
-        }
-        return false
-    }, next)
-}
-
-/**
- * @param {EditorState} state
- * @param {EventCB} next
- * @returns {EventCB}
- */
-function noActivePlatform(state, next) {
-    return is(function(evt) {
-        return state.activePlatform === null
-    }, next)
-}
-
-
-/**
- * @param {HTMLElement} editor
- * @param {EventCB} next
- * @returns {EventCB}
- */
-function isEditor(editor, next) {
-    return is(function(evt) {
-        let curr = /** @type HTMLElement */(evt.target)
-        do {
-            if (editor === curr) {
-                return true
-            }
-        } while((curr = curr.parentElement))
-        return false
-    }, next)
-}
-
-/**
- * @param {any} target
- * @param {EventCB} next
- * @returns {EventCB}
- */
-function not(target, next) {
-    return function(evt) {
-        if (evt.currentTarget !== target) {
-            next(evt)
-        }
-    }
-}
-
-
-
-
-/**
- * @param {HTMLElement} editor
- * @param {HTMLElement} panel
- * @returns {EditorState}
- * */
-export function createEditorState(editor, panel) {
-    const worldOutline = /** @type HTMLElement */(editor.querySelector("#world-outline"));
-    assert(!!worldOutline, "#world-outline not within editor")
-    return {
-        editor,
-        panel,
-        worldOutline,
-        platforms: [],
-        activePlatform: null,
-        elements: [],
-        selectedElements: [],
-        mouse: {
-            startingEl: null,
-            state: "invalid",
-        }
-    }
-}
+import * as Utils from "./utils.js"
+import * as T from "./transforms.js"
+import * as Platform from "./platform.js"
+import * as Bus from "../bus.js"
 
 /**
  * @param {EditorState} state
  * @param {(state: EditorState) => void} render
  */
 export function listen(state, render) {
-    const createPlatform = state.panel.querySelector(".create-platform")
-
-    const takeAction = createActionTaken(state, {
-        createPlatform,
-    }, render)
+    const takeAction = createActionTaken(state, render)
 
     window.addEventListener("mousedown", takeAction)
     window.addEventListener("mouseup", takeAction)
@@ -265,6 +21,7 @@ export function listen(state, render) {
     window.addEventListener("click", takeAction)
     window.addEventListener("blur", takeAction);
     window.addEventListener("resize", takeAction);
+    window.addEventListener("keydown", takeAction);
 }
 
 /**
@@ -275,7 +32,6 @@ function clear(state) {
     state.mouse.startingEl = null
     state.mouse.state = "invalid"
 }
-
 
 /**
  * @param {EditorState} state
@@ -332,14 +88,6 @@ function handleEditorOver(state, es) {
 
 /**
  * @param {EditorState} state
- */
-function handleEditorOut(state) {
-    //clear(state)
-    //clearSelected(state)
-}
-
-/**
- * @param {EditorState} state
  * @param {ElementState} es
  */
 function handleEditorUp(state, es) {
@@ -353,7 +101,7 @@ function handleEditorUp(state, es) {
 function handleCreatePlatform(state) {
     const selected = state.selectedElements
     if (selected.length > 0) {
-        const p = createPlatform(selected)
+        const p = Platform.createPlatform(selected)
         state.platforms.push(p)
     }
 
@@ -378,11 +126,11 @@ function handleSelectPlatform(state, event) {
 
     assert(found !== null, "unable to find the platform")
     found.selected = {
-        offset: toVec(evt),
+        offset: Utils.toVec(evt),
         starting: found.AABB.pos,
     }
     state.activePlatform = found
-    createPlatformControls(state, found)
+    Bus.emit("select-platform", found)
 }
 
 /**
@@ -394,9 +142,10 @@ function handleMovePlatform(state, platform, event) {
     const evt = /** @type {MouseEvent} */(event)
     assert(evt instanceof MouseEvent, "selection of platform without mouse event")
     assert(!!platform.selected, "platform is not selected")
-    const projected = project(state, toVec(evt).subtract(platform.selected.offset))
+    const projected = Utils.project(state, Utils.toVec(evt).subtract(platform.selected.offset))
 
-    platform.AABB.pos = bound(platform.selected.starting.clone().add(projected))
+    platform.AABB.pos = Utils.bound(platform.selected.starting.clone().add(projected))
+    Bus.emit("move-platform", platform)
 }
 
 /**
@@ -409,35 +158,33 @@ function handleReleasePlatform(state, platform, event) {
     assert(evt instanceof MouseEvent, "selection of platform without mouse event")
     assert(!!platform.selected, "platform is not selected")
 
-    const projected = project(state, toVec(evt).subtract(platform.selected.offset))
+    const projected = Utils.project(state, Utils.toVec(evt).subtract(platform.selected.offset))
     platform.AABB.pos = platform.selected.starting.clone().add(projected)
     platform.selected = null
     state.activePlatform = null
-    removePlatformControls(state)
+    Bus.emit("release-platform", platform)
 }
 
 /** @param {EditorState} state
-/** @param {PanelItems} panel
 /** @param {(state: EditorState) => void} render
  */
-export function createActionTaken(state, panel, render) {
-    const eDown = noActivePlatform(state, isEditor(state.editor, type("mousedown", withElement(state, handleEditorDown))))
-    const eOver = noActivePlatform(state, isEditor(state.editor, type("mouseover", withElement(state, isDown(handleEditorOver)))))
-    const eUp = noActivePlatform(state, isEditor(state.editor, type("mouseup", withElement(state, isDown(handleEditorUp)))))
-    const eOut = noActivePlatform(state, is(state.panel, type("mouseover", withState(state, handleEditorOut))))
+export function createActionTaken(state, render) {
+    const createPlatform = T.type("keydown", T.key("a", T.withState(state, handleCreatePlatform)))
+    const selectPlatform = T.isPlatform(state, T.type("mousedown", T.withState(state, handleSelectPlatform)))
+    const movePlatform = T.type("mousemove", T.withSelectedPlatform(state, handleMovePlatform))
+    const releasePlatform = T.type("mouseup", T.withSelectedPlatform(state, handleReleasePlatform))
 
-    const createPlatform = is(panel.createPlatform, type("click", withState(state, handleCreatePlatform)))
-    const selectPlatform = isPlatform(state, type("mousedown", withState(state, handleSelectPlatform)))
-    const movePlatform = type("mousemove", withSelectedPlatform(state, handleMovePlatform))
-    const releasePlatform = type("mouseup", withSelectedPlatform(state, handleReleasePlatform))
-    const debug = type("mousemove", function(evt) { })
+    const eDown = T.noActivePlatform(state, T.isEditor(state.editor, T.type("mousedown", T.withElement(state, handleEditorDown))))
+    const eOver = T.noActivePlatform(state, T.isEditor(state.editor, T.type("mouseover", T.withElement(state, T.isDown(handleEditorOver)))))
+    const eUp = T.noActivePlatform(state, T.isEditor(state.editor, T.type("mouseup", T.withElement(state, T.isDown(handleEditorUp)))))
+
+    const debug = T.type("mousemove", function(evt) { })
 
     const handlers = [
         debug,
         eDown,
         eOver,
         eUp,
-        eOut,
         createPlatform,
         selectPlatform,
         movePlatform,
@@ -478,8 +225,8 @@ export function createRender(app) {
         }
 
         // TODO configure?
-        const start = unproject(state, new Vector2D(5, 5))
-        const dims = unproject(state, new Vector2D(5 + GAME_WIDTH, 5 + GAME_HEIGHT)).subtract(start)
+        const start = Utils.unproject(state, new Vector2D(5, 5))
+        const dims = Utils.unproject(state, new Vector2D(5 + GAME_WIDTH, 5 + GAME_HEIGHT)).subtract(start)
         state.worldOutline.style.width = `${Math.ceil(dims.x)}px`
         state.worldOutline.style.height = `${Math.ceil(dims.y)}px`
         state.worldOutline.style.top = `${Math.ceil(start.y)}px`

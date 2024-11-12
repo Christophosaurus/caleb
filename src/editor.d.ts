@@ -13,7 +13,6 @@ declare global {
 
     type EditorState = {
         editor: HTMLElement
-        panel: HTMLElement
         worldOutline: HTMLElement
         platforms: EditorPlatform[]
         activePlatform: null | EditorPlatform
@@ -24,10 +23,6 @@ declare global {
         elements: ElementState[][]
         selectedElements: ElementState[]
 
-    }
-
-    type PanelItems = {
-        createPlatform: any,
     }
 
     type EventCB = (event: Event) => void

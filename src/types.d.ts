@@ -229,5 +229,18 @@ declare global {
         run(state: GameState): void
         exit(state: GameState): void
     }
+
+    type BusType = "select-platform" | "release-platform" | "move-platform"
+    type BusArgMap = {
+        "select-platform": EditorPlatform;
+        "release-platform": EditorPlatform;
+        "move-platform": EditorPlatform;
+    };
+
+    type BusArg = EditorPlatform
+    type BusCB<T extends BusArg> = (args: T) => void;
+    type BusListeners = {
+        [K in keyof BusArgMap]?: BusCB<BusArgMap[K]>[];
+    };
 }
 
