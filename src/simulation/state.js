@@ -37,24 +37,6 @@ function isJump(act) {
         act.key === "j"
 }
 
-/**
- * @param {{key: string}} act
- * @returns {boolean}
- */
-function isWalk(act) {
-    return act.key === "h" ||
-        act.key === "l"
-}
-
-/**
- * @param {{key: string}} act
- * @returns {boolean}
- */
-function isDash(act) {
-    return act.key === "w" ||
-        act.key === "b"
-}
-
 const randomLetters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+[{(&=)}]*"
 const possibleActions = [
     {key: "f"},
@@ -123,55 +105,54 @@ function remaining(action) {
 }
 
 /**
- * @param {GameState} gstate
  * @param {SimState} state
- * @param {number} delta
+ * @returns {GameTick}
  */
-export function tick(gstate, state, delta) {
-    if (state.action === null) {
-        state.action = {
-            actions: getNextAction(gstate, state),
-            idx: 0,
-            start: gstate.loopStartTime,
-        }
-    }
-
-
-    const a = state.action
-    if (a.idx >= a.actions.length) {
-        state.action = null
-        return
-    }
-
-    const curr = a.actions[a.idx]
-    if (remaining(curr) < 0) {
-        a.idx++
-        return
-    }
-
-    /** @type {KeyEvent} */
-    const keyEvent = {
-        key: curr.key,
-        type: "keydown",
-        repeat: !curr.downPerformed,
-    }
-    if (curr.held > 0) {
-        if (!curr.downPerformed) {
-            curr.downPerformed = true
+export function createSimulationTick(state) {
+    return function tick(gstate) {
+        const delta = gstate.loopDelta
+        if (state.action === null) {
+            state.action = {
+                actions: getNextAction(gstate, state),
+                idx: 0,
+                start: gstate.loopStartTime,
+            }
         }
 
-        curr.held -= delta
-        Input.processKey(gstate.input, keyEvent)
-    } else {
-        if (!curr.upPerformed) {
-            curr.upPerformed = true
-            keyEvent.key = "keyup"
-            keyEvent.repeat = false
+
+        const a = state.action
+        if (a.idx >= a.actions.length) {
+            state.action = null
+            return
+        }
+
+        const curr = a.actions[a.idx]
+        if (remaining(curr) < 0) {
+            a.idx++
+            return
+        }
+
+        /** @type {KeyEvent} */
+        const keyEvent = {
+            key: curr.key,
+            type: "keydown",
+            repeat: !curr.downPerformed,
+        }
+        if (curr.held > 0) {
+            if (!curr.downPerformed) {
+                curr.downPerformed = true
+            }
+
+            curr.held -= delta
             Input.processKey(gstate.input, keyEvent)
+        } else {
+            if (!curr.upPerformed) {
+                curr.upPerformed = true
+                keyEvent.key = "keyup"
+                keyEvent.repeat = false
+                Input.processKey(gstate.input, keyEvent)
+            }
+            curr.wait -= delta
         }
-        curr.wait -= delta
     }
 }
-
-
-

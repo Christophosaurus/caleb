@@ -212,6 +212,9 @@ declare global {
         anykey: boolean
     }
 
+    type GameLoop = (cb: () => void) => void;
+    type GameTick = (state: GameState) => void
+
     type UpdateableModule = {
         update(gameState: GameState, delta: number): void
         tickClear(gameState: GameState): void

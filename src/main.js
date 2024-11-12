@@ -1,16 +1,8 @@
-import { startGame } from "./game.js";
 import { Vector2D } from "./math/vector.js";
 import * as Ease from "./math/ease.js";
 import { resize } from "./window.js"
 
 const canvas = /** @type {HTMLCanvasElement} */ (document.getElementById("game_canvas"))
-canvas.tabIndex = 0;
-canvas.focus();
-
-canvas.addEventListener('blur', () => {
-    canvas.focus();
-});
-
 const urlParams = new URLSearchParams(window.location.search);
 const debug = urlParams.get("debug") === "1";
 
