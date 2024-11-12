@@ -16,6 +16,7 @@ declare global {
         panel: HTMLElement
         worldOutline: HTMLElement
         platforms: EditorPlatform[]
+        activePlatform: null | EditorPlatform
         mouse: {
             startingEl: ElementState | null
             state: "invalid" | "down"

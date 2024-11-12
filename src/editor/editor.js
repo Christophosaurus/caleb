@@ -179,6 +179,18 @@ function isPlatform(state, next) {
 }
 
 /**
+ * @param {EditorState} state
+ * @param {EventCB} next
+ * @returns {EventCB}
+ */
+function noActivePlatform(state, next) {
+    return is(function(evt) {
+        return state.activePlatform === null
+    }, next)
+}
+
+
+/**
  * @param {HTMLElement} editor
  * @param {EventCB} next
  * @returns {EventCB}
@@ -224,6 +236,7 @@ export function createEditorState(editor, panel) {
         panel,
         worldOutline,
         platforms: [],
+        activePlatform: null,
         elements: [],
         selectedElements: [],
         mouse: {
@@ -368,6 +381,8 @@ function handleSelectPlatform(state, event) {
         offset: toVec(evt),
         starting: found.AABB.pos,
     }
+    state.activePlatform = found
+    createPlatformControls(state, found)
 }
 
 /**
@@ -397,6 +412,8 @@ function handleReleasePlatform(state, platform, event) {
     const projected = project(state, toVec(evt).subtract(platform.selected.offset))
     platform.AABB.pos = platform.selected.starting.clone().add(projected)
     platform.selected = null
+    state.activePlatform = null
+    removePlatformControls(state)
 }
 
 /** @param {EditorState} state
@@ -404,15 +421,15 @@ function handleReleasePlatform(state, platform, event) {
 /** @param {(state: EditorState) => void} render
  */
 export function createActionTaken(state, panel, render) {
-    const eDown = isEditor(state.editor, type("mousedown", withElement(state, handleEditorDown)))
-    const eOver = isEditor(state.editor, type("mouseover", withElement(state, isDown(handleEditorOver))))
-    const eUp = isEditor(state.editor, type("mouseup", withElement(state, isDown(handleEditorUp))))
-    const eOut = is(state.panel, type("mouseover", withState(state, handleEditorOut)))
+    const eDown = noActivePlatform(state, isEditor(state.editor, type("mousedown", withElement(state, handleEditorDown))))
+    const eOver = noActivePlatform(state, isEditor(state.editor, type("mouseover", withElement(state, isDown(handleEditorOver)))))
+    const eUp = noActivePlatform(state, isEditor(state.editor, type("mouseup", withElement(state, isDown(handleEditorUp)))))
+    const eOut = noActivePlatform(state, is(state.panel, type("mouseover", withState(state, handleEditorOut))))
+
     const createPlatform = is(panel.createPlatform, type("click", withState(state, handleCreatePlatform)))
     const selectPlatform = isPlatform(state, type("mousedown", withState(state, handleSelectPlatform)))
     const movePlatform = type("mousemove", withSelectedPlatform(state, handleMovePlatform))
     const releasePlatform = type("mouseup", withSelectedPlatform(state, handleReleasePlatform))
-
     const debug = type("mousemove", function(evt) { })
 
     const handlers = [

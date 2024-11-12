@@ -40,6 +40,15 @@
             border: 3px solid black;
         }
 
+        .platform-visual {
+            position: absolute;
+            pointer-events: none;
+        }
+
+        .platform-visual.circuit {
+            border: 3px solid #red;
+        }
+
         .platform.selected {
             position: absolute;
             box-sizing: border-box;
@@ -83,12 +92,39 @@
 	<body>
         <div id="app">
             <div id="panel">
+                <button class="create-level">create level</button>
                 <button class="create-platform">create platform</button>
+                <div class="type">
+                    <div class="title">type</div>
+                    <div class="obstacle">
+                        <input id="obstacle" type="checkbox"></input> <label>Obstacle</label><br>
+                    </div>
+                    <div class="instagib">
+                        <input id="instagib" type="checkbox"></input> <label>Instagib</label><br>
+                    </div>
+                    <div class="circuit">
+                        <input id="circuit" type="checkbox"></input> <label>Circuit</label><br>
+                    </div>
+                    <div class="next-level">
+                        <input id="next-level" type="checkbox"></input> <label>Next Level</label><br>
+                    </div>
+                    <div class="render">
+                        <input id="render" type="checkbox"></input> <label>Render</label><br>
+                    </div>
+                </div>
+                <button class="delete-level">delete level</button>
             </div>
             <div id="editor">
                 <div id="world-outline"></div>
             </div>
         </div>
+        <template id="circuit-info">
+            <label>Start X,Y</label> <input id="circuit-sx" min="-5" max="37" type="number" value="0"></input> <input id="circuit-sy" min="-5" max="29" type="number" value="0"></input> <br>
+            <label>End X,Y</label> <input id="circuit-ex" min="-5" max="37" type="number" value="0"></input> <input id="circuit-ey" min="-5" max="29" type="number" value="0"></input> <br>
+        </template>
+        <template id="next-level-info">
+            <label>Next Level ID</label> <input id="nl-id" min="0" max="1000" type="number" value="0"></input><br>
+        </template>
 		<script type="module" src="./editor/app.js"></script>
 	</body>
 </html>
