@@ -220,8 +220,8 @@ export class AABB {
  * @returns {AABB}
  */
 export function from2Vecs(start, end) {
-    const width = end.x - start.x
-    const height = end.y - start.y
+    const width = (end.x - start.x) + 1
+    const height = (end.y - start.y) + 1
 
     assert(width > 0, "cannot have negative width")
     assert(height > 0, "cannot have negative height")

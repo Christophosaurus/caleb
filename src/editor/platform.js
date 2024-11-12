@@ -6,6 +6,11 @@ import { from2Vecs } from "../math/aabb.js";
 export class PlatformControls extends HTMLElement {
     /** @type {HTMLElement} */
     controls = null
+
+    change = (evt) => {
+        console.log(evt)
+    }
+
     constructor() {
         super();
         // TODO can i have multiple of these??
@@ -23,8 +28,6 @@ export class PlatformControls extends HTMLElement {
 
         this.controls = shadowRoot.querySelector(".platform-controls");
     }
-
-    connectedCallback() { }
 
     /** @param {EditorPlatform} platform */
     revealControls(platform) {
@@ -51,7 +54,8 @@ export class PlatformControls extends HTMLElement {
 
     values() {
         return {
-            obstacle: /** @type {HTMLInputElement} */(this.controls.querySelector("#obstacle")).value
+            obstacle: /** @type {HTMLInputElement} */(this.controls.querySelector("#obstacle")).value == "on",
+            instagib: /** @type {HTMLInputElement} */(this.controls.querySelector("#instagib")).value == "on",
         };
     }
 }

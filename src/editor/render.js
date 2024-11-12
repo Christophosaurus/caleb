@@ -53,8 +53,8 @@ export function renderPlatform(state, platform) {
     const rect = start.el.getBoundingClientRect()
     const w = rect.width
     const h = rect.height
-    const pW = w * (aabb.width + 1)
-    const pH = h * (aabb.height + 1)
+    const pW = w * aabb.width
+    const pH = h * aabb.height
 
     platform.el.style.width = `${Math.ceil(pW)}px`
     platform.el.style.height = `${Math.ceil(pH)}px`
