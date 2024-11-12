@@ -1,18 +1,21 @@
 import { assert } from "../assert.js";
 import { from2Vecs } from "../math/aabb.js";
 import { Vector2D } from "../math/vector.js";
+import { GAME_HEIGHT, GAME_WIDTH } from "../window.js";
+
+const MIN_W = 0
+const MAX_W = 10 + GAME_WIDTH
+const MIN_H = 0
+const MAX_H = 10 + GAME_HEIGHT
 
 /**
- * @param {EditorState} state
  * @param {Vector2D} pos
  * @returns {Vector2D}
  */
-export function project(state, pos) {
-    const editorRect = state.editor.getBoundingClientRect()
-    const rect = state.elements[0][0].el.getBoundingClientRect()
-    const w = rect.width
-    const h = rect.height
-    return new Vector2D(Math.floor((pos.x - editorRect.left) / w), Math.floor((pos.y - editorRect.top) / h));
+export function bound(pos) {
+    pos.x = Math.min(MAX_W, Math.max(MIN_W, pos.x))
+    pos.y = Math.min(MAX_H, Math.max(MIN_H, pos.y))
+    return pos
 }
 
 /**
@@ -20,7 +23,7 @@ export function project(state, pos) {
  * @param {Vector2D} pos
  * @returns {Vector2D}
  */
-export function project2(state, pos) {
+export function project(state, pos) {
     const rect = state.elements[0][0].el.getBoundingClientRect()
     const w = rect.width
     const h = rect.height
@@ -214,9 +217,12 @@ function not(target, next) {
  * @returns {EditorState}
  * */
 export function createEditorState(editor, panel) {
+    const worldOutline = /** @type HTMLElement */(editor.querySelector("#world-outline"));
+    assert(!!worldOutline, "#world-outline not within editor")
     return {
         editor,
         panel,
+        worldOutline,
         platforms: [],
         elements: [],
         selectedElements: [],
@@ -245,6 +251,7 @@ export function listen(state, render) {
     window.addEventListener("mousemove", takeAction)
     window.addEventListener("click", takeAction)
     window.addEventListener("blur", takeAction);
+    window.addEventListener("resize", takeAction);
 }
 
 /**
@@ -372,9 +379,24 @@ function handleMovePlatform(state, platform, event) {
     const evt = /** @type {MouseEvent} */(event)
     assert(evt instanceof MouseEvent, "selection of platform without mouse event")
     assert(!!platform.selected, "platform is not selected")
-    const projected = project2(state, toVec(evt).subtract(platform.selected.offset))
+    const projected = project(state, toVec(evt).subtract(platform.selected.offset))
 
+    platform.AABB.pos = bound(platform.selected.starting.clone().add(projected))
+}
+
+/**
+ * @param {EditorState} state
+ * @param {EditorPlatform} platform
+ * @param {Event} event
+ */
+function handleReleasePlatform(state, platform, event) {
+    const evt = /** @type {MouseEvent} */(event)
+    assert(evt instanceof MouseEvent, "selection of platform without mouse event")
+    assert(!!platform.selected, "platform is not selected")
+
+    const projected = project(state, toVec(evt).subtract(platform.selected.offset))
     platform.AABB.pos = platform.selected.starting.clone().add(projected)
+    platform.selected = null
 }
 
 /** @param {EditorState} state
@@ -388,8 +410,8 @@ export function createActionTaken(state, panel, render) {
     const eOut = is(state.panel, type("mouseover", withState(state, handleEditorOut)))
     const createPlatform = is(panel.createPlatform, type("click", withState(state, handleCreatePlatform)))
     const selectPlatform = isPlatform(state, type("mousedown", withState(state, handleSelectPlatform)))
-    const movePlatform = isPlatform(state, type("mousemove", withSelectedPlatform(state, handleMovePlatform)))
-    //const releasePlatform = isPlatform(state, type("mouseup", withSelectedPlatform(state, )))
+    const movePlatform = type("mousemove", withSelectedPlatform(state, handleMovePlatform))
+    const releasePlatform = type("mouseup", withSelectedPlatform(state, handleReleasePlatform))
 
     const debug = type("mousemove", function(evt) { })
 
@@ -402,6 +424,7 @@ export function createActionTaken(state, panel, render) {
         createPlatform,
         selectPlatform,
         movePlatform,
+        releasePlatform,
     ]
 
     /** @param {Event} event */
@@ -414,6 +437,8 @@ export function createActionTaken(state, panel, render) {
 }
 
 /**
+ * TODO perf
+ * easy win would be to put a tick on each platform every time it changes and only recalc / re-render when i need to
  * @param {HTMLElement} app
  */
 export function createRender(app) {
@@ -435,6 +460,13 @@ export function createRender(app) {
             renderPlatform(state, plat)
         }
 
+        // TODO configure?
+        const start = unproject(state, new Vector2D(5, 5))
+        const dims = unproject(state, new Vector2D(5 + GAME_WIDTH, 5 + GAME_HEIGHT)).subtract(start)
+        state.worldOutline.style.width = `${Math.ceil(dims.x)}px`
+        state.worldOutline.style.height = `${Math.ceil(dims.y)}px`
+        state.worldOutline.style.top = `${Math.ceil(start.y)}px`
+        state.worldOutline.style.left = `${Math.ceil(start.x)}px`
     }
 }
 

@@ -34,6 +34,12 @@
             border: 3px solid #3498db;
         }
 
+        #world-outline {
+            position: absolute;
+            pointer-events: none;
+            border: 3px solid black;
+        }
+
         .platform.selected {
             position: absolute;
             box-sizing: border-box;
@@ -79,7 +85,9 @@
             <div id="panel">
                 <button class="create-platform">create platform</button>
             </div>
-            <div id="editor"></div>
+            <div id="editor">
+                <div id="world-outline"></div>
+            </div>
         </div>
 		<script type="module" src="./editor/app.js"></script>
 	</body>

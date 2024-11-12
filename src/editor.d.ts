@@ -14,6 +14,7 @@ declare global {
     type EditorState = {
         editor: HTMLElement
         panel: HTMLElement
+        worldOutline: HTMLElement
         platforms: EditorPlatform[]
         mouse: {
             startingEl: ElementState | null
