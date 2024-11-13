@@ -104,42 +104,116 @@
         </div>
         <template id="platform-controls">
 <style>
-.platform-controls {
-    display: none;
-    position: absolute;
-    font-size: 2em;
-}
 
 .platform-controls.show {
+    position: absolute;
     display: flex;
     z-index: 69420;
 }
+
+.platform-controls {
+    display: none;
+    align-items: center;
+    font-size: 2em;
+    gap: 1em;
+    padding: 0.5em;
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    width: 50%;
+}
+
+.platform-controls button {
+    padding: 0.2em 0.5em;
+    font-size: 0.8em;
+    border: none;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+.platform-controls button:hover {
+    background-color: #45a049;
+}
+
+.platform-controls .type {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1em;
+}
+
+.platform-controls .type .title {
+    font-weight: bold;
+    margin-right: 0.5em;
+}
+
+.platform-controls .type div {
+    display: flex;
+    align-items: center;
+    gap: 0.3em;
+}
+
+.platform-controls input[type="checkbox"] {
+    width: auto;
+    height: auto;
+    cursor: pointer;
+}
+
+.platform-controls input[type="number"] {
+    width: 3em;
+    font-size: 0.8em;
+    padding: 0.2em;
+}
+.platform-controls input[type="number"]::-webkit-outer-spin-button,
+.platform-controls input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* For Firefox */
+.platform-controls input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+.platform-controls label {
+    font-size: 0.8em;
+}
+
+.platform-controls .circuit,
+.platform-controls .next-level {
+    display: flex;
+    align-items: center;
+    gap: 0.3em;
+}
+
+.platform-controls .circuit label,
+.platform-controls .next-level label {
+    font-size: 0.8em;
+}
 </style>
             <div class="platform-controls">
-                <button class="create-level">create level</button>
-                <button class="create-platform">create platform</button>
                 <div class="type">
-                    <div class="title">type</div>
                     <div class="obstacle">
-                        <input id="obstacle" type="checkbox"></input> <label>Obstacle</label><br>
+                        <input id="obstacle" type="checkbox"></input> <label>O</label><br>
                     </div>
                     <div class="instagib">
-                        <input id="instagib" type="checkbox"></input> <label>Instagib</label><br>
+                        <input id="instagib" type="checkbox"></input> <label>I</label><br>
                     </div>
                     <div class="circuit">
-                        <input id="circuit" type="checkbox"></input> <label>Circuit</label><br>
+                        <input id="circuit" type="checkbox"></input> <label>C</label><br>
                         <label></label> <input id="circuit-sx" min="-5" max="37" type="number" value="0"></input> <input id="circuit-sy" min="-5" max="29" type="number" value="0"></input> <br>
                         <label>-&gt;</label> <input id="circuit-ex" min="-5" max="37" type="number" value="0"></input> <input id="circuit-ey" min="-5" max="29" type="number" value="0"></input> <br>
                     </div>
                     <div class="next-level">
-                        <input id="next-level" type="checkbox"></input> <label>Next Level</label><br>
-                        <label>Next Level ID</label> <input id="nl-id" min="0" max="1000" type="number" value="0"></input><br>
+                        <input id="next-level" type="checkbox"></input> <label>N</label><br>
+                        <label>#</label> <input id="nl-id" min="0" max="1000" type="number" value="0"></input><br>
                     </div>
                     <div class="render">
-                        <input id="render" type="checkbox"></input> <label>Render</label><br>
+                        <input id="render" type="checkbox"></input> <label>R</label><br>
                     </div>
                 </div>
-                <button class="delete-level">delete level</button>
             </div>
         </template>
         <script type="module" src="./editor/app.js"></script>

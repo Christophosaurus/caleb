@@ -2,6 +2,7 @@ import { assert, never } from "../assert.js";
 import * as Bus from "../bus.js"
 import * as Utils from "./utils.js"
 import { from2Vecs } from "../math/aabb.js";
+import { Vector2D } from "../math/vector.js";
 
 export class PlatformControls extends HTMLElement {
     /** @type {HTMLElement} */
@@ -69,7 +70,14 @@ export class PlatformControls extends HTMLElement {
 
     /** @param {EditorPlatform} platform */
     moveControls(platform) {
-        const pos = Utils.unproject(platform.state, platform.AABB.pos)
+        const topPos = platform.AABB.pos.clone().subtract(new Vector2D(0, 3))
+        let pos = Utils.unproject(platform.state, topPos)
+
+        if (pos.y < 0) {
+            const topPos = platform.AABB.pos.clone().add(new Vector2D(0, platform.AABB.height + 0.5))
+            pos = Utils.unproject(platform.state, topPos)
+        }
+
         this.controls.style.top = `${pos.y}px`
         this.controls.style.left = `${pos.x}px`
     }
