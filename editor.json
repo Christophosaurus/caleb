@@ -1,1 +1,1 @@
-{"type":"editor-save","platforms":[{"selected":null,"AABB":{"pos":{"x":9,"y":18},"width":15,"height":9},"behaviors":{"obstacle":{"type":"obstacle"}}},{"selected":null,"AABB":{"pos":{"x":7,"y":5},"width":16,"height":9},"behaviors":{}}]}
+{"type":"editor-save","platforms":[{"selected":null,"AABB":{"pos":{"x":9,"y":17},"width":15,"height":9},"behaviors":{"next":{"type":"next-level","toLevel":0,"toLevelPosition":{"x":0,"y":0}}}},{"selected":null,"AABB":{"pos":{"x":19,"y":6},"width":16,"height":9},"behaviors":{"obstacle":{"type":"obstacle"},"render":{"type":"render"}}}]}

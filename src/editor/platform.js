@@ -115,9 +115,9 @@ export class PlatformControls extends HTMLElement {
             render,
         } = this.values()
 
-        platform.behaviors.obstacle = obstacle ? {type: "obstacle"} : undefined
-        platform.behaviors.instagib = instagib ? {type: "instagib"} : undefined
-        platform.behaviors.circuit = circuit ? {
+        platform.behaviors.obstacle = !nextLevel && obstacle ? {type: "obstacle"} : undefined
+        platform.behaviors.instagib = !nextLevel && instagib ? {type: "instagib"} : undefined
+        platform.behaviors.circuit = !nextLevel && circuit ? {
             type: "circuit",
             startPos: new Vector2D(circuitStartX, circuitStartY),
             endPos: new Vector2D(circuitEndX, circuitEndY),
@@ -127,7 +127,7 @@ export class PlatformControls extends HTMLElement {
             currentDir: 1,
             currentTime: 0,
         } : undefined
-        platform.behaviors.render = render ? {type: "render"} : undefined
+        platform.behaviors.render = !nextLevel && render ? {type: "render"} : undefined
         platform.behaviors.next = nextLevel ? {
             type: "next-level",
             toLevel: nextLevelLevel,
