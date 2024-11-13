@@ -29,6 +29,9 @@ export function listen(state) {
     });
     window.addEventListener("keydown", takeAction);
     Bus.listen("render", takeAction)
+    Bus.listen("editor-change", function() {
+        state.change++
+    })
     Bus.render()
 }
 
@@ -111,6 +114,7 @@ function handleCreatePlatform(state) {
         const p = Platform.createPlatform(state)
         state.platforms.push(p)
     }
+    state.change++
 
     clear(state)
 }
@@ -251,11 +255,16 @@ export function createActionTaken(state) {
 
     /** @param {Event} event */
     return function(event) {
+        const startChange = state.change
         state.tick = Date.now()
         for (const h of handlers) {
             h(event)
         }
         Renderer.render(state)
+
+        if (startChange < state.change) {
+            Bus.editorSave(state)
+        }
     }
 }
 

@@ -133,6 +133,8 @@ export class PlatformControls extends HTMLElement {
             toLevel: nextLevelLevel,
             toLevelPosition: new Vector2D(0, 0),
         } : undefined
+
+        Bus.editorChange()
     }
 
     /** @param {EditorPlatform} platform */
@@ -220,4 +222,3 @@ export function createPlatform(state) {
         el: null,
     }
 }
-

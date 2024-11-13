@@ -4,9 +4,10 @@ import { assert } from "../assert.js";
  * @param {HTMLElement} editor
  * @param {HTMLElement} overlay
  * @param {boolean} debug
+ * @param {EditorStateFromServer} stateFromServer
  * @returns {EditorState}
  * */
-export function createEditorState(editor, overlay, debug) {
+export function createEditorState(editor, overlay, debug, stateFromServer) {
     const worldOutline = /** @type HTMLElement */(editor.querySelector("#world-outline"));
     assert(!!worldOutline, "#world-outline not within editor")
 
@@ -14,6 +15,8 @@ export function createEditorState(editor, overlay, debug) {
     assert(!!platformControls, "platform-controls is not within overlay")
 
     return {
+        change: 0,
+
         debug,
         editor,
         overlay,
@@ -21,7 +24,7 @@ export function createEditorState(editor, overlay, debug) {
         platformControls,
 
         tick: 0,
-        platforms: [],
+        platforms: stateFromServer.platforms,
         activePlatform: null,
         elements: [],
         selectedElements: [],

@@ -11,9 +11,14 @@ declare global {
         selected: boolean
     }
 
+    type EditorStateFromServer = {
+        platforms: EditorPlatform[]
+    }
+
     type EditorState = {
         debug: boolean,
         tick: number
+        change: number
         editor: HTMLElement
         overlay: HTMLElement
         platformControls: HTMLElement
