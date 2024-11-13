@@ -69,7 +69,9 @@ export function render(state) {
  * @returns {BasedPlatform}
  */
 export function createPlatformFromEditorPlatform(platform) {
-    const plat = createPlatform(platform.AABB)
+    const aabb = platform.AABB.clone()
+    aabb.pos.subtract(new Vector2D(5, 5))
+    const plat = createPlatform(aabb)
 
     plat.behaviors.circuit = platform.behaviors.circuit
     plat.behaviors.next = platform.behaviors.next

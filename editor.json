@@ -1,1 +1,1 @@
-{"type":"editor-save","platforms":[]}
+{"type":"editor-save","platforms":[{"selected":null,"AABB":{"pos":{"x":6,"y":19},"width":29,"height":1},"behaviors":{"obstacle":{"type":"obstacle"},"render":{"type":"render"}}},{"selected":null,"AABB":{"pos":{"x":6,"y":9},"width":1,"height":10},"behaviors":{"instagib":{"type":"instagib"},"render":{"type":"render"}}}]}
