@@ -96,7 +96,7 @@ function collidePlatform(state, platform) {
 
         CalebInput.resetJumpState(state);
     } else {
-        console.log("here again")
+        // TODO Figure out how this happens and how to prevent it...
     }
 }
 

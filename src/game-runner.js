@@ -11,7 +11,7 @@ import * as State from "./state/state.js";
  * @param {GameState} state
  * @param {GameLoop} loop
  * @param {GameTick[]} ticks
- * @param {() => void} done
+ * @param {(e: Error) => void} done
  * @param {number} until
  */
 export function run(
@@ -21,15 +21,28 @@ export function run(
     done,
     until = 0,
 ) {
+    let stackOverflowPrevention = 0
     function onLoop() {
-        for (const tick of ticks) {
-            tick(state)
+        stackOverflowPrevention++
+        if (stackOverflowPrevention > 500) {
+            stackOverflowPrevention = 0
+            setTimeout(onLoop)
+            return
+        }
+
+        try {
+            for (const tick of ticks) {
+                tick(state)
+            }
+        } catch (e) {
+            done(e)
+            return
         }
 
         if (until === 0 || state.tick <= until) {
             loop(onLoop)
         } else {
-            done()
+            done(null)
         }
     }
 
@@ -85,7 +98,6 @@ export function tickWithRender(state) {
     const delta = state.loopDelta
     state.tick++
 
-    console.log("caleb", state.caleb.dead, state.loopStartTime, state.caleb.deadAt, state.loopStartTime - state.caleb.deadAt)
     // TODO probably need opts?
     if (state.caleb.dead && state.loopStartTime - state.caleb.deadAt > 1000) {
         State.reset(state);
@@ -185,11 +197,10 @@ export function tickWithoutRender(state) {
 export function createGameLoop(state) {
 
     /**
-    * @param {number} start
     * @param {() => void} cb
     */
-    function runCb(cb, start) {
-        const delta = state.now() - start
+    function runCb(cb) {
+        const delta = state.now() - state.loopStartTime
         state.loopStartTime = state.now();
         state.loopDelta = delta;
         cb()
@@ -200,9 +211,9 @@ export function createGameLoop(state) {
         const goal = state.loopStartTime + state.opts.frameTimeMS
 
         if (start > goal) {
-            requestAnimationFrame(() => runCb(cb, start))
+            requestAnimationFrame(() => runCb(cb))
         } else {
-            setTimeout(() => runCb(cb, start), goal - start);
+            setTimeout(() => runCb(cb), goal - start);
         }
     }
 }

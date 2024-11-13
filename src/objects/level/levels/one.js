@@ -22,10 +22,6 @@ export function createLevel() {
             new Vector2D(27, 5),
         )),
         Level.withRender(Level.withInstaGib(Level.withLetters(Level.createPlatform(new AABB(new Vector2D(20, 5), 1, 10)), "abcdefghij"))),
-        Level.withNextLevel(Level.createPlatform(new AABB(new Vector2D(1, GAME_HEIGHT), 5, 1)), 1, new Vector2D(
-            Level.DO_NOT_USE_FOR_INITIAL_POS_OR_YOU_WILL_BE_FIRED,
-            1,
-        )),
     ];
 
     /** @type {Level} */

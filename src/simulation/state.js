@@ -76,7 +76,7 @@ function getNextAction(gstate, state) {
     const nextAction = possibleActions[state.rand.randRange(possibleActions.length)]
 
     if (isfFtT(nextAction)) {
-        const letters = Level.getLettersByRow(gstate, CalebUtils.getRow(gstate.caleb))
+        const letters = Level.getLettersByRow(gstate, CalebUtils.getRow(gstate.caleb)).filter(x => x)
         let randLet = letters.length > 0 ?
             letters[state.rand.randRange(letters.length)] :
             randomLetters[state.rand.randRange(randomLetters.length)];
@@ -138,6 +138,7 @@ export function createSimulationTick(state) {
             type: "keydown",
             repeat: !curr.downPerformed,
         }
+
         if (curr.held > 0) {
             if (!curr.downPerformed) {
                 curr.downPerformed = true

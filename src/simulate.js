@@ -1,22 +1,37 @@
 import * as Utils from "./utils.js";
-import { GAME_HEIGHT, GAME_WIDTH } from "./window.js";
-import { tickWithoutRender } from "./game2.js";
+import * as Levels from "./objects/level/levels/levels.js";
+import * as Config from "./game-config.js";
+import * as Runner from "./game-runner.js";
+import * as Simulation from "./simulation/state.js";
 
-/** @type {Dimension} */
-const dim = {width: GAME_WIDTH * 100, height: GAME_HEIGHT * 100}
 let now = 0
-
-function getDim() { return dim }
-function getCtx() { return null }
 Utils.setNow(() => now);
 
 /** @param {number} next */
 function setTime(next) { now = next }
 
 const seed = +process.argv[2]
-const ticks = +process.argv[3]
-const state =
+const until = +process.argv[3]
+const rand = Utils.createSimRand(Utils.mulberry32(seed))
+const {
+    state,
+    sim,
+} = Config.createSimGame(rand, Config.getSimGameConfig(rand), Levels.levels()[0])
 
 const ticks = [
-    tickWithoutRender
+    Simulation.createSimulationTick(sim),
+    Runner.tickWithoutRender,
 ]
+const loop = Runner.createSimulatedGameLoop(state, setTime)
+
+Runner.clear(state)
+Runner.addStandardBehaviors(state)
+Runner.run(
+    state,
+    loop,
+    ticks,
+    (error) => {
+        console.log("game finished", state.tick, error)
+    },
+    until
+);

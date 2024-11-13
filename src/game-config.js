@@ -5,6 +5,8 @@ import * as Simulation from "./simulation/state.js";
 import * as Window from "./window.js";
 import { Vector2D } from "./math/vector.js";
 import * as Ease from "./math/ease.js";
+import { GAME_HEIGHT, GAME_WIDTH } from "./window.js";
+import { assert } from "./assert.js";
 
 /**
  * @param canvas {HTMLCanvasElement}
@@ -36,13 +38,17 @@ function configureCanvas(canvas) {
 export function createCanvasGame(canvas, gameopts, levelSet) {
     configureCanvas(canvas)
 
+    const ctx = canvas.getContext("2d")
+    assert(!!ctx, "unable to get context from the canvas")
+
     const inputState = Input.createInputState();
     const state = State.createGameState(
         gameopts,
         inputState,
         () => canvas,
-        () => canvas.getContext("2d"),
+        () => ctx,
     levelSet);
+    State.reset(state);
 
     // @ts-ignore
     window.state = state
@@ -52,35 +58,59 @@ export function createCanvasGame(canvas, gameopts, levelSet) {
 
 /**
  * @param {GameState} state
- * @param {HTMLCanvasElement} canvas
  */
-export function addBrowserListeners(state, canvas) {
-    // TODO: clean these up?
-    Input.listenTo(canvas, state.input);
-    State.reset(state);
-
+export function addBrowserListeners(state) {
     window.addEventListener("resize", function() {
         State.projectStaticObjects(state);
     });
 }
 
 /**
- * @param {number} seed
  * @param {GameState} state
+ * @param {HTMLCanvasElement} canvas
  */
-export function addSimulation(seed, state) {
-    const rand = Utils.mulberry32(seed)
-    const simState = Simulation.createSimState(state, {
+export function addInputListener(state, canvas) {
+    // TODO: clean these up?
+    Input.listenTo(canvas, state.input);
+}
+
+/**
+ * @param {SimRand} rand
+ * @param {GameOptions} opts
+ * @param {LevelSet} levelSet
+ *
+ * @returns {{
+ *     state: GameState,
+ *     sim: SimState,
+ * }}
+ */
+export function createSimGame(rand, opts, levelSet) {
+    const inputState = Input.createInputState();
+
+    /** @type {Dimension} */
+    const dim = {width: GAME_WIDTH * 100, height: GAME_HEIGHT * 100}
+    function getDim() { return dim }
+    function getCtx() { return null }
+
+    const state = State.createGameState(
+        opts,
+        inputState,
+        getDim,
+        getCtx,
+        levelSet
+    );
+    State.reset(state);
+
+    const sim = Simulation.createSimState(state, {
         maxJump: 15,
         waitRange: {start: 100, stop: 500},
         holdRange: {start: 100, stop: 1500},
-    }, {
-        rand,
-        randRange: Utils.randRange(rand),
-        randInt: Utils.randInt(rand),
-        randRangeR: Utils.randRangR(rand),
-    });
+    }, rand);
 
+    return {
+        sim,
+        state,
+    }
 }
 
 /**
@@ -104,10 +134,8 @@ export function getGameConfig(debug) {
             },
 
             jump: {
-                jumpEaseMS: 500,
                 jumpEaseRange: 0.10,
                 jumpNormHeight: 30,
-                jumpEaseFn: Ease.x3,
                 noJumpBase: 450,
                 noJumpMultiplier: 350,
             }
@@ -119,5 +147,42 @@ export function getGameConfig(debug) {
         },
 
         gravity: new Vector2D(0, 28),
+    }
+}
+
+/**
+ * @param {SimRand} rand
+ * @returns {GameOptions}
+ */
+export function getSimGameConfig(rand) {
+    return {
+        debug: false,
+
+        frameTimeMS: rand.randRange(50, 2),
+        tickTimeMS: rand.randRange(50, 2),
+
+        caleb: {
+            hodlTime: rand.randRange(1000),
+            normWidthsPerSecond: rand.randRange(20),
+            dash: {
+                dashNormWidth: rand.randRange(50),
+                distance: rand.randRange(15),
+                dashEaseRange: rand.rand() * 5
+            },
+
+            jump: {
+                jumpEaseRange: rand.rand() * 5,
+                jumpNormHeight: rand.randRange(50),
+                noJumpBase: rand.randRange(1000),
+                noJumpMultiplier: rand.randRange(1000),
+            }
+        },
+
+        tolerance: {
+            topBy: rand.randRange(0.45),
+            bottomBy: rand.randRange(0.45),
+        },
+
+        gravity: new Vector2D(0, rand.randRange(48, 2)),
     }
 }

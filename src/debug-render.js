@@ -13,7 +13,7 @@ import { clonePhysics } from "./utils.js";
  */
 function stroke(state, pos, w, h) {
     const aabb = new AABB(pos, w, h);
-    state.ctx.strokeRect(...Window.projectAABB(state.ctx.canvas, aabb))
+    state.getCtx().strokeRect(...Window.projectAABB(state.getCtx().canvas, aabb))
 }
 
 /**
@@ -24,8 +24,9 @@ export function render(state) {
         return
     }
 
-    state.ctx.strokeStyle = "red";
-    state.ctx.lineWidth = 3;
+    const ctx = state.getCtx()
+    ctx.strokeStyle = "red";
+    ctx.lineWidth = 3;
 
     const dash = state.caleb.dash
     const jump = state.caleb.jump
@@ -35,7 +36,7 @@ export function render(state) {
         stroke(state, jump.jumpStart, CalebUtils.CALEB_WIDTH, jump.jumpDir * jump.jumpDistance)
     }
 
-    state.ctx.strokeStyle = "green";
+    ctx.strokeStyle = "green";
 
     for (const p of state.level.activeLevel.platforms) {
         const next = p.behaviors.next
@@ -55,7 +56,7 @@ export function render(state) {
  * @param {Vector2D} body
  */
 function renderText(state, text, body) {
-    const ctx = state.ctx
+    const ctx = state.getCtx()
     const {x, y} = body
     const [_x, _y] = Window.projectCoords(ctx.canvas, x + 0.25, y + 0.5)
 

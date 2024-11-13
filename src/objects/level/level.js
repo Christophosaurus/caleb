@@ -211,7 +211,7 @@ export function createLetterMap(platforms) {
  */
 export function getLetters(state, r) {
     // TODO this just has to create such garbage...
-    return state.level.activeLevel.letterMap[r].map((key, idx) => ({key, idx})).filter(({key}) => key !== null)
+    return getLettersByRow(state, r).map((key, idx) => ({key, idx})).filter(({key}) => key !== null)
 }
 
 /**
@@ -220,8 +220,7 @@ export function getLetters(state, r) {
  * @returns {string[]}
  */
 export function getLettersByRow(state, r) {
-    // TODO this just has to create such garbage...
-    return state.level.activeLevel.letterMap[r]
+    return state.level.activeLevel.letterMap[r] || []
 }
 
 

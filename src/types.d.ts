@@ -21,8 +21,6 @@ declare global {
 
     type CalebJumpEaseCB = (percent: number) => number
     type CalebJumpOpts = {
-        jumpEaseMS: number,
-        jumpEaseFn: CalebJumpEaseCB,
         jumpEaseRange: number,
         jumpNormHeight: number,
         noJumpBase: number,
