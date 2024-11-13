@@ -114,6 +114,15 @@ function handleCreatePlatform(state) {
 
 /**
  * @param {EditorState} state
+ * @param {ElementState} es
+ */
+function handleCellClick(state, es) {
+    console.log("work??")
+    createSelected(state, es, es)
+}
+
+/**
+ * @param {EditorState} state
  * @param {Event} event
  */
 function handleSelectPlatform(state, event) {
@@ -207,16 +216,20 @@ export function createActionTaken(state) {
     const createPlatform = T.type("keydown", T.key("a", T.withState(state, handleCreatePlatform)))
     const selectPlatform = T.notControls(state, T.isPlatform(state, T.type("mousedown", T.withState(state, handleSelectPlatform))))
     const movePlatform = T.type("mousemove", T.withSelectedPlatform(state, handleMovePlatform))
-    const releasePlatform = T.type("keydown", T.key("o", T.withSelectedPlatform(state, handleReleasePlatform)))
+    const releasePlatform = T.type("keydown", T.key(["o", "Escape"], T.withSelectedPlatform(state, handleReleasePlatform)))
     const upPlatform = T.activePlatform(state, T.type("mouseup", T.withSelectedPlatform(state, handleUpPlatform)))
 
+    const eClear = T.type("keydown", T.key("Escape", T.withState(state, clear)))
     const eDown = T.noActivePlatform(state, T.isEditor(state.editor, T.type("mousedown", T.withElement(state, handleEditorDown))))
     const eOver = T.noActivePlatform(state, T.isEditor(state.editor, T.type("mouseover", T.withElement(state, T.isDown(handleEditorOver)))))
     const eUp = T.noActivePlatform(state, T.isEditor(state.editor, T.type("mouseup", T.withElement(state, T.isDown(handleEditorUp)))))
+    const eCell = T.noSelected(state, T.noActivePlatform(state, T.isGridItem(T.type("click", T.withElement(state, handleCellClick)))))
 
     const debug = T.type("mousemove", function(_) { })
 
     const handlers = [
+        eCell,
+        eClear,
         debug,
         eDown,
         eOver,

@@ -127,6 +127,18 @@ export function isPlatform(state, next) {
  * @param {EventCB} next
  * @returns {EventCB}
  */
+export function noSelected(state, next) {
+    return is(function() {
+        return state.selectedElements.length === 0
+    }, next)
+}
+
+
+/**
+ * @param {EditorState} state
+ * @param {EventCB} next
+ * @returns {EventCB}
+ */
 export function noActivePlatform(state, next) {
     return is(function() {
         return state.activePlatform === null
@@ -139,7 +151,6 @@ export function noActivePlatform(state, next) {
  * @returns {EventCB}
  */
 export function notControls(state, next) {
-    never("implement")
     //return is(function(_) {
     //    return state.overlay
     //}, next)
@@ -155,6 +166,17 @@ export function notControls(state, next) {
 export function activePlatform(state, next) {
     return is(function() {
         return state.activePlatform !== null
+    }, next)
+}
+
+/**
+ * @param {EventCB} next
+ * @returns {EventCB}
+ */
+export function isGridItem(next) {
+    return is(function(evt) {
+        let curr = /** @type HTMLElement */(evt.target)
+        return curr?.classList.contains("grid-item")
     }, next)
 }
 
