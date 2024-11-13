@@ -55,21 +55,29 @@ export function renderPlatform(state, platform) {
     const h = rect.height
     const pW = w * aabb.width
     const pH = h * aabb.height
+    const el = platform.el
 
-    platform.el.style.width = `${Math.ceil(pW)}px`
-    platform.el.style.height = `${Math.ceil(pH)}px`
-    platform.el.style.top = `${Math.ceil(rect.top)}px`
-    platform.el.style.left = `${Math.ceil(rect.left)}px`
+    el.style.width = `${Math.ceil(pW)}px`
+    el.style.height = `${Math.ceil(pH)}px`
+    el.style.top = `${Math.ceil(rect.top)}px`
+    el.style.left = `${Math.ceil(rect.left)}px`
 
     if (state.mouse.state === "down") {
-        platform.el.style.pointerEvents = "none"
+        el.style.pointerEvents = "none"
     } else {
-        platform.el.style.pointerEvents = "auto"
+        el.style.pointerEvents = "auto"
     }
 
     if (platform.selected) {
-        platform.el.classList.add("selected")
+        el.classList.add("selected")
     } else {
-        platform.el.classList.remove("selected")
+        el.classList.remove("selected")
+    }
+
+    for (const [k, b] of Object.entries(platform.behaviors)) {
+        el.classList.remove(k)
+        if (b) {
+            el.classList.add(k)
+        }
     }
 }

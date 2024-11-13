@@ -5,6 +5,7 @@ import * as EditorState from "./state.js";
 import { PlatformControls } from "./platform.js";
 import { assert, never } from "../assert.js";
 import * as Bus from "../bus.js"
+import { AABB } from "../math/aabb.js";
 
 /**
  * @returns {Promise<EditorStateFromServer | null>}
@@ -17,14 +18,7 @@ async function getState() {
             throw new Error(`Response status: ${response.status}`);
         }
 
-        /** @type {EditorStateFromServer} */
-        const editorState = await response.json();
-
-        for (const p of editorState.platforms) {
-            p.el = null
-        }
-
-        return editorState
+        return response.json();
 
     } catch (error) {
         never("unable to get data: " + error + "\n" + error.stack)
