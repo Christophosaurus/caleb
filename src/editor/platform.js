@@ -53,6 +53,7 @@ export class PlatformControls extends HTMLElement {
         Bus.listen("hide-platform", () => this.hideControls())
         Bus.listen("move-platform", (platform) => this.moveControls(platform))
         Bus.listen("release-platform", (platform) => this.save(platform))
+        Bus.listen("delete-platform", (platform) => this.hideControls())
         Bus.listen("resize", this.change);
 
         let template = /** @type {HTMLTemplateElement} */(document.getElementById("platform-controls"))

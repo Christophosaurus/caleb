@@ -31,11 +31,8 @@ export function withState(state, next) {
  */
 export function withSelectedPlatform(state, next) {
     return function(event) {
-        for (const p of state.platforms) {
-            if (p.selected) {
-                next(state, p, event)
-                return
-            }
+        if (state.activePlatform) {
+            next(state, state.activePlatform, event)
         }
     }
 }

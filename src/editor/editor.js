@@ -43,7 +43,6 @@ function actionResize(e) {
 function editorChange() {
     assert(!!currentEditorState, "expected editor state to be set")
     currentEditorState.change++
-    console.log("editor change", currentEditorState)
 }
 
 function addListeners() {
@@ -235,6 +234,24 @@ function handleUpPlatform(state, platform) {
 /**
  * @param {EditorState} state
  * @param {EditorPlatform} platform
+ */
+function handleDeletePlatform(state, platform) {
+    assert(!!state.activePlatform, "must have a selected platform to call this function")
+
+    const idx = state.platforms.indexOf(platform)
+    state.platforms.splice(idx, 1)
+
+    platform.el.remove()
+    editorChange()
+    Bus.emit("delete-platform", platform)
+
+    platform.selected = null
+    state.activePlatform = null
+}
+
+/**
+ * @param {EditorState} state
+ * @param {EditorPlatform} platform
  * @param {Event} event
  */
 function handleMovePlatform(state, platform, event) {
@@ -334,6 +351,7 @@ export function createActionTaken(state) {
     const selectPlatform = T.notControls(state, T.isPlatform(state, T.type("mousedown", T.withState(state, handleSelectPlatform))))
     const movePlatform = T.type("mousemove", T.withSelectedPlatform(state, handleMovePlatform))
     const releasePlatform = T.type("keydown", T.key(["o", "Escape"], T.withSelectedPlatform(state, handleReleasePlatform)))
+    const delPlatform = T.type("keydown", T.key("Backspace", T.withSelectedPlatform(state, handleDeletePlatform)))
     const upPlatform = T.notControls(state, T.activePlatform(state, T.type("mouseup", T.withSelectedPlatform(state, handleUpPlatform))))
 
     const eClear = T.type("keydown", T.key("Escape", T.withState(state, clear)))
@@ -354,6 +372,7 @@ export function createActionTaken(state) {
         eDown,
         eOver,
         eUp,
+        delPlatform,
         createPlatform,
         upPlatform,
         selectPlatform,
