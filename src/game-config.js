@@ -66,15 +66,6 @@ export function addBrowserListeners(state) {
 }
 
 /**
- * @param {GameState} state
- * @param {HTMLCanvasElement} canvas
- */
-export function addInputListener(state, canvas) {
-    // TODO: clean these up?
-    Input.listenTo(canvas, state.input);
-}
-
-/**
  * @param {SimRand} rand
  * @param {GameOptions} opts
  * @param {LevelSet} levelSet

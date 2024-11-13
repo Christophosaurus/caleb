@@ -23,6 +23,11 @@ export function run(
 ) {
     let stackOverflowPrevention = 0
     function onLoop() {
+        if (state.done) {
+            done(null)
+            return
+        }
+
         stackOverflowPrevention++
         if (stackOverflowPrevention > 500) {
             stackOverflowPrevention = 0

@@ -146,6 +146,8 @@ declare global {
     }
 
     type GameState = {
+        done: boolean
+
         updateables: UpdateableModule[]
         renderables: RenderableModule[]
         applyables: UpdateAndApplyModule[]
@@ -212,7 +214,8 @@ declare global {
         inputs: Input[]
         tick: number
         numericModifier: number
-        anykey: boolean
+        listener: (e: KeyboardEvent) => void
+        anykey: ((state: GameState) => void) | null
     }
 
     type GameLoop = (cb: () => void) => void;

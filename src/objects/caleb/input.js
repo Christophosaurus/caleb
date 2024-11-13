@@ -83,7 +83,7 @@ function movefFtT(key) {
     return function(state) {
         state.caleb.fFtT.type = key
         state.caleb.fFtT.startTick = state.tick
-        state.input.anykey = true;
+        state.input.anykey = completefFtT;
 
         // modifies a structure while iterating it...
         state.input.inputs.length = 0
@@ -95,14 +95,40 @@ function movefFtT(key) {
 /**
  * @param {GameState} state
  */
-function anykey(state) {
+function completeCommand(state) {
     const input = state.input.inputs[0]
     if (!input) {
         return
     }
 
     state.input.inputs.length = 0
-    state.input.anykey = false
+    state.input.anykey = null
+    if (input.key === "q") {
+        state.done = true
+    }
+}
+
+/**
+ * @param {GameState} state
+ * @returns {boolean}
+ */
+function command(state) {
+    state.input.anykey = completeCommand;
+    state.input.inputs.length = 0
+    return true;
+}
+
+/**
+ * @param {GameState} state
+ */
+function completefFtT(state) {
+    const input = state.input.inputs[0]
+    if (!input) {
+        return
+    }
+
+    state.input.inputs.length = 0
+    state.input.anykey = null
     resetJumpState(state);
     resetDashState(state);
 
@@ -209,6 +235,7 @@ const f = onDown(filter("f", movefFtT("f")));
 const t = onDown(filter("t", movefFtT("t")));
 const F = onDown(filter("F", movefFtT("F")));
 const T = onDown(filter("T", movefFtT("T")));
+const quit = onDown(filter(":", command));
 const numeric = onDown(isNumeric(numericModifier))
 
 /**
@@ -245,7 +272,7 @@ export function apply(state, _) { }
 export function update(state, _) {
     handleHL(state);
     if (state.input.anykey) {
-        anykey(state)
+        state.input.anykey(state)
         return
     }
 
@@ -259,6 +286,7 @@ export function update(state, _) {
         F(state, i)
         t(state, i)
         T(state, i)
+        quit(state, i)
     }
 }
 

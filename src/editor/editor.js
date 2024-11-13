@@ -1,5 +1,6 @@
 import { assert } from "../assert.js";
 import * as Runner from "../game-runner.js";
+import * as Input from "../input/input.js"
 import * as Config from "../game-config.js"
 import * as Utils from "./utils.js"
 import * as T from "./transforms.js"
@@ -312,6 +313,7 @@ function currentEditorStateToLevelSet(state) {
  */
 function handlePlay(state) {
     state.canvas.classList.add("show")
+    removeListeners();
     handlePlayListeners(state)
 
     const ticks = [Runner.tickWithRender]
@@ -322,13 +324,16 @@ function handlePlay(state) {
     Runner.clear(gstate)
     Runner.addStandardBehaviors(gstate)
 
-    Config.addInputListener(gstate, state.canvas)
+    Input.addListenersTo(gstate, state.canvas)
     Runner.run(
         gstate,
         loop,
         ticks,
         (e) => {
             console.log("game finished", e)
+            state.canvas.classList.remove("show")
+            Input.removeListenersFrom(gstate, state.canvas)
+            addListeners();
         });
 }
 
@@ -344,6 +349,8 @@ function handleReleasePlatform(state, platform) {
 }
 
 /** @param {EditorState} state
+ *
+ * @returns {(e: Event) => void}
  */
 export function createActionTaken(state) {
 
@@ -380,7 +387,6 @@ export function createActionTaken(state) {
         releasePlatform,
     ]
 
-    /** @param {Event} event */
     return function(event) {
         const startChange = state.change
         state.tick = Date.now()

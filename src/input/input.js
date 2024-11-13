@@ -51,7 +51,7 @@ export function createInputState() {
         hasInput: true,
         tick: 0,
         numericModifier: 0,
-        anykey: false
+        anykey: null
     }
 }
 
@@ -104,15 +104,23 @@ function toKeyEvent(event) {
 }
 
 /**
+ * @param {GameState} state
  * @param {HTMLElement} el
- * @param {InputState} state
  */
-export function listenTo(el, state) {
-    /** @param event {KeyboardEvent} */
-    function listen(event) {
-        processKey(state, toKeyEvent(event));
+export function addListenersTo(state, el) {
+    state.input.listener = function listen(event) {
+        processKey(state.input, toKeyEvent(event));
     }
 
-    el.addEventListener("keydown", listen)
-    el.addEventListener("keyup", listen)
+    el.addEventListener("keydown", state.input.listener)
+    el.addEventListener("keyup", state.input.listener)
+}
+
+/**
+ * @param {GameState} state
+ * @param {HTMLElement} el
+ */
+export function removeListenersFrom(state, el) {
+    el.removeEventListener("keydown", state.input.listener)
+    el.removeEventListener("keyup", state.input.listener)
 }
