@@ -1,0 +1,10 @@
+# air.toml
+
+root = "."
+
+[build]
+# Specify the command to run your app
+cmd = "go build -o ./tmp/main cmd/main.go"
+bin = "tmp/main"
+include_dir = ["./cmd", "./pkg"]
+
