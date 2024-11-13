@@ -23,7 +23,10 @@ export function listen(state) {
     window.addEventListener("mousemove", takeAction)
     window.addEventListener("click", takeAction)
     window.addEventListener("blur", takeAction);
-    window.addEventListener("resize", takeAction);
+    window.addEventListener("resize", (e) => {
+        takeAction(e)
+        Bus.emit("resize", /** @type {ResizeEvent} */(e))
+    });
     window.addEventListener("keydown", takeAction);
     Bus.listen("render", takeAction)
     Bus.render()
@@ -194,9 +197,13 @@ function handleMovePlatform(state, platform, event) {
     const projected = Utils.project(state, Utils.toVec(evt).subtract(platform.selected.offset), Math.round)
     const moved = platform.selected.starting.clone().add(projected)
 
+    const before = platform.selected.moving
     platform.selected.moving ||= moved.magnituteSquared() > behaviors.toBeMovingPxs
     platform.AABB.pos = Utils.bound(moved)
-    Bus.emit("hide-platform", platform)
+
+    if (!before && platform.selected.moving) {
+        Bus.emit("hide-platform", platform)
+    }
 }
 
 /**
@@ -213,11 +220,12 @@ function handleReleasePlatform(state, platform) {
 /** @param {EditorState} state
  */
 export function createActionTaken(state) {
+
     const createPlatform = T.type("keydown", T.key("a", T.withState(state, handleCreatePlatform)))
     const selectPlatform = T.notControls(state, T.isPlatform(state, T.type("mousedown", T.withState(state, handleSelectPlatform))))
     const movePlatform = T.type("mousemove", T.withSelectedPlatform(state, handleMovePlatform))
     const releasePlatform = T.type("keydown", T.key(["o", "Escape"], T.withSelectedPlatform(state, handleReleasePlatform)))
-    const upPlatform = T.activePlatform(state, T.type("mouseup", T.withSelectedPlatform(state, handleUpPlatform)))
+    const upPlatform = T.notControls(state, T.activePlatform(state, T.type("mouseup", T.withSelectedPlatform(state, handleUpPlatform))))
 
     const eClear = T.type("keydown", T.key("Escape", T.withState(state, clear)))
     const eDown = T.noActivePlatform(state, T.isEditor(state.editor, T.type("mousedown", T.withElement(state, handleEditorDown))))

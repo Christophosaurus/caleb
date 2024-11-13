@@ -241,8 +241,10 @@ declare global {
     }
 
     type RenderEvent = Event & {type: "render"}
+    type ResizeEvent = Event & {type: "resize"}
     type BusType = "hide-platform" | "show-platform" | "move-platform" | "release-platform" | "render"
     type BusArgMap = {
+        "resize": ResizeEvent;
         "move-platform": EditorPlatform;
         "hide-platform": EditorPlatform;
         "show-platform": EditorPlatform;

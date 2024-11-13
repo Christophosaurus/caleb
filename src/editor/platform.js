@@ -1,4 +1,4 @@
-import { assert } from "../assert.js";
+import { assert, never } from "../assert.js";
 import * as Bus from "../bus.js"
 import * as Utils from "./utils.js"
 import { from2Vecs } from "../math/aabb.js";
@@ -7,9 +7,28 @@ export class PlatformControls extends HTMLElement {
     /** @type {HTMLElement} */
     controls = null
 
+    /**
+     * @param {Event} evt
+     */
     change = (evt) => {
-        console.log(evt)
+        if (evt.type === "resize" && this.lastPlatform) {
+            this.moveControls(this.lastPlatform);
+        }
+
+        const target = /** @type {HTMLInputElement | null} */(evt.target)
+        if (!target) {
+            return
+        }
+
+        if (target.id === "obstacle" && evt.checked) {
+            console.log("help?")
+        }
     }
+
+    /**
+     * @type {EditorPlatform | null}
+     */
+    lastPlatform = null
 
     constructor() {
         super();
@@ -18,6 +37,7 @@ export class PlatformControls extends HTMLElement {
         Bus.listen("hide-platform", () => this.hideControls())
         Bus.listen("move-platform", (platform) => this.moveControls(platform))
         Bus.listen("release-platform", (platform) => this.save(platform))
+        Bus.listen("resize", this.change);
 
         let template = /** @type {HTMLTemplateElement} */(document.getElementById("platform-controls"))
         assert(!!template, "unable to retrieve template")
@@ -31,12 +51,20 @@ export class PlatformControls extends HTMLElement {
 
     /** @param {EditorPlatform} platform */
     revealControls(platform) {
+        this.lastPlatform = platform
         this.controls.classList.add("show")
         this.moveControls(platform)
+        for (const [_, v] of Object.entries(this.getControls())) {
+            v.addEventListener("change", this.change)
+        }
     }
 
     hideControls() {
+        this.lastPlatform = null
         this.controls.classList.remove("show")
+        for (const [_, v] of Object.entries(this.getControls())) {
+            v.removeEventListener("change", this.change)
+        }
     }
 
     /** @param {EditorPlatform} platform */
@@ -53,9 +81,34 @@ export class PlatformControls extends HTMLElement {
     }
 
     values() {
+        const controls = this.getControls()
+        const out = {}
+        for (const [k, v] of Object.entries(controls)) {
+            if (v.type === "checkbox") {
+                out[k] = v.checked
+            } else {
+                out[k] = +v.value
+            }
+        }
+
+        return out
+    }
+
+    /**
+     * @returns {Record<string, HTMLInputElement>}
+     */
+    getControls() {
         return {
-            obstacle: /** @type {HTMLInputElement} */(this.controls.querySelector("#obstacle")).value == "on",
-            instagib: /** @type {HTMLInputElement} */(this.controls.querySelector("#instagib")).value == "on",
+            obstacle: /** @type {HTMLInputElement} */this.controls.querySelector("#obstacle"),
+            instagib: /** @type {HTMLInputElement} */this.controls.querySelector("#instagib"),
+            circuit: /** @type {HTMLInputElement} */this.controls.querySelector("#circuit"),
+            circuitStartX: /** @type {HTMLInputElement} */this.controls.querySelector("#circuit-sx"),
+            circuitStartY: /** @type {HTMLInputElement} */this.controls.querySelector("#circuit-sy"),
+            circuitEndX: /** @type {HTMLInputElement} */this.controls.querySelector("#circuit-ex"),
+            circuitEndY: /** @type {HTMLInputElement} */this.controls.querySelector("#circuit-ey"),
+            nextLevel: /** @type {HTMLInputElement} */this.controls.querySelector("#next-level"),
+            nextLevelLevel: /** @type {HTMLInputElement} */this.controls.querySelector("#nl-id"),
+            render: /** @type {HTMLInputElement} */this.controls.querySelector("#render"),
         };
     }
 }

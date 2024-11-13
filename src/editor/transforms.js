@@ -1,5 +1,18 @@
 import { never } from "../assert.js"
 
+function hasParent(el, evt) {
+    let curr = /** @type HTMLElement */(evt.target)
+    if (curr == null) {
+        return false
+    }
+    do {
+        if (el === curr) {
+            return true
+        }
+    } while((curr = curr.parentElement))
+    return false
+}
+
 /**
  * @param {EditorState} state
  * @param {StateCB} next
@@ -151,10 +164,9 @@ export function noActivePlatform(state, next) {
  * @returns {EventCB}
  */
 export function notControls(state, next) {
-    //return is(function(_) {
-    //    return state.overlay
-    //}, next)
-    return is(() => true, next)
+    return is(function(evt) {
+        return !hasParent(state.platformControls, evt)
+    }, next)
 }
 
 
@@ -187,16 +199,7 @@ export function isGridItem(next) {
  */
 export function isEditor(editor, next) {
     return is(function(evt) {
-        let curr = /** @type HTMLElement */(evt.target)
-        if (curr == null) {
-            return false
-        }
-        do {
-            if (editor === curr) {
-                return true
-            }
-        } while((curr = curr.parentElement))
-        return false
+        return hasParent(editor, evt)
     }, next)
 }
 

@@ -12,6 +12,7 @@ declare global {
     }
 
     type EditorState = {
+        debug: boolean,
         tick: number
         editor: HTMLElement
         overlay: HTMLElement
