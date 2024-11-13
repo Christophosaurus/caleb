@@ -120,7 +120,7 @@ declare global {
             lettered?: Lettered
             next?: NextLevelBehavior
             obstacle?: ObstacleBehavior
-            instaGib?: InstaGib
+            instagib?: InstaGib
             circuit?: Circuit
             render?: CanvasProjectable
         }
@@ -246,7 +246,7 @@ declare global {
     type SaveEvent = {type: "editor-save", platforms: EditorPlatform[]}
     type ChangeEvent = {type: "editor-change"}
 
-    type BusType = "hide-platform" | "show-platform" | "move-platform" | "release-platform" | "render" | "editor-save"
+    type BusType = "hide-platform" | "show-platform" | "move-platform" | "release-platform" | "render" | "editor-save" | "editor-change"
     type BusArgMap = {
         "resize": ResizeEvent;
         "move-platform": EditorPlatform;

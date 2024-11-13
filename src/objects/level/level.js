@@ -32,7 +32,7 @@ function renderText(ctx, text, x, y, calebY) {
 }
 
 
-/** @param state {GameState}
+/** @param {GameState} state
 */
 export function render(state) {
     const ctx = state.getCtx();
@@ -62,6 +62,31 @@ export function render(state) {
         }
     }
 
+}
+
+/**
+ * @param {EditorPlatform} platform
+ * @returns {BasedPlatform}
+ */
+export function createPlatformFromEditorPlatform(platform) {
+    const plat = createPlatform(platform.AABB)
+
+    plat.behaviors.circuit = platform.behaviors.circuit
+    plat.behaviors.next = platform.behaviors.next
+    plat.behaviors.instagib = platform.behaviors.instagib
+    plat.behaviors.obstacle = platform.behaviors.obstacle
+    plat.behaviors.lettered = platform.behaviors.lettered
+
+    if (platform.behaviors.render) {
+        plat.behaviors.render = {
+            renderX: 0,
+            renderY: 0,
+            renderWidth: 0,
+            renderHeight: 0,
+        }
+    }
+
+    return plat
 }
 
 /**
@@ -108,7 +133,7 @@ export function withRender(platform) {
  * @returns {BasedPlatform}
  */
 export function withObstacle(platform) {
-    assert(platform.behaviors.instaGib === undefined, "cannot have an obsacle that is also instagib")
+    assert(platform.behaviors.instagib === undefined, "cannot have an obsacle that is also instagib")
     platform.behaviors.obstacle = {type: "obstacle"}
     return platform
 }
@@ -155,7 +180,7 @@ export function withLetters(platform, letters) {
  */
 export function withInstaGib(platform) {
     assert(platform.behaviors.obstacle === undefined, "cannot have instagib that is also obstacle")
-    platform.behaviors.instaGib = { type: "insta-gib", };
+    platform.behaviors.instagib = { type: "insta-gib", };
     return platform
 }
 

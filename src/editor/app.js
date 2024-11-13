@@ -36,6 +36,12 @@ async function run() {
     const editor = document.querySelector("#editor")
     /** @type {HTMLElement} */
     const overlay = document.querySelector("#overlay")
+    /** @type {HTMLCanvasElement} */
+    const canvas = document.querySelector("canvas")
+
+    assert(!!editor, "expected editor to exist")
+    assert(!!canvas, "expected canvas to exist")
+    assert(!!overlay, "expected overlay to exist")
 
     /** @type {HTMLElement} */
     const loading = document.querySelector("#loading")
@@ -45,7 +51,7 @@ async function run() {
 
     const urlParams = new URLSearchParams(window.location.search);
     const debug = urlParams.get("debug") === "1";
-    const state = EditorState.createEditorState(editor, overlay, debug, data)
+    const state = EditorState.createEditorState(editor, overlay, canvas, debug, data)
 
     let id = 0
     for (let r = 0; r < GAME_HEIGHT + 10; ++r) {
@@ -71,7 +77,7 @@ async function run() {
     }
 
     customElements.define("platform-controls", PlatformControls);
-    Editor.listen(state)
+    Editor.start(state)
 
     Bus.listen("editor-save", async function(save) {
         const res = await fetch("/save", {

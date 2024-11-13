@@ -19,6 +19,7 @@ declare global {
         debug: boolean,
         tick: number
         change: number
+        canvas: HTMLCanvasElement
         editor: HTMLElement
         overlay: HTMLElement
         platformControls: HTMLElement

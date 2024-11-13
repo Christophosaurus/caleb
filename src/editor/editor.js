@@ -1,38 +1,86 @@
 import { assert } from "../assert.js";
+import * as Runner from "../game-runner.js";
+import * as Config from "../game-config.js"
 import * as Utils from "./utils.js"
 import * as T from "./transforms.js"
 import * as Platform from "./platform.js"
 import * as Bus from "../bus.js"
 import * as Renderer from "./render.js"
+import * as Window from "../window.js"
+import * as Level from "../objects/level/level.js"
+import { Vector2D } from "../math/vector.js";
 
 const behaviors = {
     fastClickTimeMS: 250,
     toBeMovingPxs: 144,
 }
 
+const windowEvents = [
+    "mousedown",
+    "mouseup",
+    "mouseover",
+    "mouseout",
+    "mousemove",
+    "click",
+    "blur",
+    "keydown",
+]
+
+/** @type {(e: Event) => void} */
+let currentTakeAction = null
+/** @type {EditorState} */
+let currentEditorState = null
+
+/**
+ * @param {ResizeEvent} e
+ */
+function actionResize(e) {
+    assert(!!currentTakeAction, "expected take action to be defined")
+    currentTakeAction(e)
+    Bus.emit("resize", /** @type {ResizeEvent} */(e))
+}
+
+function editorChange() {
+    assert(!!currentEditorState, "expected editor state to be set")
+    currentEditorState.change++
+    console.log("editor change", currentEditorState)
+}
+
+function addListeners() {
+    assert(!!currentTakeAction, "expected take action to be defined")
+    assert(!!currentEditorState, "expected editor state to be set")
+
+    for (const e of windowEvents) {
+        window.addEventListener(e, currentTakeAction)
+    }
+    window.addEventListener("resize", actionResize)
+
+    Bus.listen("render", currentTakeAction)
+    Bus.listen("editor-change", editorChange)
+    Bus.render()
+}
+
+function removeListeners() {
+    assert(!!currentTakeAction, "expected take action to be defined")
+    assert(!!currentEditorState, "expected editor state to be set")
+
+    for (const e of windowEvents) {
+        window.removeEventListener(e, currentTakeAction)
+    }
+    window.removeEventListener("resize", actionResize)
+    Bus.remove("render", currentTakeAction)
+    Bus.remove("editor-change", editorChange)
+}
+
+
 /**
  * @param {EditorState} state
  */
-export function listen(state) {
+export function start(state) {
     const takeAction = createActionTaken(state)
-
-    window.addEventListener("mousedown", takeAction)
-    window.addEventListener("mouseup", takeAction)
-    window.addEventListener("mouseover", takeAction)
-    window.addEventListener("mouseout", takeAction)
-    window.addEventListener("mousemove", takeAction)
-    window.addEventListener("click", takeAction)
-    window.addEventListener("blur", takeAction);
-    window.addEventListener("resize", (e) => {
-        takeAction(e)
-        Bus.emit("resize", /** @type {ResizeEvent} */(e))
-    });
-    window.addEventListener("keydown", takeAction);
-    Bus.listen("render", takeAction)
-    Bus.listen("editor-change", function() {
-        state.change++
-    })
-    Bus.render()
+    currentTakeAction = takeAction
+    currentEditorState = state
+    addListeners()
 }
 
 /**
@@ -212,6 +260,63 @@ function handleMovePlatform(state, platform, event) {
 
 /**
  * @param {EditorState} state
+ */
+function handlePlayListeners(state) {
+    window.addEventListener("resize", function() {
+        Window.resize(state.canvas)
+    });
+    Window.resize(state.canvas)
+}
+
+/**
+ * @param {EditorState} state
+ * @returns {LevelSet}
+ */
+function currentEditorStateToLevelSet(state) {
+    const platforms= state.platforms.map(Level.createPlatformFromEditorPlatform)
+    /** @type {Level} */
+    const level = {
+        platforms,
+        initialPosition: new Vector2D(10, 0),
+        letterMap: Level.createLetterMap(platforms),
+    }
+
+    return {
+        title: "editor state",
+        difficulty: 1,
+        levels: [level],
+        activeLevel: level,
+        initialLevel: level,
+    }
+}
+
+/**
+ * @param {EditorState} state
+ */
+function handlePlay(state) {
+    state.canvas.classList.add("show")
+    handlePlayListeners(state)
+
+    const ticks = [Runner.tickWithRender]
+    const levelSet = currentEditorStateToLevelSet(state)
+    const config = Config.getGameConfig(false)
+    const gstate = Config.createCanvasGame(state.canvas, config, levelSet)
+    const loop = Runner.createGameLoop(gstate)
+    Runner.clear(gstate)
+    Runner.addStandardBehaviors(gstate)
+
+    Config.addInputListener(gstate, state.canvas)
+    Runner.run(
+        gstate,
+        loop,
+        ticks,
+        (e) => {
+            console.log("game finished", e)
+        });
+}
+
+/**
+ * @param {EditorState} state
  * @param {EditorPlatform} platform
  */
 function handleReleasePlatform(state, platform) {
@@ -237,9 +342,12 @@ export function createActionTaken(state) {
     const eUp = T.noActivePlatform(state, T.isEditor(state.editor, T.type("mouseup", T.withElement(state, T.isDown(handleEditorUp)))))
     const eCell = T.noSelected(state, T.noActivePlatform(state, T.isGridItem(T.type("click", T.withElement(state, handleCellClick)))))
 
+    const play = T.noSelected(state, T.noActivePlatform(state, T.type("keydown", T.key("p", T.withState(state, handlePlay)))))
+
     const debug = T.type("mousemove", function(_) { })
 
     const handlers = [
+        play,
         eCell,
         eClear,
         debug,

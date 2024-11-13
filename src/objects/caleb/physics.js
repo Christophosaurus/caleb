@@ -19,7 +19,7 @@ export function testCollisions(state) {
             collidePlatform(state, p)
         } else if (p.behaviors.next) {
             collideLevelChange(state, p)
-        } else if (p.behaviors.instaGib) {
+        } else if (p.behaviors.instagib) {
             collideInstagib(state)
         }
     }

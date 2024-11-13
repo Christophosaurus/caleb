@@ -5,11 +5,12 @@ import { Vector2D } from "../math/vector.js";
 /**
  * @param {HTMLElement} editor
  * @param {HTMLElement} overlay
+ * @param {HTMLCanvasElement} canvas
  * @param {boolean} debug
  * @param {EditorStateFromServer} stateFromServer
  * @returns {EditorState}
  * */
-export function createEditorState(editor, overlay, debug, stateFromServer) {
+export function createEditorState(editor, overlay, canvas, debug, stateFromServer) {
     const worldOutline = /** @type HTMLElement */(editor.querySelector("#world-outline"));
     assert(!!worldOutline, "#world-outline not within editor")
 
@@ -20,6 +21,7 @@ export function createEditorState(editor, overlay, debug, stateFromServer) {
     const state = {
         change: 0,
 
+        canvas,
         debug,
         editor,
         overlay,
