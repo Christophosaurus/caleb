@@ -48,9 +48,9 @@ declare global {
             lettered?: Lettered
             next?: NextLevelBehavior
             obstacle?: ObstacleBehavior
-            instaGib?: InstaGib
+            instagib?: InstaGib
             circuit?: Circuit
-            render?: CanvasProjectable
+            render?: Render
         }
         el: HTMLElement | null
     }

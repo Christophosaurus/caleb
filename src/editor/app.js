@@ -16,7 +16,10 @@ if (loading) {
     overlay.removeChild(loading)
 }
 
-const state = EditorState.createEditorState(editor, overlay)
+const urlParams = new URLSearchParams(window.location.search);
+const debug = urlParams.get("debug") === "1";
+
+const state = EditorState.createEditorState(editor, overlay, debug)
 let id = 0
 for (let r = 0; r < GAME_HEIGHT + 10; ++r) {
     /** @type {ElementState[]} */

@@ -3,6 +3,7 @@ import * as Bus from "../bus.js"
 import * as Utils from "./utils.js"
 import { from2Vecs } from "../math/aabb.js";
 import { Vector2D } from "../math/vector.js";
+import { renderPlatform } from "./render.js";
 
 export class PlatformControls extends HTMLElement {
     /** @type {HTMLElement} */
@@ -14,16 +15,30 @@ export class PlatformControls extends HTMLElement {
     change = (evt) => {
         if (evt.type === "resize" && this.lastPlatform) {
             this.moveControls(this.lastPlatform);
-        }
-
-        const target = /** @type {HTMLInputElement | null} */(evt.target)
-        if (!target) {
             return
         }
+        this.setInputState()
+    }
 
-        if (target.id === "obstacle" && evt.checked) {
-            console.log("help?")
-        }
+    setInputState = () => {
+        const {
+            obstacle,
+            instagib,
+            circuit,
+            circuitStartX,
+            circuitStartY,
+            circuitEndX,
+            circuitEndY,
+            nextLevel,
+            nextLevelLevel,
+        } = this.getControls()
+        instagib.disabled = obstacle.checked
+        obstacle.disabled = instagib.checked
+        circuitStartX.disabled = !circuit.checked
+        circuitStartY.disabled = !circuit.checked
+        circuitEndX.disabled = !circuit.checked
+        circuitEndY.disabled = !circuit.checked
+        nextLevelLevel.disabled = !nextLevel.checked
     }
 
     /**
@@ -54,6 +69,8 @@ export class PlatformControls extends HTMLElement {
     revealControls(platform) {
         this.lastPlatform = platform
         this.controls.classList.add("show")
+        this.hydrateState(platform)
+        this.setInputState()
         this.moveControls(platform)
         for (const [_, v] of Object.entries(this.getControls())) {
             v.addEventListener("change", this.change)
@@ -85,7 +102,72 @@ export class PlatformControls extends HTMLElement {
     /** @param {EditorPlatform} platform */
     save(platform) {
         this.hideControls()
-        console.log(this.values())
+        const {
+            obstacle,
+            instagib,
+            circuit,
+            circuitStartX,
+            circuitStartY,
+            circuitEndX,
+            circuitEndY,
+            nextLevel,
+            nextLevelLevel,
+            render,
+        } = this.values()
+
+        platform.behaviors.obstacle = obstacle ? {type: "obstacle"} : undefined
+        platform.behaviors.instagib = instagib ? {type: "instagib"} : undefined
+        platform.behaviors.circuit = circuit ? {
+            type: "circuit",
+            startPos: new Vector2D(circuitStartX, circuitStartY),
+            endPos: new Vector2D(circuitEndX, circuitEndY),
+
+            // TODO: time?
+            time: 1000,
+            currentDir: 1,
+            currentTime: 0,
+        } : undefined
+        platform.behaviors.render = render ? {type: "render"} : undefined
+        platform.behaviors.next = nextLevel ? {
+            type: "next-level",
+            toLevel: nextLevelLevel,
+            toLevelPosition: new Vector2D(0, 0),
+        } : undefined
+    }
+
+    /** @param {EditorPlatform} platform */
+    hydrateState(platform) {
+        const {
+            obstacle,
+            instagib,
+            circuit,
+            circuitStartX,
+            circuitStartY,
+            circuitEndX,
+            circuitEndY,
+            nextLevel,
+            nextLevelLevel,
+            render,
+        } = this.getControls()
+
+        const behaviors = platform.behaviors
+        obstacle.checked = !!behaviors.obstacle
+        instagib.checked = !!behaviors.instagib
+        render.checked = !!behaviors.render
+
+        if (behaviors.next) {
+            nextLevel.checked = true
+            nextLevelLevel.value = String(behaviors.next.toLevel)
+        }
+
+        if (behaviors.circuit) {
+            circuit.checked = true
+            circuitStartX.value = String(behaviors.circuit.startPos.x)
+            circuitStartY.value = String(behaviors.circuit.startPos.y)
+            circuitEndX.value = String(behaviors.circuit.endPos.x)
+            circuitEndY.value = String(behaviors.circuit.endPos.y)
+
+        }
     }
 
     values() {

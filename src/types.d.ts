@@ -92,7 +92,7 @@ declare global {
         key: string,
     }
 
-    type PlatformBehaviors = "obstacle" | "next-level" | "insta-gib" | "lettered" | "circuit"
+    type PlatformBehaviors = "obstacle" | "next-level" | "instagib" | "lettered" | "circuit" | "render"
     type Lettered = {
         type: "lettered"
         letters: string
@@ -112,7 +112,8 @@ declare global {
         toLevelPosition: Vector2D
     }
     type ObstacleBehavior = { type: "obstacle" }
-    type InstaGib = { type: "insta-gib" }
+    type InstaGib = { type: "instagib" }
+    type Render = { type: "render" }
     type BasedPlatform = Collidable & {
         id: number,
         behaviors: {

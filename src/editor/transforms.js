@@ -188,7 +188,7 @@ export function activePlatform(state, next) {
 export function isGridItem(next) {
     return is(function(evt) {
         let curr = /** @type HTMLElement */(evt.target)
-        return curr?.classList.contains("grid-item")
+        return curr?.classList?.contains("grid-item")
     }, next)
 }
 
