@@ -1,4 +1,5 @@
 import { assert } from "../assert.js";
+import * as Bus from "../bus.js"
 
 export class LevelSetControls extends HTMLElement {
     /** @type {HTMLElement} */
@@ -14,6 +15,11 @@ export class LevelSetControls extends HTMLElement {
         shadowRoot.appendChild(templateContent.cloneNode(true));
 
         this.controls = shadowRoot.querySelector(".level-set-controls");
+        Bus.listen("editor-started", this.hydrateFromState)
+    }
+
+    /** @param {EditorState} state */
+    hydrateFromState = (state) => {
     }
 }
 
@@ -31,6 +37,11 @@ export class LevelSelectControls extends HTMLElement {
         shadowRoot.appendChild(templateContent.cloneNode(true));
 
         this.controls = shadowRoot.querySelector(".level-select-controls");
+        Bus.listen("editor-started", this.hydrateFromState)
+    }
+
+    /** @param {EditorState} state */
+    hydrateFromState = (state) => {
     }
 }
 

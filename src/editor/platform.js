@@ -207,11 +207,11 @@ export class PlatformControls extends HTMLElement {
 
 /**
  * @param {EditorState} state
+ * @param {ElementState} start
+ * @param {ElementState} end
  * @returns {EditorPlatform}
  */
-export function createPlatform(state) {
-    const start = state.selectedElements[0]
-    const end = state.selectedElements[state.selectedElements.length - 1]
+export function createPlatform(state, start, end) {
 
     return {
         state,
@@ -221,4 +221,23 @@ export function createPlatform(state) {
         behaviors: {},
         el: null,
     }
+}
+
+/**
+ * @param {EditorState} state
+ * @param {EditorPlatform} platform
+ * @returns {number}
+ */
+export function selectedDuration(state, platform) {
+    assert(!!platform.selected, "cannot get selected duration of a platform not selected")
+    return state.tick - platform.selected.tick
+}
+
+/**
+ * @param {EditorPlatform} platform
+ * @returns {boolean}
+ */
+export function isMoving(platform) {
+    assert(!!platform.selected, "cannot get selected duration of a platform not selected")
+    return platform.selected.moving
 }

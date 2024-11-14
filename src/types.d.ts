@@ -249,8 +249,9 @@ declare global {
     type SaveEvent = {type: "editor-save", platforms: EditorPlatform[]}
     type ChangeEvent = {type: "editor-change"}
 
-    type BusType = "hide-platform" | "show-platform" | "move-platform" | "release-platform" | "render" | "editor-save" | "editor-change" | "delete-platform"
+    type BusType = "hide-platform" | "show-platform" | "move-platform" | "release-platform" | "render" | "editor-save" | "editor-change" | "delete-platform" | "editor-started"
     type BusArgMap = {
+        "editor-started": EditorState;
         "resize": ResizeEvent;
         "move-platform": EditorPlatform;
         "hide-platform": EditorPlatform;

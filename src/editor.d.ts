@@ -11,21 +11,45 @@ declare global {
         selected: boolean
     }
 
-    type EditorStateFromServer = {
-        platforms: EditorPlatform[]
+    type EditorLevelSet = {
+        title: string,
+        difficulty: number,
+        levels: EditorLevel[]
+        initialLevel: number
+        current: number
     }
 
+    type EditorLevel = {
+        platforms: EditorPlatform[]
+        initialPosition: Vector2D
+        letterMap: (string | null)[][]
+    }
+
+    type EditorLevelState = {
+        levels: EditorLevelSet[]
+        current: number
+    }
+
+
     type EditorState = {
+        // TODO opts?
         debug: boolean,
         outerRect: number
         tick: number
         change: number
+
+        // TODO elements
         canvas: HTMLCanvasElement
         editor: HTMLElement
         overlay: HTMLElement
         platformControls: HTMLElement
+        levelSetControls: HTMLElement
+        levelSelectControls: HTMLElement
         worldOutline: HTMLElement
-        platforms: EditorPlatform[]
+
+        levelState: EditorLevelState
+
+        // TODO state
         activePlatform: null | EditorPlatform
         mouse: {
             startingEl: ElementState | null
@@ -33,6 +57,7 @@ declare global {
         },
         elements: ElementState[][]
         selectedElements: ElementState[]
+
     }
 
     type EventCB = (event: Event) => void

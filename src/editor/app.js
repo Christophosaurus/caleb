@@ -8,7 +8,7 @@ import * as Bus from "../bus.js"
 import { LevelSelectControls, LevelSetControls } from "./level-set.js";
 
 /**
- * @returns {Promise<EditorStateFromServer | null>}
+ * @returns {Promise<EditorLevelState | null>}
  */
 async function getState() {
     const url = "/get";
@@ -28,7 +28,7 @@ async function getState() {
 }
 
 async function run() {
-    /** @type {EditorStateFromServer | null} */
+    /** @type {EditorLevelState | null} */
     const data = await getState()
     assert(!!data, "unable to get data from the server")
 
@@ -79,6 +79,7 @@ async function run() {
     customElements.define("platform-controls", PlatformControls);
     customElements.define("level-set-controls", LevelSetControls);
     customElements.define("level-select-controls", LevelSelectControls);
+
     Editor.start(state)
 
     Bus.listen("editor-save", async function(save) {

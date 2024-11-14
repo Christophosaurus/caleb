@@ -4,12 +4,13 @@ import * as Input from "../input/input.js"
 import * as Config from "../game-config.js"
 import * as Utils from "./utils.js"
 import * as T from "./transforms.js"
-import * as Platform from "./platform.js"
 import * as Bus from "../bus.js"
 import * as Renderer from "./render.js"
 import * as Window from "../window.js"
 import * as Level from "../objects/level/level.js"
 import { Vector2D } from "../math/vector.js";
+import * as State from "./state.js"
+import * as Platform from "./platform.js"
 
 const behaviors = {
     fastClickTimeMS: 250,
@@ -81,48 +82,8 @@ export function start(state) {
     currentTakeAction = takeAction
     currentEditorState = state
     addListeners()
-}
 
-/**
- * @param {EditorState} state
- */
-function clear(state) {
-    clearSelected(state)
-    state.mouse.startingEl = null
-    state.mouse.state = "invalid"
-}
-
-/**
- * @param {EditorState} state
- */
-function clearSelected(state) {
-    for (const el of state.selectedElements) {
-        el.selected = false
-    }
-    state.selectedElements.length = 0
-}
-
-/**
- * @param {EditorState} state
- * @param {ElementState} end
- * @param {ElementState} start
- */
-export function createSelected(state, end, start = state.mouse.startingEl) {
-    assert(start !== null, "you must call createBox after we have selected as starting element")
-
-    clearSelected(state)
-    const rStart = Math.min(start.pos.y, end.pos.y)
-    const rEnd = Math.max(start.pos.y, end.pos.y)
-    const cStart = Math.min(start.pos.x, end.pos.x)
-    const cEnd = Math.max(start.pos.x, end.pos.x)
-
-    for (let r = rStart; r <= rEnd; ++r) {
-        for (let c = cStart; c <= cEnd; ++c) {
-            const el = state.elements[r][c]
-            el.selected = true
-            state.selectedElements.push(el)
-        }
-    }
+    Bus.emit("editor-started", state)
 }
 
 /**
@@ -130,11 +91,8 @@ export function createSelected(state, end, start = state.mouse.startingEl) {
  * @param {ElementState} es
  */
 function handleEditorDown(state, es) {
-    state.mouse.state = "down"
-    state.mouse.startingEl = es
-    for (const p of state.platforms) {
-        p.selected = null
-    }
+    State.Mouse.down(state, es)
+    State.createSelected(state, es)
 }
 
 /**
@@ -142,7 +100,7 @@ function handleEditorDown(state, es) {
  * @param {ElementState} es
  */
 function handleEditorOver(state, es) {
-    createSelected(state, es)
+    State.createSelected(state, es)
 }
 
 /**
@@ -150,21 +108,7 @@ function handleEditorOver(state, es) {
  * @param {ElementState} _
  */
 function handleEditorUp(state, _) {
-    //clear(state)
-    state.mouse.state = "invalid"
-}
-
-/**
- * @param {EditorState} state
- */
-function handleCreatePlatform(state) {
-    if (state.selectedElements.length > 0) {
-        const p = Platform.createPlatform(state)
-        state.platforms.push(p)
-    }
-    state.change++
-
-    clear(state)
+    State.Mouse.up(state)
 }
 
 /**
@@ -172,7 +116,7 @@ function handleCreatePlatform(state) {
  * @param {ElementState} es
  */
 function handleCellClick(state, es) {
-    createSelected(state, es, es)
+    State.createSelected(state, es, es)
 }
 
 /**
@@ -183,49 +127,21 @@ function handleSelectPlatform(state, event) {
     const evt = /** @type {MouseEvent} */(event)
     assert(evt instanceof MouseEvent, "selection of platform without mouse event")
 
-    let found = null
-    for (const p of state.platforms) {
-        if (evt.target === p.el) {
-            found = p
-            break
-        }
-    }
+    const found = State.selectPlatform(state, evt)
 
-    assert(found !== null, "unable to find the platform")
-
-    if (found.selected) {
-        found.selected = {
-            ...found.selected,
-            moving: false,
-            offset: Utils.toVec(evt),
-            starting: found.AABB.pos,
-            down: true,
-        }
-        Bus.emit("show-platform", found)
-        return
-    }
-
-    found.selected = {
-        offset: Utils.toVec(evt),
-        starting: found.AABB.pos,
-        down: true,
-        moving: false,
-        tick: state.tick
-    }
-    state.activePlatform = found
     Bus.emit("show-platform", found)
 }
 
 /**
  * @param {EditorState} state
- * @param {EditorPlatform} platform
  */
-function handleUpPlatform(state, platform) {
-    const s = platform.selected
-    s.down = false
+function handleUpPlatform(state) {
+    const platform = State.activePlatform(state)
+    const duration = Platform.selectedDuration(state, platform)
+    const moving = Platform.isMoving(platform)
 
-    if (!s.moving && s.tick + behaviors.fastClickTimeMS < state.tick) {
-        handleReleasePlatform(state, platform)
+    if (!moving && duration < behaviors.fastClickTimeMS) {
+        handleReleasePlatform(state)
     } else {
         Bus.emit("show-platform", platform)
     }
@@ -233,32 +149,21 @@ function handleUpPlatform(state, platform) {
 
 /**
  * @param {EditorState} state
- * @param {EditorPlatform} platform
  */
-function handleDeletePlatform(state, platform) {
-    assert(!!state.activePlatform, "must have a selected platform to call this function")
-
-    const idx = state.platforms.indexOf(platform)
-    state.platforms.splice(idx, 1)
-
-    platform.el.remove()
-    editorChange()
+function handleDeletePlatform(state) {
+    const platform = State.deletePlatform(state);
     Bus.emit("delete-platform", platform)
-
-    platform.selected = null
-    state.activePlatform = null
 }
 
 /**
  * @param {EditorState} state
- * @param {EditorPlatform} platform
  * @param {Event} event
  */
-function handleMovePlatform(state, platform, event) {
+function handleMovePlatform(state, event) {
     const evt = /** @type {MouseEvent} */(event)
     assert(evt instanceof MouseEvent, "selection of platform without mouse event")
-    assert(!!platform.selected, "platform is not selected")
 
+    const platform = State.activePlatform(state)
     if (!platform.selected.down) {
         return
     }
@@ -338,9 +243,8 @@ function handlePlay(state) {
 
 /**
  * @param {EditorState} state
- * @param {EditorPlatform} platform
  */
-function handleReleasePlatform(state, platform) {
+function handleReleasePlatform(state) {
     assert(!!platform.selected, "platform is not selected")
     platform.selected = null
     state.activePlatform = null

@@ -1,5 +1,3 @@
-import { never } from "../assert.js"
-
 function hasParent(el, evt) {
     let curr = /** @type HTMLElement */(evt.target)
     if (curr == null) {
@@ -73,16 +71,38 @@ export function type(t, next) {
     }
 }
 
+/** @param {string} k
+ * @returns {{key: string, ctrl: boolean}}
+ */
+function mapInput(k) {
+    if (k.startsWith("C-")) {
+        return {
+            ctrl: true,
+            key: k.split("-")[1],
+        }
+    }
+    return {
+        ctrl: true,
+        key: k,
+    };
+}
+
 /**
  * @param {string | string[]} k
  * @param {EventCB} next
  * @returns {EventCB}
  */
 export function key(k, next) {
+    const processedKeys = Array.isArray(k) ?
+        k.map(mapInput) : [mapInput(k)];
+
     return function(event) {
         const evt = /** @type {KeyboardEvent} */(event)
-        if (Array.isArray(k) && k.includes(evt.key) || evt.key === k) {
-            next(evt)
+        for (const p of processedKeys) {
+            if (evt.key === p.key && evt.ctrlKey === p.ctrl) {
+                next(evt)
+                break
+            }
         }
     }
 }

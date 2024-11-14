@@ -1,1 +1,6 @@
-{"type":"editor-save","platforms":[{"selected":null,"AABB":{"pos":{"x":9,"y":22},"width":29,"height":1},"behaviors":{"obstacle":{"type":"obstacle"},"render":{"type":"render"}}},{"selected":{"offset":{"x":156,"y":362},"starting":{"x":6,"y":9},"down":false,"moving":true,"tick":1731605522394},"AABB":{"pos":{"x":9,"y":12},"width":1,"height":10},"behaviors":{"instagib":{"type":"instagib"},"render":{"type":"render"}}}]}
+{
+    "levels": [],
+    "current": 0
+}
+
+
