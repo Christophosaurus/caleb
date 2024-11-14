@@ -20,6 +20,7 @@ export function createEditorState(editor, overlay, canvas, debug, stateFromServe
     /** @type {EditorState} */
     const state = {
         change: 0,
+        outerRect: 7,
 
         canvas,
         debug,

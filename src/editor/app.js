@@ -5,7 +5,7 @@ import * as EditorState from "./state.js";
 import { PlatformControls } from "./platform.js";
 import { assert, never } from "../assert.js";
 import * as Bus from "../bus.js"
-import { AABB } from "../math/aabb.js";
+import { LevelSelectControls, LevelSetControls } from "./level-set.js";
 
 /**
  * @returns {Promise<EditorStateFromServer | null>}
@@ -77,6 +77,8 @@ async function run() {
     }
 
     customElements.define("platform-controls", PlatformControls);
+    customElements.define("level-set-controls", LevelSetControls);
+    customElements.define("level-select-controls", LevelSelectControls);
     Editor.start(state)
 
     Bus.listen("editor-save", async function(save) {

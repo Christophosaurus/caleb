@@ -7,7 +7,7 @@
         }
         #editor {
             display: grid;
-            z-index: 69000;
+            z-index: 69;
             grid-template-columns: repeat(42, 1fr);
             grid-template-rows: repeat(34, 1fr);
             gap: 0;
@@ -123,12 +123,21 @@
 		display: block;
 		margin: 0 auto;
 	      }
+
+	      #level-controls {
+        position: absolute;
+        z-index: 69000;
+	      }
         </style>
     </head>
     <body>
         <div id="app">
             <canvas id="game_canvas" width="320" height="240"></canvas>
             <div id="overlay">
+                <div id="level-controls">
+                    <level-set-controls></level-set-controls>
+                    <level-select-controls></level-select-controls>
+                </div>
                 <platform-controls></platform-controls>
                 <div id="loading">Jabascript Loading</div>
             </div>
@@ -136,6 +145,50 @@
                 <div id="world-outline"></div>
             </div>
         </div>
+        <template id="level-select-controls">
+<style>
+.level-select-controls {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.3em;
+    z-index: 69000;
+    background: #eee;
+    display: block;
+    width: 15vw;
+}
+</style>
+            <div class="level-select-controls">
+                <div>foo</div>
+                <div>foo</div>
+                <div>foo</div>
+                <div>foo</div>
+                <div>foo</div>
+                <div>foo</div>
+                <div>foo</div>
+            </div>
+        </template>
+        <template id="level-set-controls">
+<style>
+.level-set-controls {
+    position: relative;
+    align-items: center;
+    gap: 0.3em;
+    z-index: 69000;
+    background: #eee;
+    display: block;
+    width: 100vw;
+}
+</style>
+            <div class="level-set-controls">
+                <label>Load Level</label> <input id="load-level" placeholder="path-to-file"></input>
+                <label>Save Level</label> <input id="save-level" placeholder="path-to-file"></input>
+                <label>Title</label> <input id="level-set-title" placeholder="level name"></input>
+                <label>Difficulty</label> <input id="level-set-diff" placeholder="level diff"></input>
+                <button id="create-level-set">Create Level</button>
+                <button id="delete-level-set">Delete Level</button>
+            </div>
+        </template>
         <template id="platform-controls">
 <style>
 
@@ -237,8 +290,9 @@
                     </div>
                     <div class="circuit">
                         <input id="circuit" type="checkbox"></input> <label>C</label><br>
-                        <label></label> <input id="circuit-sx" min="-5" max="37" type="number" value="0"></input> <input id="circuit-sy" min="-5" max="29" type="number" value="0"></input> <br>
-                        <label>-&gt;</label> <input id="circuit-ex" min="-5" max="37" type="number" value="0"></input> <input id="circuit-ey" min="-5" max="29" type="number" value="0"></input> <br>
+                            <!-- REMINDER : outerRect -->
+                        <label></label> <input id="circuit-sx" min="-7" max="37" type="number" value="0"></input> <input id="circuit-sy" min="-5" max="29" type="number" value="0"></input> <br>
+                        <label>-&gt;</label> <input id="circuit-ex" min="-7" max="37" type="number" value="0"></input> <input id="circuit-ey" min="-5" max="29" type="number" value="0"></input> <br>
                     </div>
                     <div class="next-level">
                         <input id="next-level" type="checkbox"></input> <label>N</label><br>
@@ -253,7 +307,3 @@
         <script type="module" src="./editor/app.js"></script>
     </body>
 </html>
-
-
-
-

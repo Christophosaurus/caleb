@@ -3,7 +3,6 @@ import * as Bus from "../bus.js"
 import * as Utils from "./utils.js"
 import { from2Vecs } from "../math/aabb.js";
 import { Vector2D } from "../math/vector.js";
-import { renderPlatform } from "./render.js";
 
 export class PlatformControls extends HTMLElement {
     /** @type {HTMLElement} */

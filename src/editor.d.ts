@@ -17,6 +17,7 @@ declare global {
 
     type EditorState = {
         debug: boolean,
+        outerRect: number
         tick: number
         change: number
         canvas: HTMLCanvasElement
@@ -32,7 +33,6 @@ declare global {
         },
         elements: ElementState[][]
         selectedElements: ElementState[]
-
     }
 
     type EventCB = (event: Event) => void

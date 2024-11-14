@@ -24,8 +24,8 @@ export function render(state) {
     }
 
     // TODO configure?
-    const start = Utils.unproject(state, new Vector2D(5, 5))
-    const dims = Utils.unproject(state, new Vector2D(5 + GAME_WIDTH, 5 + GAME_HEIGHT)).subtract(start)
+    const start = Utils.unproject(state, new Vector2D(state.outerRect, state.outerRect))
+    const dims = Utils.unproject(state, new Vector2D(state.outerRect + GAME_WIDTH, state.outerRect + GAME_HEIGHT)).subtract(start)
     state.worldOutline.style.width = `${Math.ceil(dims.x)}px`
     state.worldOutline.style.height = `${Math.ceil(dims.y)}px`
     state.worldOutline.style.top = `${Math.ceil(start.y)}px`

@@ -172,7 +172,6 @@ function handleCreatePlatform(state) {
  * @param {ElementState} es
  */
 function handleCellClick(state, es) {
-    console.log("work??")
     createSelected(state, es, es)
 }
 
