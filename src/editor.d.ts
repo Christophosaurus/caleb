@@ -55,6 +55,7 @@ declare global {
         // TODO state
         activePlatform: null | EditorPlatform
         mouse: {
+            startTime: number
             startingEl: ElementState | null
             state: "invalid" | "down"
         },

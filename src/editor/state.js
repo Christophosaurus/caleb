@@ -98,24 +98,13 @@ export function selectPlatform(state, evt) {
     found.selected = {
         offset: Utils.toVec(evt),
         starting: found.AABB.pos,
-        down: true,
+        down: false,
         moving: false,
         tick: found.selected ? found.selected.tick : state.tick
     }
     state.activePlatform = found
 
     return found;
-}
-
-/**
- * @param {EditorState} state
- * @returns {EditorPlatform}
- */
-export function releasePlatform(state) {
-    const plat = activePlatform(state)
-    plat.selected.down = false
-
-    return plat
 }
 
 /**

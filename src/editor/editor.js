@@ -9,11 +9,7 @@ import * as Renderer from "./render.js"
 import * as Window from "../window.js"
 import * as State from "./state.js"
 import * as Platform from "./platform.js"
-
-const behaviors = {
-    fastClickTimeMS: 250,
-    toBeMovingPxs: 144,
-}
+import * as Consts from "./consts.js"
 
 const windowEvents = [
     "mousedown",
@@ -71,7 +67,6 @@ function removeListeners() {
     Bus.remove("editor-change", editorChange)
 }
 
-
 /**
  * @param {EditorState} state
  */
@@ -87,40 +82,68 @@ export function start(state) {
     Bus.emit("editor-started", state)
 }
 
+
+/**
+ * @param {EditorState} state
+ */
+export function debug(state) {
+    if (State.hasSelected(state)) {
+        console.log("STATE: has selected")
+    }
+
+    if (State.hasActivePlatform(state)) {
+        console.log("STATE: has active platform")
+    }
+}
+
 /**
  * @param {EditorState} state
  * @param {Event} _
  * @param {ElementState?} es
  */
-function handleEditorDown(state, _, es) {
+export function handleEditorDown(state, _, es) {
     assert(!!es, "handle editor down must happen on grid element")
+    console.log("handle editor down")
+    State.createSelected(state, es)
+}
+
+/**
+ * @param {EditorState} state
+ * @param {Event} _
+ * @param {ElementState?} es
+ */
+export function handleMouseDown(state, _, es) {
     State.Mouse.down(state, es)
-    State.createSelected(state, es)
-}
-
-/**
- * @param {EditorState} state
- * @param {Event} _
- * @param {ElementState?} es
- */
-function handleEditorOver(state, _, es) {
-    assert(!!es, "handle editor down must happen on grid element")
-    State.createSelected(state, es)
 }
 
 /**
  * @param {EditorState} state
  */
-function handleEditorUp(state) {
+export function handleMouseUp(state, _, es) {
     State.Mouse.up(state)
 }
 
 /**
  * @param {EditorState} state
  * @param {Event} _
+ * @param {ElementState?} es
+ */
+export function handleEditorOver(state, _, es) {
+    assert(!!es, "handle editor down must happen on grid element")
+    State.createSelected(state, es)
+}
+
+/**
+ * @param {EditorState} state
+ */
+export function handleEditorUp(state) { }
+
+/**
+ * @param {EditorState} state
+ * @param {Event} _
  * @param {ElementState} es
  */
-function handleCellClick(state, _, es) {
+export function handleCellClick(state, _, es) {
     State.createSelected(state, es, es)
 }
 
@@ -128,11 +151,12 @@ function handleCellClick(state, _, es) {
  * @param {EditorState} state
  * @param {Event} event
  */
-function handleSelectPlatform(state, event) {
+export function handleSelectPlatform(state, event) {
     const evt = /** @type {MouseEvent} */(event)
     assert(evt instanceof MouseEvent, "selection of platform without mouse event")
 
     const found = State.selectPlatform(state, evt)
+    Platform.down(found)
 
     Bus.emit("show-platform", found)
 }
@@ -140,14 +164,13 @@ function handleSelectPlatform(state, event) {
 /**
  * @param {EditorState} state
  */
-function handleUpPlatform(state) {
+export function handleUpPlatform(state) {
     const platform = State.activePlatform(state)
     const duration = Platform.selectedDuration(state, platform)
     const moving = Platform.isMoving(platform)
 
-    if (!moving && duration < behaviors.fastClickTimeMS) {
-        handleReleasePlatform(state)
-    } else {
+    Platform.up(platform)
+    if (moving || duration < Consts.behaviors.fastClickTimeMS) {
         Bus.emit("show-platform", platform)
     }
 }
@@ -155,7 +178,7 @@ function handleUpPlatform(state) {
 /**
  * @param {EditorState} state
  */
-function handleDeletePlatform(state) {
+export function handleDeletePlatform(state) {
     const platform = State.deletePlatform(state);
     Bus.emit("delete-platform", platform)
 }
@@ -164,15 +187,11 @@ function handleDeletePlatform(state) {
  * @param {EditorState} state
  * @param {Event} event
  */
-function handleMovePlatform(state, event) {
+export function handleMovePlatform(state, event) {
     const evt = /** @type {MouseEvent} */(event)
     assert(evt instanceof MouseEvent, "selection of platform without mouse event")
 
     const platform = State.activePlatform(state)
-    if (Platform.isDown(platform)) {
-        return
-    }
-
     const eventPos = Utils.toVec(evt)
     const offset = Platform.offset(platform);
     const start = Platform.start(platform);
@@ -189,7 +208,7 @@ function handleMovePlatform(state, event) {
 /**
  * @param {EditorState} state
  */
-function handlePlayListeners(state) {
+export function handlePlayListeners(state) {
     window.addEventListener("resize", function() {
         Window.resize(state.canvas)
     });
@@ -199,7 +218,7 @@ function handlePlayListeners(state) {
 /**
  * @param {EditorState} state
  */
-function handlePlay(state) {
+export function handlePlay(state) {
     state.canvas.classList.add("show")
     removeListeners();
     handlePlayListeners(state)
@@ -228,53 +247,68 @@ function handlePlay(state) {
 /**
  * @param {EditorState} state
  */
-function handleReleasePlatform(state) {
-    const plat = State.releasePlatform(state)
-    Bus.emit("release-platform", plat)
+export function handleReleasePlatform(state) {
+    const platform = State.activePlatform(state)
+    Platform.up(platform)
+    Bus.emit("release-platform", platform)
 }
 
 /** @param {EditorState} state
+ * @param {boolean} render - i need ot remove this and have take action emit renders
  *
  * @returns {(e: Event) => void}
  */
-export function createActionTaken(state) {
+export function createActionTaken(state, render = true) {
     const T = createTransform(state);
 
     const createPlatform = T(State.createPlatform).type("keydown").key("a");
-    const selectPlatform = T(handleSelectPlatform).type("mousedown").not.controls().fromPlatform()
-    const movePlatform = T(handleMovePlatform).debug.type("mousemove").activePlatform().fromPlatform()
-    const releasePlatform = T(handleReleasePlatform).type("keydown").key(["o", "Escape"])
-    const delPlatform = T(handleDeletePlatform).type("keydown").key("Backspace")
-    const upPlatform = T(handleUpPlatform).type("mouseup").not.controls().activePlatform()
+    //const selectPlatform = T(handleSelectPlatform).type("mousedown").not.controls().inPlatform()
+    //const movePlatform = T(handleMovePlatform).debug.type("mousemove").activePlatform().inPlatform().stateMouseDown()
+    //const releasePlatform = T(handleReleasePlatform).type("keydown").key(["o", "Escape"])
+    //const delPlatform = T(handleDeletePlatform).type("keydown").key("Backspace")
+    //const upPlatform = T(handleUpPlatform).type("mouseup").activePlatform()
 
     const clear = T(State.clearActiveState).type("keydown").key("Escape")
 
-    const eDown = T(handleEditorDown).type("mousedown").not.activePlatform().fromEditor()
-    const eOver = T(handleEditorOver).type("mouseover").stateMouseDown().not.activePlatform().fromEditor()
-    const eUp = T(handleEditorUp).type("mouseup").stateMouseDown().not.activePlatform().fromEditor()
-    const eCell = T(handleCellClick).type("click").not.stateHasSelected().not.activePlatform().isGridItem()
+    const eOver = T(handleEditorOver).type("mouseover").stateMouseDown().not.inPlatform().fromEditor()
+    const eUp = T(handleEditorUp).type("mouseup").stateMouseDown().not.inPlatform().fromEditor()
+    const eCell = T(handleCellClick).type("mouseup").mouseDuration(Consts.behaviors.fastClickTimeMS).isGridItem()
 
     const play = T(handlePlay).type("keydown").key("p").not.stateHasSelected().not.activePlatform()
+    const mousedown = T(handleMouseDown).type("mousedown")
+    const mouseup = T(handleMouseUp).type("mouseup")
+
+    const prehandlers = [
+        mousedown,
+    ]
+
+    const posthandlers = [
+        mouseup,
+    ]
 
     const handlers = [
         play,
         eCell,
         clear,
-        eDown,
         eOver,
         eUp,
-        delPlatform,
+
         createPlatform,
-        upPlatform,
-        selectPlatform,
-        movePlatform,
-        releasePlatform,
+        //delPlatform,
+        //upPlatform,
+        //selectPlatform,
+        //movePlatform,
+        //releasePlatform,
     ]
 
     const ran = []
     return function(event) {
         const startChange = state.change
         state.tick = Date.now()
+
+        for (const h of prehandlers) {
+            h.run(event)
+        }
 
         ran.length = 0
         for (const h of handlers) {
@@ -283,10 +317,16 @@ export function createActionTaken(state) {
             }
         }
 
+        for (const h of posthandlers) {
+            h.run(event)
+        }
+
         if (ran.length >= 2) {
             console.log("ambiguous event", ran.map(x => x.toString()))
         }
-        Renderer.render(state)
+        if (render) {
+            Renderer.render(state)
+        }
 
         if (startChange < state.change) {
             /*Bus.emit("editor-save", {

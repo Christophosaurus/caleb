@@ -2,7 +2,7 @@ import { Vector2D } from "../math/vector.js";
 import { GAME_WIDTH, GAME_HEIGHT } from "../window.js";
 import * as Editor from "./editor.js";
 import * as EditorState from "./state.js";
-import { PlatformControls } from "./platform.js";
+import { PlatformControls } from "./html/platform.js";
 import { assert, never } from "../assert.js";
 import * as Bus from "../bus.js"
 import { LevelSelectControls, LevelSetControls } from "./level-set.js";

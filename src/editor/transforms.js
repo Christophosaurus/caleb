@@ -1,4 +1,5 @@
 import * as State from "./state.js"
+import * as Search from "./search.js"
 
 /** @param {any} fn
  * @returns {string}
@@ -31,17 +32,6 @@ function mapInput(k) {
     let key = ctrl ? k.split("-")[1] : k
     return { ctrl, key };
 }
-
-/**
- * @param {Window | HTMLElement | ((evt: Event) => boolean)} target
- * @returns {EventCB}
- */
-function isEl(target) {
-    return function(evt) {
-        return evt.target === target
-    }
-}
-
 
 export class Transforms {
     /** @type {EditorState} */
@@ -79,40 +69,6 @@ export class Transforms {
     get debug() {
         this.#debug = true
         return this
-    }
-
-    /**
-     * @param {Event} event
-     * @returns {ElementState | null}
-     */
-    #getElementState(event) {
-        if (!event.type.includes("mouse")) {
-            return
-        }
-        const evt = /** @type {MouseEvent} */(event)
-
-        const x = evt.clientX
-        const y = evt.clientY
-
-        // TODO technically i can binary search over this 2D array, once with Y and once with X
-        // Since its 2D and square, i can do both the X and the Y at the same time
-        /** @type {ElementState | null} */
-        let found = null
-        outer: for (const row of this.state.elements) {
-            const first = row[0]
-            if (first.el.offsetTop + first.el.offsetHeight < y) {
-                continue
-            }
-            for (const el of row) {
-                if (el.el.offsetLeft + el.el.offsetWidth < x) {
-                    continue
-                }
-                found = el
-                break outer
-            }
-        }
-
-        return found
     }
 
     /**
@@ -170,24 +126,33 @@ export class Transforms {
     stateMouseDown() {
         let that = this
         return this.chain(function stateMouseDown() {
-            return that.state.mouse.state === "down"
+            return State.Mouse.isDown(that.state)
         });
     }
 
     /**
      * @returns {this}
      */
-    fromPlatform() {
+    inPlatform() {
         let that = this
         return this.chain(function fromPlatform(evt) {
-            const platforms = State.platforms(that.state)
-            for (const p of platforms) {
-                if (p.el === evt.target) {
-                    return true
-                }
-            }
+            const platform = Search.platform(that.state, evt)
+            return platform !== null
         })
     }
+
+    /**
+     * @param {number} dur
+     * @returns {this}
+     */
+    mouseDuration(dur) {
+        let that = this
+        return this.chain(function mouseDuration() {
+            console.log("duration", State.Mouse.duration(that.state), dur)
+            return State.Mouse.duration(that.state) < dur
+        })
+    }
+
 
     /**
      * @returns {this}
@@ -265,7 +230,7 @@ export class Transforms {
             return false
         }
 
-        const es = this.#getElementState(evt)
+        const es = Search.gridItem(this.state, evt)
         if (this.#debug) {
             console.log(`${this.name}: succeeded ${ran.map(fnString).join(".")}`, es)
         }
