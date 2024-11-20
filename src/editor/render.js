@@ -1,7 +1,7 @@
 import { assert } from "../assert.js"
 import { Vector2D } from "../math/vector.js"
-import { GAME_HEIGHT, GAME_WIDTH } from "../window.js"
 import * as Utils from "./utils.js"
+import * as State from "./state.js"
 
 /**
  * TODO perf
@@ -9,7 +9,7 @@ import * as Utils from "./utils.js"
  * @param {EditorState} state
  */
 export function render(state) {
-    for (const row of state.elements) {
+    for (const row of State.elements(state)) {
         for (const el of row) {
             if (el.selected) {
                 el.el.classList.add("selected")
@@ -19,13 +19,15 @@ export function render(state) {
         }
     }
 
-    for (const plat of state.platforms) {
+    const platforms = State.platforms(state);
+    for (const plat of platforms) {
         renderPlatform(state, plat)
     }
 
     // TODO configure?
-    const start = Utils.unproject(state, new Vector2D(state.outerRect, state.outerRect))
-    const dims = Utils.unproject(state, new Vector2D(state.outerRect + GAME_WIDTH, state.outerRect + GAME_HEIGHT)).subtract(start)
+    // ... wait... this is not something i need to do a bunch...
+    const start = Utils.unproject(state, new Vector2D(state.outerRect.margin, state.outerRect.margin))
+    const dims = Utils.unproject(state, new Vector2D(state.outerRect.maxX, state.outerRect.maxY)).subtract(start)
     state.worldOutline.style.width = `${Math.ceil(dims.x)}px`
     state.worldOutline.style.height = `${Math.ceil(dims.y)}px`
     state.worldOutline.style.top = `${Math.ceil(start.y)}px`

@@ -1,9 +1,11 @@
 import { assert } from "../assert.js";
 import { AABB } from "../math/aabb.js";
 import { Vector2D } from "../math/vector.js";
+import { GAME_HEIGHT, GAME_WIDTH } from "../window.js";
 import * as Mouse from "./mouse.js"
 import * as Platform from "./platform.js"
 import * as Utils from "./utils.js"
+import * as Consts from "./consts.js"
 
 export {Mouse}
 
@@ -15,8 +17,24 @@ function change(state) {
 }
 
 /**
+ * @param {EditorState} state
  */
-export function toGameLevels(state) {
+export function toGameLevelSet(state) {
+    const platforms= state.platforms.map(Level.createPlatformFromEditorPlatform)
+    /** @type {Level} */
+    const level = {
+        platforms,
+        initialPosition: new Vector2D(10, 0),
+        letterMap: Level.createLetterMap(platforms),
+    }
+
+    return {
+        title: "editor state",
+        difficulty: 1,
+        levels: [level],
+        activeLevel: level,
+        initialLevel: level,
+    }
 }
 
 /**
@@ -39,6 +57,15 @@ export function level(state) {
     assert(!!l, "somehow you have requested a level that doesn't exist", state.levelState)
     return l
 }
+
+/**
+ * @param {EditorState} state
+ * @returns {ElementState[][]}
+ */
+export function elements(state) {
+    return state.elements
+}
+
 
 /**
  * @param {EditorState} state
@@ -76,15 +103,15 @@ export function selectPlatform(state, evt) {
     return found;
 }
 
-export function releasePlatform(state, fastClicked) {
-    const s = activePlatform(state).selected
-    s.down = false
+/**
+ * @param {EditorState} state
+ * @returns {EditorPlatform}
+ */
+export function releasePlatform(state) {
+    const plat = activePlatform(state)
+    plat.selected.down = false
 
-    if (!s.moving && s.tick + behaviors.fastClickTimeMS < state.tick) {
-        handleReleasePlatform(state, platform)
-    } else {
-        Bus.emit("show-platform", platform)
-    }
+    return plat
 }
 
 /**
@@ -170,6 +197,13 @@ export function clearSelectElements(state) {
 /**
  * @param {EditorState} state
  */
+export function hasSelected(state) {
+    return state.selectedElements.length > 0
+}
+
+/**
+ * @param {EditorState} state
+ */
 export function clearActiveState(state) {
     clearSelectElements(state);
     Mouse.clearState(state);
@@ -178,7 +212,7 @@ export function clearActiveState(state) {
 /**
  * @param {EditorState} state
  */
-export function handleCreatePlatform(state) {
+export function createPlatform(state) {
     if (state.selectedElements.length > 0) {
         const start = state.selectedElements[0]
         const end = state.selectedElements[state.selectedElements.length - 1]
@@ -269,10 +303,16 @@ export function createEditorState(editor, overlay, canvas, debug, levelState) {
     const levelSelectControls = /** @type HTMLElement */(overlay.querySelector("level-select-controls"));
     assert(!!levelSelectControls, "level-select-controls is not within overlay")
 
+    const margin = Consts.editor.margin
+
     /** @type {EditorState} */
     const state = {
         change: 0,
-        outerRect: 7,
+        outerRect: {
+            margin,
+            maxX: GAME_WIDTH + margin,
+            maxY: GAME_HEIGHT + margin,
+        },
 
         canvas,
         debug,
@@ -299,5 +339,4 @@ export function createEditorState(editor, overlay, canvas, debug, levelState) {
 
     return state
 }
-
 

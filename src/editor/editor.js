@@ -7,8 +7,6 @@ import * as T from "./transforms.js"
 import * as Bus from "../bus.js"
 import * as Renderer from "./render.js"
 import * as Window from "../window.js"
-import * as Level from "../objects/level/level.js"
-import { Vector2D } from "../math/vector.js";
 import * as State from "./state.js"
 import * as Platform from "./platform.js"
 
@@ -164,19 +162,20 @@ function handleMovePlatform(state, event) {
     assert(evt instanceof MouseEvent, "selection of platform without mouse event")
 
     const platform = State.activePlatform(state)
-    if (!platform.selected.down) {
+    if (Platform.isDown(platform)) {
         return
     }
 
-    const projected = Utils.project(state, Utils.toVec(evt).subtract(platform.selected.offset), Math.round)
-    const moved = platform.selected.starting.clone().add(projected)
+    const eventPos = Utils.toVec(evt)
+    const offset = Platform.offset(platform);
+    const start = Platform.start(platform);
 
-    const before = platform.selected.moving
-    platform.selected.moving ||= moved.magnituteSquared() > behaviors.toBeMovingPxs
-    platform.AABB.pos = Utils.bound(moved)
+    const projected = Utils.project(state, eventPos.subtract(offset), Math.round)
+    const moved = projected.add(start)
+    const startedMoving = Platform.moveTo(platform, Utils.bound(state, moved));
 
-    if (!before && platform.selected.moving) {
-        Bus.emit("hide-platform", platform)
+    if (startedMoving) {
+        Bus.emit("move-platform", platform)
     }
 }
 
@@ -192,28 +191,6 @@ function handlePlayListeners(state) {
 
 /**
  * @param {EditorState} state
- * @returns {LevelSet}
- */
-function currentEditorStateToLevelSet(state) {
-    const platforms= state.platforms.map(Level.createPlatformFromEditorPlatform)
-    /** @type {Level} */
-    const level = {
-        platforms,
-        initialPosition: new Vector2D(10, 0),
-        letterMap: Level.createLetterMap(platforms),
-    }
-
-    return {
-        title: "editor state",
-        difficulty: 1,
-        levels: [level],
-        activeLevel: level,
-        initialLevel: level,
-    }
-}
-
-/**
- * @param {EditorState} state
  */
 function handlePlay(state) {
     state.canvas.classList.add("show")
@@ -221,7 +198,7 @@ function handlePlay(state) {
     handlePlayListeners(state)
 
     const ticks = [Runner.tickWithRender]
-    const levelSet = currentEditorStateToLevelSet(state)
+    const levelSet = State.toGameLevelSet(state)
     const config = Config.getGameConfig(false)
     const gstate = Config.createCanvasGame(state.canvas, config, levelSet)
     const loop = Runner.createGameLoop(gstate)
@@ -245,10 +222,8 @@ function handlePlay(state) {
  * @param {EditorState} state
  */
 function handleReleasePlatform(state) {
-    assert(!!platform.selected, "platform is not selected")
-    platform.selected = null
-    state.activePlatform = null
-    Bus.emit("release-platform", platform)
+    const plat = State.releasePlatform(state)
+    Bus.emit("release-platform", plat)
 }
 
 /** @param {EditorState} state
@@ -257,14 +232,16 @@ function handleReleasePlatform(state) {
  */
 export function createActionTaken(state) {
 
-    const createPlatform = T.type("keydown", T.key("a", T.withState(state, handleCreatePlatform)))
+    const createPlatform = T.type("keydown", T.key("a", T.withState(state, State.createPlatform)))
     const selectPlatform = T.notControls(state, T.isPlatform(state, T.type("mousedown", T.withState(state, handleSelectPlatform))))
-    const movePlatform = T.type("mousemove", T.withSelectedPlatform(state, handleMovePlatform))
-    const releasePlatform = T.type("keydown", T.key(["o", "Escape"], T.withSelectedPlatform(state, handleReleasePlatform)))
-    const delPlatform = T.type("keydown", T.key("Backspace", T.withSelectedPlatform(state, handleDeletePlatform)))
-    const upPlatform = T.notControls(state, T.activePlatform(state, T.type("mouseup", T.withSelectedPlatform(state, handleUpPlatform))))
+    const movePlatform = T.type("mousemove", T.isPlatform(state, T.withState(state, handleMovePlatform)))
 
-    const eClear = T.type("keydown", T.key("Escape", T.withState(state, clear)))
+    const releasePlatform = T.type("keydown", T.key(["o", "Escape"], T.withState(state, handleReleasePlatform)))
+    const delPlatform = T.type("keydown", T.key("Backspace", T.withState(state, handleDeletePlatform)))
+    const upPlatform = T.notControls(state, T.activePlatform(state, T.type("mouseup", T.withState(state, handleUpPlatform))))
+
+    const clear = T.type("keydown", T.key("Escape", T.withState(state, State.clearActiveState)))
+
     const eDown = T.noActivePlatform(state, T.isEditor(state.editor, T.type("mousedown", T.withElement(state, handleEditorDown))))
     const eOver = T.noActivePlatform(state, T.isEditor(state.editor, T.type("mouseover", T.withElement(state, T.isDown(handleEditorOver)))))
     const eUp = T.noActivePlatform(state, T.isEditor(state.editor, T.type("mouseup", T.withElement(state, T.isDown(handleEditorUp)))))
@@ -277,7 +254,7 @@ export function createActionTaken(state) {
     const handlers = [
         play,
         eCell,
-        eClear,
+        clear,
         debug,
         eDown,
         eOver,

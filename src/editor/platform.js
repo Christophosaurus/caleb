@@ -3,6 +3,14 @@ import * as Bus from "../bus.js"
 import * as Utils from "./utils.js"
 import { from2Vecs } from "../math/aabb.js";
 import { Vector2D } from "../math/vector.js";
+import * as Consts from "./consts.js"
+
+/**
+ * @param {EditorPlatform} platform
+ */
+function assertSelected(platform) {
+    assert(!!platform.selected, "expected platform to be selected")
+}
 
 export class PlatformControls extends HTMLElement {
     /** @type {HTMLElement} */
@@ -229,7 +237,7 @@ export function createPlatform(state, start, end) {
  * @returns {number}
  */
 export function selectedDuration(state, platform) {
-    assert(!!platform.selected, "cannot get selected duration of a platform not selected")
+    assertSelected(platform)
     return state.tick - platform.selected.tick
 }
 
@@ -238,6 +246,61 @@ export function selectedDuration(state, platform) {
  * @returns {boolean}
  */
 export function isMoving(platform) {
-    assert(!!platform.selected, "cannot get selected duration of a platform not selected")
+    assertSelected(platform)
     return platform.selected.moving
+}
+
+/**
+ * @param {EditorPlatform} platform
+ * @param {Vector2D} pos
+ */
+export function moveTo(platform, pos) {
+    assertSelected(platform)
+
+    platform.AABB.pos = pos.clone()
+    const wasMoving = isMoving(platform)
+    if (wasMoving) {
+        return false;
+    }
+
+    const dist = platform.selected.starting.clone().subtract(pos).magnituteSquared()
+    return orInMoving(platform, dist > Consts.platform.sqDistForMoving);
+}
+
+/**
+ * @param {EditorPlatform} platform
+ * @param {boolean} moving
+ * @returns {boolean}
+ */
+export function orInMoving(platform, moving) {
+    assertSelected(platform)
+    platform.selected.moving ||= moving
+    return platform.selected.moving
+}
+
+/**
+ * @param {EditorPlatform} platform
+ * @returns {boolean}
+ */
+export function isDown(platform) {
+    assertSelected(platform)
+    return platform.selected.down
+}
+
+/**
+ * @param {EditorPlatform} platform
+ * @returns {Vector2D}
+ */
+export function offset(platform) {
+    assertSelected(platform)
+    return platform.selected.offset
+}
+
+/**
+ * @param {EditorPlatform} platform
+ * @returns {Vector2D}
+ */
+export function start(platform) {
+    assertSelected(platform)
+    return platform.selected.starting
 }

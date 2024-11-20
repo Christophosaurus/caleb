@@ -1,3 +1,5 @@
+import * as State from "./state.js"
+
 function hasParent(el, evt) {
     let curr = /** @type HTMLElement */(evt.target)
     if (curr == null) {
@@ -21,20 +23,6 @@ export function withState(state, next) {
         next(state, event)
     }
 }
-
-/**
- * @param {EditorState} state
- * @param {PlatformCB} next
- * @returns {EventCB}
- */
-export function withSelectedPlatform(state, next) {
-    return function(event) {
-        if (state.activePlatform) {
-            next(state, state.activePlatform, event)
-        }
-    }
-}
-
 
 /**
  * @param {EditorState} state
@@ -143,7 +131,8 @@ export function is(target, next) {
  */
 export function isPlatform(state, next) {
     return is(function(evt) {
-        for (const p of state.platforms) {
+        const platforms = State.platforms(state)
+        for (const p of platforms) {
             if (p.el === evt.target) {
                 return true
             }
@@ -159,7 +148,7 @@ export function isPlatform(state, next) {
  */
 export function noSelected(state, next) {
     return is(function() {
-        return state.selectedElements.length === 0
+        return !State.hasSelected(state)
     }, next)
 }
 
@@ -171,7 +160,7 @@ export function noSelected(state, next) {
  */
 export function noActivePlatform(state, next) {
     return is(function() {
-        return state.activePlatform === null
+        return !State.hasActivePlatform(state)
     }, next)
 }
 

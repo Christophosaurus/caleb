@@ -34,7 +34,11 @@ declare global {
     type EditorState = {
         // TODO opts?
         debug: boolean,
-        outerRect: number
+        outerRect: {
+            margin: number,
+            maxX: number,
+            maxY: number,
+        },
         tick: number
         change: number
 

@@ -5,18 +5,14 @@
 import { Vector2D } from "../math/vector.js";
 import { GAME_HEIGHT, GAME_WIDTH } from "../window.js";
 
-const MIN_W = 0
-const MAX_W = 10 + GAME_WIDTH
-const MIN_H = 0
-const MAX_H = 10 + GAME_HEIGHT
-
 /**
+ * @param {EditorState} state
  * @param {Vector2D} pos
  * @returns {Vector2D}
  */
-export function bound(pos) {
-    pos.x = Math.min(MAX_W, Math.max(MIN_W, pos.x))
-    pos.y = Math.min(MAX_H, Math.max(MIN_H, pos.y))
+export function bound(state, pos) {
+    pos.x = Math.min(state.outerRect.maxX, Math.max(0, pos.x))
+    pos.y = Math.min(state.outerRect.maxY, Math.max(0, pos.y))
     return pos
 }
 
