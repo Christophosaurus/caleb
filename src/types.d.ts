@@ -130,8 +130,8 @@ declare global {
         title: string,
         difficulty: number,
         levels: Level[]
-        activeLevel: Level
-        initialLevel: Level
+        activeLevel?: Level
+        initialLevel: number
     }
 
     type Level = {

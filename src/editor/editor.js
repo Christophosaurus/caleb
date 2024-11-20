@@ -3,7 +3,7 @@ import * as Runner from "../game-runner.js";
 import * as Input from "../input/input.js"
 import * as Config from "../game-config.js"
 import * as Utils from "./utils.js"
-import * as T from "./transforms.js"
+import { createTransform } from "./transforms.js"
 import * as Bus from "../bus.js"
 import * as Renderer from "./render.js"
 import * as Window from "../window.js"
@@ -81,39 +81,46 @@ export function start(state) {
     currentEditorState = state
     addListeners()
 
+    // @ts-ignore this is reasonable thing to do
+    window.state = state
+
     Bus.emit("editor-started", state)
 }
 
 /**
  * @param {EditorState} state
- * @param {ElementState} es
+ * @param {Event} _
+ * @param {ElementState?} es
  */
-function handleEditorDown(state, es) {
+function handleEditorDown(state, _, es) {
+    assert(!!es, "handle editor down must happen on grid element")
     State.Mouse.down(state, es)
     State.createSelected(state, es)
 }
 
 /**
  * @param {EditorState} state
- * @param {ElementState} es
+ * @param {Event} _
+ * @param {ElementState?} es
  */
-function handleEditorOver(state, es) {
+function handleEditorOver(state, _, es) {
+    assert(!!es, "handle editor down must happen on grid element")
     State.createSelected(state, es)
 }
 
 /**
  * @param {EditorState} state
- * @param {ElementState} _
  */
-function handleEditorUp(state, _) {
+function handleEditorUp(state) {
     State.Mouse.up(state)
 }
 
 /**
  * @param {EditorState} state
+ * @param {Event} _
  * @param {ElementState} es
  */
-function handleCellClick(state, es) {
+function handleCellClick(state, _, es) {
     State.createSelected(state, es, es)
 }
 
@@ -198,7 +205,7 @@ function handlePlay(state) {
     handlePlayListeners(state)
 
     const ticks = [Runner.tickWithRender]
-    const levelSet = State.toGameLevelSet(state)
+    const levelSet = State.toSaveState(state)
     const config = Config.getGameConfig(false)
     const gstate = Config.createCanvasGame(state.canvas, config, levelSet)
     const loop = Runner.createGameLoop(gstate)
@@ -231,31 +238,28 @@ function handleReleasePlatform(state) {
  * @returns {(e: Event) => void}
  */
 export function createActionTaken(state) {
+    const T = createTransform(state);
 
-    const createPlatform = T.type("keydown", T.key("a", T.withState(state, State.createPlatform)))
-    const selectPlatform = T.notControls(state, T.isPlatform(state, T.type("mousedown", T.withState(state, handleSelectPlatform))))
-    const movePlatform = T.type("mousemove", T.isPlatform(state, T.withState(state, handleMovePlatform)))
+    const createPlatform = T(State.createPlatform).type("keydown").key("a");
+    const selectPlatform = T(handleSelectPlatform).type("mousedown").not.controls().fromPlatform()
+    const movePlatform = T(handleMovePlatform).debug.type("mousemove").activePlatform().fromPlatform()
+    const releasePlatform = T(handleReleasePlatform).type("keydown").key(["o", "Escape"])
+    const delPlatform = T(handleDeletePlatform).type("keydown").key("Backspace")
+    const upPlatform = T(handleUpPlatform).type("mouseup").not.controls().activePlatform()
 
-    const releasePlatform = T.type("keydown", T.key(["o", "Escape"], T.withState(state, handleReleasePlatform)))
-    const delPlatform = T.type("keydown", T.key("Backspace", T.withState(state, handleDeletePlatform)))
-    const upPlatform = T.notControls(state, T.activePlatform(state, T.type("mouseup", T.withState(state, handleUpPlatform))))
+    const clear = T(State.clearActiveState).type("keydown").key("Escape")
 
-    const clear = T.type("keydown", T.key("Escape", T.withState(state, State.clearActiveState)))
+    const eDown = T(handleEditorDown).type("mousedown").not.activePlatform().fromEditor()
+    const eOver = T(handleEditorOver).type("mouseover").stateMouseDown().not.activePlatform().fromEditor()
+    const eUp = T(handleEditorUp).type("mouseup").stateMouseDown().not.activePlatform().fromEditor()
+    const eCell = T(handleCellClick).type("click").not.stateHasSelected().not.activePlatform().isGridItem()
 
-    const eDown = T.noActivePlatform(state, T.isEditor(state.editor, T.type("mousedown", T.withElement(state, handleEditorDown))))
-    const eOver = T.noActivePlatform(state, T.isEditor(state.editor, T.type("mouseover", T.withElement(state, T.isDown(handleEditorOver)))))
-    const eUp = T.noActivePlatform(state, T.isEditor(state.editor, T.type("mouseup", T.withElement(state, T.isDown(handleEditorUp)))))
-    const eCell = T.noSelected(state, T.noActivePlatform(state, T.isGridItem(T.type("click", T.withElement(state, handleCellClick)))))
-
-    const play = T.noSelected(state, T.noActivePlatform(state, T.type("keydown", T.key("p", T.withState(state, handlePlay)))))
-
-    const debug = T.type("mousemove", function(_) { })
+    const play = T(handlePlay).type("keydown").key("p").not.stateHasSelected().not.activePlatform()
 
     const handlers = [
         play,
         eCell,
         clear,
-        debug,
         eDown,
         eOver,
         eUp,
@@ -267,16 +271,28 @@ export function createActionTaken(state) {
         releasePlatform,
     ]
 
+    const ran = []
     return function(event) {
         const startChange = state.change
         state.tick = Date.now()
+
+        ran.length = 0
         for (const h of handlers) {
-            h(event)
+            if (h.run(event)) {
+                ran.push(h)
+            }
+        }
+
+        if (ran.length >= 2) {
+            console.log("ambiguous event", ran.map(x => x.toString()))
         }
         Renderer.render(state)
 
         if (startChange < state.change) {
-            Bus.editorSave(state)
+            /*Bus.emit("editor-save", {
+                type: "editor-save",
+                ...State.toSaveState(state)
+            })*/
         }
     }
 }

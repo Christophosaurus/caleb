@@ -61,10 +61,3 @@ export function render() {
 export function editorChange() {
     emit("editor-change", {type: "editor-change"})
 }
-
-/**
- * @param {EditorState} state
-*/
-export function editorSave(state) {
-    emit("editor-save", {type: "editor-save", platforms: state.platforms})
-}

@@ -36,7 +36,7 @@ export function createLevel() {
         difficulty: 1,
         levels: [a],
         activeLevel: a,
-        initialLevel: a,
+        initialLevel: 0,
     }
 }
 

@@ -65,33 +65,6 @@ export function render(state) {
 }
 
 /**
- * @param {EditorPlatform} platform
- * @returns {BasedPlatform}
- */
-export function createPlatformFromEditorPlatform(platform) {
-    const aabb = platform.AABB.clone()
-    aabb.pos.subtract(new Vector2D(5, 5))
-    const plat = createPlatform(aabb)
-
-    plat.behaviors.circuit = platform.behaviors.circuit
-    plat.behaviors.next = platform.behaviors.next
-    plat.behaviors.instagib = platform.behaviors.instagib
-    plat.behaviors.obstacle = platform.behaviors.obstacle
-    plat.behaviors.lettered = platform.behaviors.lettered
-
-    if (platform.behaviors.render) {
-        plat.behaviors.render = {
-            renderX: 0,
-            renderY: 0,
-            renderWidth: 0,
-            renderHeight: 0,
-        }
-    }
-
-    return plat
-}
-
-/**
  * @param {AABB} aabb
  * @returns {BasedPlatform}
 */
@@ -182,7 +155,7 @@ export function withLetters(platform, letters) {
  */
 export function withInstaGib(platform) {
     assert(platform.behaviors.obstacle === undefined, "cannot have instagib that is also obstacle")
-    platform.behaviors.instagib = { type: "insta-gib", };
+    platform.behaviors.instagib = { type: "instagib", };
     return platform
 }
 

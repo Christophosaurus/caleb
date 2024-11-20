@@ -1,9 +1,10 @@
-import { assert, never } from "../assert.js";
+import { assert } from "../assert.js";
 import * as Bus from "../bus.js"
 import * as Utils from "./utils.js"
 import { from2Vecs } from "../math/aabb.js";
 import { Vector2D } from "../math/vector.js";
 import * as Consts from "./consts.js"
+import * as Level from "../objects/level/level.js"
 
 /**
  * @param {EditorPlatform} platform
@@ -240,6 +241,36 @@ export function selectedDuration(state, platform) {
     assertSelected(platform)
     return state.tick - platform.selected.tick
 }
+
+/**
+ * @param {EditorState} state
+ * @param {EditorPlatform} platform
+ * @returns {BasedPlatform}
+ */
+export function toPlatform(state, platform) {
+    const aabb = platform.AABB.clone()
+    const m = state.outerRect.margin
+    aabb.pos.subtract(new Vector2D(m, m))
+    const plat = Level.createPlatform(aabb)
+
+    plat.behaviors.circuit = platform.behaviors.circuit
+    plat.behaviors.next = platform.behaviors.next
+    plat.behaviors.instagib = platform.behaviors.instagib
+    plat.behaviors.obstacle = platform.behaviors.obstacle
+    plat.behaviors.lettered = platform.behaviors.lettered
+
+    if (platform.behaviors.render) {
+        plat.behaviors.render = {
+            renderX: 0,
+            renderY: 0,
+            renderWidth: 0,
+            renderHeight: 0,
+        }
+    }
+
+    return plat
+}
+
 
 /**
  * @param {EditorPlatform} platform

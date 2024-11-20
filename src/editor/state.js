@@ -6,6 +6,7 @@ import * as Mouse from "./mouse.js"
 import * as Platform from "./platform.js"
 import * as Utils from "./utils.js"
 import * as Consts from "./consts.js"
+import * as Level from "../objects/level/level.js"
 
 export {Mouse}
 
@@ -18,21 +19,24 @@ function change(state) {
 
 /**
  * @param {EditorState} state
+ * @returns {}
  */
-export function toGameLevelSet(state) {
-    const platforms= state.platforms.map(Level.createPlatformFromEditorPlatform)
+export function toSaveState(state) {
+    const plats = platforms(state).map(plat => {
+        return Platform.toPlatform(state, plat)
+    })
+
     /** @type {Level} */
     const level = {
-        platforms,
+        platforms: plats,
         initialPosition: new Vector2D(10, 0),
-        letterMap: Level.createLetterMap(platforms),
+        letterMap: Level.createLetterMap(plats),
     }
 
     return {
         title: "editor state",
         difficulty: 1,
         levels: [level],
-        activeLevel: level,
         initialLevel: level,
     }
 }

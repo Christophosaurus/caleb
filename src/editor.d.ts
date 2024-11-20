@@ -30,7 +30,6 @@ declare global {
         current: number
     }
 
-
     type EditorState = {
         // TODO opts?
         debug: boolean,
@@ -64,10 +63,10 @@ declare global {
 
     }
 
-    type EventCB = (event: Event) => void
+    type EventCB = (event: Event) => (boolean | undefined)
     type StateCB = (s: EditorState, evt: Event) => void
     type PlatformCB = (s: EditorState, p: EditorPlatform, evt: Event) => void
-    type ElementCB = (s: EditorState, es: ElementState, evt: Event) => void
+    type Action = (s: EditorState, evt: Event, es?: ElementState) => void
 
     type EditorPlatform = {
         state: EditorState,
