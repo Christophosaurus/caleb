@@ -4,6 +4,11 @@ import { Vector2D } from "./math/vector.js";
 export {};
 
 declare global {
+    type EditorSaveRequest = {
+        editorState: EditorState,
+        path: string
+    }
+
     type ElementState = {
         id: number
         pos: Vector2D
@@ -23,11 +28,6 @@ declare global {
         platforms: EditorPlatform[]
         initialPosition: Vector2D
         letterMap: (string | null)[][]
-    }
-
-    type EditorLevelState = {
-        levels: EditorLevelSet[]
-        current: number
     }
 
     type EditorState = {
@@ -50,7 +50,7 @@ declare global {
         levelSelectControls: HTMLElement
         worldOutline: HTMLElement
 
-        levelState: EditorLevelState
+        levelSet: EditorLevelSet
 
         // TODO state
         activePlatform: null | EditorPlatform

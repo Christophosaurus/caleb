@@ -327,7 +327,7 @@ export class Transforms {
     }
 
     /**
-    * @param {Event} evt
+    * @param {Event | BusEvent} evt
     */
     run(evt) {
         const ran = [];
@@ -342,6 +342,8 @@ export class Transforms {
                 const i = 5; // allows for conditional debugger statements
             }
 
+            // @ts-ignore
+            // TODO probably will consider a better T type but i don't want to go through all that typing until i am needing to extend this editor far enough that it makes sense
             if (!runFilter(c, evt)) {
                 break;
             }
@@ -361,6 +363,10 @@ export class Transforms {
 
         this.action(this.state, evt, es)
         return true
+    }
+
+    updateState(state) {
+        this.state = state
     }
 
     toString() {

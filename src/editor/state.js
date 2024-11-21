@@ -46,9 +46,8 @@ export function toGameState(state) {
  * @returns {EditorLevelSet}
  */
 export function levelSet(state) {
-    const level = state.levelState.levels[state.levelState.current];
-    assert(!!level, "somehow you have requested a level-set that does not exist", state.levelState)
-    return level
+    assert(!!state.levelSet, "levelSet called on malformed editor state")
+    return state.levelSet
 }
 
 /**
@@ -58,7 +57,7 @@ export function levelSet(state) {
 export function level(state) {
     const ls = levelSet(state)
     const l = ls.levels[ls.current]
-    assert(!!l, "somehow you have requested a level that doesn't exist", state.levelState)
+    assert(!!l, "somehow you have requested a level that doesn't exist", ls)
     return l
 }
 
@@ -67,9 +66,9 @@ export function level(state) {
  * @returns {ElementState[][]}
  */
 export function elements(state) {
+    assert(state.elements.length > 0, "calling elements on malformed objects")
     return state.elements
 }
-
 
 /**
  * @param {EditorState} state
@@ -245,7 +244,7 @@ export function endRound(state) {
 /**
  * @returns {EditorLevelSet}
  */
-function createEmptyLevelSet() {
+export function createEmptyLevelSet() {
     /** @type {EditorLevel} */
     const emptyLevel = {
         letterMap: [],
@@ -263,26 +262,31 @@ function createEmptyLevelSet() {
 }
 
 /**
- * @param {EditorState} state
+ * @returns {EditorState}
  */
-function readyLevelState(state) {
-    const levelState = state.levelState
-    if (levelState.levels.length === 0) {
-        levelState.levels.push(createEmptyLevelSet())
-        levelState.current = 0;
-    }
+export function createEmptyEditorState() {
+    const margin = Consts.editor.margin
+    return /** @type EditorState */({
+        levelSet: createEmptyLevelSet(),
 
-    for (const set of levelState.levels) {
-        for (const level of set.levels) {
-            for (const p of level.platforms) {
-                p.el = null
-                p.state = state
-                const a = p.AABB
-                p.AABB = new AABB(new Vector2D(a.pos.x, a.pos.y), a.width, a.height)
-            }
-        }
-    }
+        debug: false,
+        tick: 0,
+        change: 0,
+        mouse: {
+            startTime: 0,
+            startingEl: null,
+            state: "invalid",
+        },
 
+        activePlatform: null,
+        elements: [],
+        outerRect: {
+            margin,
+            maxX: GAME_WIDTH + margin,
+            maxY: GAME_HEIGHT + margin,
+        },
+        selectedElements: [],
+    })
 }
 
 /**
@@ -339,8 +343,6 @@ export function createEditorState(editor, overlay, canvas, debug, remoteState) {
             state: "invalid",
         }
     }
-
-    readyLevelState(state);
 
     return state
 }

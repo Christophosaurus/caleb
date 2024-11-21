@@ -246,10 +246,12 @@ declare global {
 
     type RenderEvent = Event & {type: "render"}
     type ResizeEvent = Event & {type: "resize"}
-    type SaveEvent = {type: "editor-save", state: EditorState}
-    type ChangeEvent = {type: "editor-change"}
+    type UpdatedEvent = {type: "editor-updated", state: EditorState}
+    type ChangeEvent = {type: "editor-change", state: EditorState}
+    type EditorStateLoadedEvent = {type: "editor-state-loaded", state: EditorState}
+    type BusEvent = RenderEvent | ResizeEvent | UpdatedEvent | ChangeEvent | EditorStateLoadedEvent
 
-    type BusType = "hide-platform" | "show-platform" | "move-platform" | "release-platform" | "render" | "editor-save" | "editor-change" | "delete-platform" | "editor-started"
+    type BusType = "hide-platform" | "show-platform" | "move-platform" | "release-platform" | "render" | "editor-change" | "delete-platform" | "editor-started" | "editor-state-loaded" | "editor-updated"
     type BusArgMap = {
         "editor-started": EditorState;
         "resize": ResizeEvent;
@@ -259,8 +261,9 @@ declare global {
         "release-platform": EditorPlatform;
         "delete-platform": EditorPlatform;
         "render": RenderEvent
-        "editor-save": SaveEvent
         "editor-change": ChangeEvent
+        "editor-state-loaded": EditorStateLoadedEvent
+        "editor-updated": UpdatedEvent
     };
 
     type BusArg = EditorPlatform

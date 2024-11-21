@@ -1,26 +1,41 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 )
+
+type Data struct {
+    Path string `json:"path"`
+    EditorState map[string]interface{} `json:"editorState"`
+}
 
 func save(w http.ResponseWriter, r *http.Request) {
 
     // Read the request body
     body, err := io.ReadAll(r.Body)
     if err != nil {
+        slog.Error("unable to read request body", "error", err)
         http.Error(w, "Failed to read request body", http.StatusBadRequest)
         return
     }
     defer r.Body.Close() // Close the body after reading
-
-    path := os.Getenv("EDITOR_FILE")
-    err = os.WriteFile(path, body, 0644)
+    var data Data
+    err = json.Unmarshal(body, &data)
     if err != nil {
+        slog.Error("unable to decode json body", "error", err)
+        http.Error(w, "Failed to decode json body", http.StatusBadRequest)
+        return
+    }
+
+    err = os.WriteFile(data.Path, body, 0644)
+    if err != nil {
+        slog.Error("unable to write file", "error", err)
         http.Error(w, "Failed to write file", http.StatusBadRequest)
         return
     }
@@ -35,12 +50,21 @@ func main() {
 	http.HandleFunc("/save", save)
 
 	http.HandleFunc("/get", func(w http.ResponseWriter, r *http.Request) {
-        path := os.Getenv("EDITOR_FILE")
+        path := r.URL.Query().Get("path")
+        slog.Info("get request", "path", path)
+        if path == "" {
+            http.Error(w, "please provide path key", http.StatusBadRequest)
+        }
+
+        // TODO if/when i make public version of level editor, i should ensure
+        // i don't screw myself with rando paths
+
         body, err := os.ReadFile(path)
         if err != nil {
             http.Error(w, "Failed to write file", http.StatusBadRequest)
             return
         }
+
         fmt.Fprintf(w, string(body))
     })
 

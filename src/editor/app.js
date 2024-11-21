@@ -5,32 +5,10 @@ import * as EditorState from "./state.js";
 import { PlatformControls } from "./html/platform.js";
 import { assert, never } from "../assert.js";
 import * as Bus from "../bus.js"
-import { LevelSelectControls, LevelSetControls } from "./level-set.js";
-
-/**
- * @returns {Promise<EditorLevelState | null>}
- */
-async function getState() {
-    const url = "/get";
-    try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`Response status: ${response.status}`);
-        }
-
-        return response.json();
-
-    } catch (error) {
-        never("unable to get data: " + error + "\n" + error.stack)
-    }
-
-    return null
-}
+import { LevelSelectControls, LevelSetControls } from "./html/level-set.js";
 
 async function run() {
-    /** @type {EditorLevelState | null} */
-    const data = await getState()
-    assert(!!data, "unable to get data from the server")
+    const data = EditorState.createEmptyEditorState();
 
     /** @type {HTMLElement} */
     const editor = document.querySelector("#editor")
@@ -96,22 +74,6 @@ async function run() {
         "levelSelectControls",
         "worldOutline",
     ]
-
-    Bus.listen("editor-save", async function(save) {
-        const res = await fetch("/save", {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(save.state, (key, value) => {
-                if (dropKeys.includes(key)) {
-                    return undefined
-                }
-                return value
-            })
-        })
-        assert(res.ok, "unable to save the editor state")
-    })
 }
 
 run()

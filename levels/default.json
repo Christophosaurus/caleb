@@ -1,0 +1,47 @@
+{
+    "path": "./levels/default.json",
+    "editorState": {
+        "levelSet": {
+            "levels": [
+                {
+                    "letterMap": [],
+                    "platforms": [
+                        {
+                            "selected": null,
+                            "AABB": {
+                                "pos": {
+                                    "x": 15,
+                                    "y": 12
+                                },
+                                "width": 13,
+                                "height": 9
+                            },
+                            "behaviors": {}
+                        }
+                    ],
+                    "initialPosition": {
+                        "x": 24,
+                        "y": 24
+                    }
+                }
+            ],
+            "title": "empty",
+            "difficulty": 0,
+            "initialLevel": 0,
+            "current": 0
+        },
+        "debug": false,
+        "tick": 1584,
+        "change": 1,
+        "mouse": {
+            "startTime": 1732230842248,
+            "startingEl": null
+        },
+        "outerRect": {
+            "margin": 7,
+            "maxX": 39,
+            "maxY": 31
+        },
+        "selectedElements": []
+    }
+}

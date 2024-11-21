@@ -22,7 +22,7 @@ const windowEvents = [
     "keydown",
 ]
 
-/** @type {(e: Event) => void} */
+/** @type {(e: Event | BusEvent) => void} */
 let currentTakeAction = null
 /** @type {EditorState} */
 let currentEditorState = null
@@ -50,6 +50,7 @@ function addListeners() {
     }
     window.addEventListener("resize", actionResize)
 
+    Bus.listen("editor-state-loaded", currentTakeAction)
     Bus.listen("render", currentTakeAction)
     Bus.listen("editor-change", editorChange)
     Bus.render()
@@ -64,6 +65,7 @@ function removeListeners() {
     }
     window.removeEventListener("resize", actionResize)
     Bus.remove("render", currentTakeAction)
+    Bus.remove("editor-state-loaded", currentTakeAction)
     Bus.remove("editor-change", editorChange)
 }
 
@@ -262,7 +264,7 @@ export function handleShowPlatform(state) {
 /** @param {EditorState} state
  * @param {boolean} render - i need ot remove this and have take action emit renders
  *
- * @returns {(e: Event) => void}
+ * @returns {(e: Event | BusEvent) => void}
  */
 export function createActionTaken(state, render = true) {
     const T = createTransform(state);
@@ -306,7 +308,6 @@ export function createActionTaken(state, render = true) {
     const play = T(handlePlay).type("keydown").key("p").not.stateHasSelected().not.activePlatform()
     const mousedown = T(handleMouseDown).type("mousedown")
     const mouseup = T(handleMouseUp).type("mouseup")
-
     const prehandlers = [
         mousedown,
     ]
@@ -332,10 +333,35 @@ export function createActionTaken(state, render = true) {
         delPlatform,
     ]
 
+    const newState = T((_, event) => {
+        // TODO probably will consider a better T type but i don't want to go through all that typing until i am needing to extend this editor far enough that it makes sense
+        // @ts-ignore
+        const evt = /** @type {EditorStateLoadedEvent} */(event)
+
+        // TODO yikes
+        // also, don't cause a state change that way fetches don't result in an immediate save
+        state = {
+            ...state,
+            ...evt.state,
+
+            // use active elements
+            elements: state.elements,
+        }
+
+        prehandlers.forEach(x => x.updateState(state));
+        posthandlers.forEach(x => x.updateState(state));
+        handlers.forEach(x => x.updateState(state));
+
+    }).type("editor-state-loaded")
+
+    // TODO: The Event | BusEvent thing is real but again i don't want to
+    // refactor the types until i really want the need to... :(
     const ran = []
     return function(event) {
         const startChange = state.change
         state.tick++
+
+        newState.run(event);
 
         for (const h of prehandlers) {
             h.run(event)
@@ -360,9 +386,9 @@ export function createActionTaken(state, render = true) {
         }
 
         if (startChange < state.change) {
-            Bus.emit("editor-save", {
-                type: "editor-save",
-                state,
+            Bus.emit("editor-updated", {
+                type: "editor-updated",
+                state: state,
             })
         }
     }
