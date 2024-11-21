@@ -64,12 +64,6 @@ export function renderPlatform(state, platform) {
     el.style.top = `${Math.ceil(rect.top)}px`
     el.style.left = `${Math.ceil(rect.left)}px`
 
-    if (state.mouse.state === "down") {
-        el.style.pointerEvents = "none"
-    } else {
-        el.style.pointerEvents = "auto"
-    }
-
     if (platform.selected) {
         el.classList.add("selected")
     } else {

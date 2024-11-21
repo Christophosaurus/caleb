@@ -69,7 +69,7 @@ declare global {
     type PlatformCB = (s: EditorState, p: EditorPlatform, evt: Event) => void
     type Filter = {
         name: string,
-        fn: EventCB | EventCB[],
+        fn: EventCB | (Filter | EventCB)[],
         invert: boolean
         or: boolean
         and: boolean
@@ -82,7 +82,6 @@ declare global {
         selected: {
             offset: Vector2D,
             starting: Vector2D,
-            down: boolean,
             moving: boolean,
             tick: number,
         } | null

@@ -3,14 +3,45 @@ import * as Search from "./search.js"
 import * as Consts from "./consts.js"
 import { assert, never } from "../assert.js"
 
-/** @param {any} fn
+/** @param {Filter} fn
  * @returns {string}
  */
-function fnString(fn) {
+function filterString(fn) {
     if (fn.invert) {
         return `not(${fn.name})`
     }
     return fn.name
+}
+
+/**
+ * @param {Filter} filter
+ * @param {Event} event
+ * @returns {boolean}
+ */
+function runFilter(filter, event) {
+    const fns = filter.fn
+    let results = true
+    if (typeof fns === "function") {
+        results = fns(event);
+    } else {
+        for (const fn of fns) {
+            if (!results) {
+                break;
+            }
+
+            let step = typeof fn === "function" ? fn(event) : runFilter(fn, event)
+
+            if (filter.or) {
+                results ||= step
+            } else if (filter.and) {
+                results &&= step
+            } else {
+                never("combination function with neither or / and set", filter)
+            }
+        }
+    }
+
+    return filter.invert ? !results : results
 }
 
 function hasParent(el, evt) {
@@ -55,6 +86,9 @@ export class Transforms {
     #debug
 
     /** @type {boolean} */
+    #break
+
+    /** @type {boolean} */
     #or
 
     /** @param {EditorState} state
@@ -78,12 +112,20 @@ export class Transforms {
     }
 
     /**
+     * @returns {this}
+     */
+    get break() {
+        this.#break = true
+        return this
+    }
+
+    /**
      * @param {EventCB} f
      * @returns {this}
      */
     chain(f) {
         /** @type {Filter} */
-        const filter = {
+        let filter = {
             name: f.name,
             fn: f,
             or: false,
@@ -93,11 +135,16 @@ export class Transforms {
 
         if (this.#or) {
             const last = this.cbs.pop()
-            filter.fn = [
-                f,
-                last,
-            ];
-            filter.or = true
+            filter = {
+                or: true,
+                and: false,
+                invert: false, // cannot not(or(...)) under this logic (i am ok with that)
+                name: `or(${f.name}, ${last.name})`,
+                fn: [
+                    f,
+                    last,
+                ]
+            }
         }
 
         this.cbs.push(filter);
@@ -117,7 +164,7 @@ export class Transforms {
     }
 
     get or() {
-        assert(this.cbs.length === 0, "there must be at least one call on the stack")
+        assert(this.cbs.length >= 1, "there must be at least one call on the stack")
         this.#or = true
         return this;
     }
@@ -167,6 +214,17 @@ export class Transforms {
     }
 
     /**
+     * @param {number} within
+     * @returns {this}
+     */
+    platformSelectedThisTick(within = 1) {
+        let state = this.state
+        return this.chain(function platformSelectedThisTick() {
+            return State.activePlatform(state).selected.tick >= state.tick - within
+        })
+    }
+
+    /**
      * @returns {this}
      */
     inActivePlatform() {
@@ -187,10 +245,22 @@ export class Transforms {
      */
     fastClick() {
         let that = this
-        return this.chain(function mouseDuration() {
-            return State.Mouse.duration(that.state) < Consts.behaviors.fastClickTimeMS
+        return this.chain(function fastClick() {
+            return State.Mouse.duration(that.state) < Consts.behaviors.toBeMovingPxs
         })
     }
+
+    /**
+     * @returns {this}
+     */
+    moving() {
+        let state = this.state
+        return this.chain(function moving() {
+            return State.hasActivePlatform(state) &&
+                State.activePlatform(state).selected.moving
+        })
+    }
+
 
     /**
      * @returns {this}
@@ -254,40 +324,25 @@ export class Transforms {
                 ran.push(c)
             }
 
-            const fns = c.fn
-            let result = false
-
-            if (typeof fns === "function") {
-                result = fns(evt)
-            } else {
-                result = true
-                for (const fn of fns) {
-                    let tmp = fn(evt)
-                    if (c.or) {
-                        result ||= tmp
-                    } else if (c.and) {
-                        result &&= tmp
-                    } else {
-                        never("combination function with neither or / and set", c)
-                    }
-                }
+            if (this.#break) {
+                const i = 5; // allows for conditional debugger statements
             }
 
-            if (c.invert && result || !c.invert && !result) {
-                break
+            if (!runFilter(c, evt)) {
+                break;
             }
         }
 
         if (i < this.cbs.length) {
             if (this.#debug) {
-                console.log(`${this.name}: failed ${ran.map(fnString).join(".")}`)
+                console.log(`${this.name}(failed): ${ran.map(filterString).join(".")}`)
             }
             return false
         }
 
         const es = Search.gridItem(this.state, evt)
         if (this.#debug) {
-            console.log(`${this.name}: succeeded ${ran.map(fnString).join(".")}`, es)
+            console.log(`${this.name}(success): ${ran.map(filterString).join(".")}`, es)
         }
 
         this.action(this.state, evt, es)
@@ -295,7 +350,7 @@ export class Transforms {
     }
 
     toString() {
-        return `${this.name}: ${this.cbs.map(fnString)}`
+        return `${this.name}: ${this.cbs.map(filterString)}`
     }
 }
 

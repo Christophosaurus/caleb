@@ -263,10 +263,12 @@ export function createActionTaken(state, render = true) {
 
     const createPlatform = T(State.createPlatform).type("keydown").key("a");
     const selectPlatform = T(handleSelectPlatform).type("mousedown").not.controls().inPlatform()
+
     const releasePlatformByKey = T(handleReleasePlatform).
         type("keydown").key(["o", "Escape"]).activePlatform()
+
     const releasePlatformByMouse = T(handleReleasePlatform).
-        type("mouseup").inActivePlatform().fastClick()
+        type("mouseup").activePlatform().not.platformSelectedThisTick(2).inActivePlatform().fastClick()
 
     //const movePlatform = T(handleMovePlatform).debug.type("mousemove").activePlatform().inPlatform().stateMouseDown()
     //const delPlatform = T(handleDeletePlatform).type("keydown").key("Backspace")
@@ -314,7 +316,7 @@ export function createActionTaken(state, render = true) {
     const ran = []
     return function(event) {
         const startChange = state.change
-        state.tick = Date.now()
+        state.tick++
 
         for (const h of prehandlers) {
             h.run(event)

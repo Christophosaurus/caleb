@@ -19,7 +19,7 @@ function change(state) {
 
 /**
  * @param {EditorState} state
- * @returns {}
+ * @returns {any}
  */
 export function toSaveState(state) {
     const plats = platforms(state).map(plat => {
@@ -79,6 +79,11 @@ export function platforms(state) {
     return level(state).platforms
 }
 
+export function releasePlatform(state) {
+    const p = activePlatform(state);
+    p.selected = null;
+}
+
 /**
  * @param {EditorState} state
  * @param {MouseEvent} evt
@@ -98,7 +103,6 @@ export function selectPlatform(state, evt) {
     found.selected = {
         offset: Utils.toVec(evt),
         starting: found.AABB.pos,
-        down: false,
         moving: false,
         tick: found.selected ? found.selected.tick : state.tick
     }
@@ -200,6 +204,9 @@ export function hasSelected(state) {
 export function clearActiveState(state) {
     clearSelectElements(state);
     Mouse.clearState(state);
+    if (hasActivePlatform(state)) {
+        releasePlatform(state);
+    }
 }
 
 /**
