@@ -1,5 +1,5 @@
-import { assert } from "../assert.js";
-import * as Bus from "../bus.js"
+import { assert } from "../../assert.js";
+import * as Bus from "../../bus.js"
 
 export class LevelSetControls extends HTMLElement {
     /** @type {HTMLElement} */
