@@ -249,7 +249,7 @@ export function handlePlay(state) {
  */
 export function handleReleasePlatform(state) {
     const platform = State.activePlatform(state)
-    Platform.up(platform)
+    State.clearActiveState(state);
     Bus.emit("release-platform", platform)
 }
 
@@ -262,17 +262,26 @@ export function createActionTaken(state, render = true) {
     const T = createTransform(state);
 
     const createPlatform = T(State.createPlatform).type("keydown").key("a");
-    //const selectPlatform = T(handleSelectPlatform).type("mousedown").not.controls().inPlatform()
+    const selectPlatform = T(handleSelectPlatform).type("mousedown").not.controls().inPlatform()
+    const releasePlatformByKey = T(handleReleasePlatform).
+        type("keydown").key(["o", "Escape"]).activePlatform()
+    const releasePlatformByMouse = T(handleReleasePlatform).
+        type("mouseup").inActivePlatform().fastClick()
+
     //const movePlatform = T(handleMovePlatform).debug.type("mousemove").activePlatform().inPlatform().stateMouseDown()
-    //const releasePlatform = T(handleReleasePlatform).type("keydown").key(["o", "Escape"])
     //const delPlatform = T(handleDeletePlatform).type("keydown").key("Backspace")
     //const upPlatform = T(handleUpPlatform).type("mouseup").activePlatform()
 
     const clear = T(State.clearActiveState).type("keydown").key("Escape")
 
-    const eOver = T(handleEditorOver).type("mouseover").stateMouseDown().not.inPlatform().fromEditor()
-    const eUp = T(handleEditorUp).type("mouseup").stateMouseDown().not.inPlatform().fromEditor()
-    const eCell = T(handleCellClick).type("mouseup").mouseDuration(Consts.behaviors.fastClickTimeMS).isGridItem()
+    const eOver = T(handleEditorOver).
+        type("mouseover").stateMouseDown().not.inPlatform().fromEditor()
+
+    const eUp = T(handleEditorUp).
+        type("mouseup").stateMouseDown().not.inPlatform().fromEditor()
+
+    const eCell = T(handleCellClick).
+        type("mouseup").not.inPlatform().fastClick().isGridItem()
 
     const play = T(handlePlay).type("keydown").key("p").not.stateHasSelected().not.activePlatform()
     const mousedown = T(handleMouseDown).type("mousedown")
@@ -294,11 +303,12 @@ export function createActionTaken(state, render = true) {
         eUp,
 
         createPlatform,
+        selectPlatform,
+        releasePlatformByKey,
+        releasePlatformByMouse,
         //delPlatform,
         //upPlatform,
-        //selectPlatform,
         //movePlatform,
-        //releasePlatform,
     ]
 
     const ran = []

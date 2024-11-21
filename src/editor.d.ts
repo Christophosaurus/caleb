@@ -67,6 +67,13 @@ declare global {
     type EventCB = (event: Event) => (boolean | undefined)
     type StateCB = (s: EditorState, evt: Event) => void
     type PlatformCB = (s: EditorState, p: EditorPlatform, evt: Event) => void
+    type Filter = {
+        name: string,
+        fn: EventCB | EventCB[],
+        invert: boolean
+        or: boolean
+        and: boolean
+    }
     type Action = (s: EditorState, evt: Event, es?: ElementState) => void
 
     type EditorPlatform = {

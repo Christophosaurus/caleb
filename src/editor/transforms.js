@@ -1,5 +1,7 @@
 import * as State from "./state.js"
 import * as Search from "./search.js"
+import * as Consts from "./consts.js"
+import { assert, never } from "../assert.js"
 
 /** @param {any} fn
  * @returns {string}
@@ -37,11 +39,11 @@ export class Transforms {
     /** @type {EditorState} */
     state
 
-    /** @type {EventCB[]} */
+    /** @type {Filter[]} */
     cbs
 
     /** @type {boolean} */
-    invert
+    #not
 
     /** @type {Action} */
     action
@@ -52,13 +54,17 @@ export class Transforms {
     /** @type {boolean} */
     #debug
 
+    /** @type {boolean} */
+    #or
+
     /** @param {EditorState} state
     /** @param {Action} action */
     constructor(state, action) {
         this.state = state
         this.#debug = false
         this.cbs = []
-        this.invert = false
+        this.#not = false
+        this.#or = false
         this.action = action
         this.name = action.name;
     }
@@ -76,14 +82,27 @@ export class Transforms {
      * @returns {this}
      */
     chain(f) {
-        // TODO deem as geniouous? (or cursed?)
-        if (this.invert) {
-            // @ts-ignore
-            f.invert = true
+        /** @type {Filter} */
+        const filter = {
+            name: f.name,
+            fn: f,
+            or: false,
+            and: false,
+            invert: this.#not,
+        };
+
+        if (this.#or) {
+            const last = this.cbs.pop()
+            filter.fn = [
+                f,
+                last,
+            ];
+            filter.or = true
         }
 
-        this.cbs.push(f);
-        this.invert = false
+        this.cbs.push(filter);
+        this.#not = false
+        this.#or = false
         return this;
     }
 
@@ -97,8 +116,14 @@ export class Transforms {
         })
     }
 
+    get or() {
+        assert(this.cbs.length === 0, "there must be at least one call on the stack")
+        this.#or = true
+        return this;
+    }
+
     get not() {
-        this.invert = true
+        this.#not = true
         return this;
     }
 
@@ -142,17 +167,30 @@ export class Transforms {
     }
 
     /**
-     * @param {number} dur
      * @returns {this}
      */
-    mouseDuration(dur) {
-        let that = this
-        return this.chain(function mouseDuration() {
-            console.log("duration", State.Mouse.duration(that.state), dur)
-            return State.Mouse.duration(that.state) < dur
+    inActivePlatform() {
+        let state = this.state
+        return this.chain(function fromPlatform(evt) {
+            if (!State.hasActivePlatform(state)) {
+                return false
+            }
+            const ap = State.activePlatform(state)
+            const platform = Search.platform(state, evt)
+            return platform !== null && platform === ap
         })
     }
 
+
+    /**
+     * @returns {this}
+     */
+    fastClick() {
+        let that = this
+        return this.chain(function mouseDuration() {
+            return State.Mouse.duration(that.state) < Consts.behaviors.fastClickTimeMS
+        })
+    }
 
     /**
      * @returns {this}
@@ -216,9 +254,26 @@ export class Transforms {
                 ran.push(c)
             }
 
-            const res = c(evt)
-            // @ts-ignore invert.... this is dumb
-            if (c.invert && res || !c.invert && !res) {
+            const fns = c.fn
+            let result = false
+
+            if (typeof fns === "function") {
+                result = fns(evt)
+            } else {
+                result = true
+                for (const fn of fns) {
+                    let tmp = fn(evt)
+                    if (c.or) {
+                        result ||= tmp
+                    } else if (c.and) {
+                        result &&= tmp
+                    } else {
+                        never("combination function with neither or / and set", c)
+                    }
+                }
+            }
+
+            if (c.invert && result || !c.invert && !result) {
                 break
             }
         }
