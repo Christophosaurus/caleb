@@ -82,14 +82,29 @@ async function run() {
 
     Editor.start(state)
 
+    const dropKeys = [
+        "activePlatform",
+        "elements",
+        "el",
+        "state",
+
+        "canvas",
+        "editor",
+        "overlay",
+        "platformControls",
+        "levelSetControls",
+        "levelSelectControls",
+        "worldOutline",
+    ]
+
     Bus.listen("editor-save", async function(save) {
         const res = await fetch("/save", {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(save, (key, value) => {
-                if (key === "state" || key === "el") {
+            body: JSON.stringify(save.state, (key, value) => {
+                if (dropKeys.includes(key)) {
                     return undefined
                 }
                 return value

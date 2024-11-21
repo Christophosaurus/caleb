@@ -103,7 +103,6 @@ export function debug(state) {
  */
 export function handleEditorDown(state, _, es) {
     assert(!!es, "handle editor down must happen on grid element")
-    console.log("handle editor down")
     State.createSelected(state, es)
 }
 
@@ -224,7 +223,7 @@ export function handlePlay(state) {
     handlePlayListeners(state)
 
     const ticks = [Runner.tickWithRender]
-    const levelSet = State.toSaveState(state)
+    const levelSet = State.toGameState(state)
     const config = Config.getGameConfig(false)
     const gstate = Config.createCanvasGame(state.canvas, config, levelSet)
     const loop = Runner.createGameLoop(gstate)
@@ -253,6 +252,13 @@ export function handleReleasePlatform(state) {
     Bus.emit("release-platform", platform)
 }
 
+/**
+ * @param {EditorState} state
+ */
+export function handleShowPlatform(state) {
+    Bus.emit("show-platform", State.activePlatform(state));
+}
+
 /** @param {EditorState} state
  * @param {boolean} render - i need ot remove this and have take action emit renders
  *
@@ -268,19 +274,31 @@ export function createActionTaken(state, render = true) {
         type("keydown").key(["o", "Escape"]).activePlatform()
 
     const releasePlatformByMouse = T(handleReleasePlatform).
-        type("mouseup").activePlatform().not.platformSelectedThisTick(2).inActivePlatform().fastClick()
+        type("mouseup").activePlatform().
+        not.platformSelectedThisTick(2).inActivePlatform().fastClick()
 
-    //const movePlatform = T(handleMovePlatform).debug.type("mousemove").activePlatform().inPlatform().stateMouseDown()
-    //const delPlatform = T(handleDeletePlatform).type("keydown").key("Backspace")
-    //const upPlatform = T(handleUpPlatform).type("mouseup").activePlatform()
+    const releasePlatformByOutsideClick = T(handleReleasePlatform).
+        type("mouseup").activePlatform().
+        not.inActivePlatform().
+        fastClick().not.controls()
+
+    const showPlatformControls = T(handleShowPlatform).
+        type("mouseup").platformMoving()
+
+    const movePlatform = T(handleMovePlatform).
+        type("mousemove").activePlatform().inPlatform().stateMouseDown()
+
+    const delPlatform = T(handleDeletePlatform).type("keydown").key("Backspace")
 
     const clear = T(State.clearActiveState).type("keydown").key("Escape")
 
     const eOver = T(handleEditorOver).
-        type("mouseover").stateMouseDown().not.inPlatform().fromEditor()
+        type("mouseover").not.activePlatform().
+        stateMouseDown().not.inPlatform().fromEditor()
 
     const eUp = T(handleEditorUp).
-        type("mouseup").stateMouseDown().not.inPlatform().fromEditor()
+        type("mouseup").not.activePlatform().
+        stateMouseDown().not.inPlatform().fromEditor()
 
     const eCell = T(handleCellClick).
         type("mouseup").not.inPlatform().fastClick().isGridItem()
@@ -308,9 +326,10 @@ export function createActionTaken(state, render = true) {
         selectPlatform,
         releasePlatformByKey,
         releasePlatformByMouse,
-        //delPlatform,
-        //upPlatform,
-        //movePlatform,
+        releasePlatformByOutsideClick,
+        movePlatform,
+        showPlatformControls,
+        delPlatform,
     ]
 
     const ran = []
@@ -341,10 +360,10 @@ export function createActionTaken(state, render = true) {
         }
 
         if (startChange < state.change) {
-            /*Bus.emit("editor-save", {
+            Bus.emit("editor-save", {
                 type: "editor-save",
-                ...State.toSaveState(state)
-            })*/
+                state,
+            })
         }
     }
 }

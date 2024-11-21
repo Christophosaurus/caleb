@@ -1,6 +1,12 @@
 
+
 /** @type {BusListeners} */
 let listeners = {};
+let emitTypes = false
+
+export function debug() {
+    emitTypes = true
+}
 
 /**
  * @template {keyof BusArgMap} T
@@ -8,6 +14,9 @@ let listeners = {};
  * @param {BusArgMap[T]} args
  */
 export function emit(type, args) {
+    if (emitTypes) {
+        console.log("Bus", type, args)
+    }
     for (const cb of listeners[type] || []) {
         cb(args)
     }

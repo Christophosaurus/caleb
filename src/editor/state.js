@@ -21,7 +21,7 @@ function change(state) {
  * @param {EditorState} state
  * @returns {any}
  */
-export function toSaveState(state) {
+export function toGameState(state) {
     const plats = platforms(state).map(plat => {
         return Platform.toPlatform(state, plat)
     })
@@ -79,9 +79,13 @@ export function platforms(state) {
     return level(state).platforms
 }
 
+/**
+ * @param {EditorState} state
+ */
 export function releasePlatform(state) {
     const p = activePlatform(state);
     p.selected = null;
+    state.activePlatform = null;
 }
 
 /**
@@ -286,10 +290,10 @@ function readyLevelState(state) {
  * @param {HTMLElement} overlay
  * @param {HTMLCanvasElement} canvas
  * @param {boolean} debug
- * @param {EditorLevelState} levelState
+ * @param {EditorState} remoteState
  * @returns {EditorState}
  * */
-export function createEditorState(editor, overlay, canvas, debug, levelState) {
+export function createEditorState(editor, overlay, canvas, debug, remoteState) {
 
     const worldOutline = /** @type HTMLElement */(editor.querySelector("#world-outline"));
     assert(!!worldOutline, "#world-outline not within editor")
@@ -307,6 +311,8 @@ export function createEditorState(editor, overlay, canvas, debug, levelState) {
 
     /** @type {EditorState} */
     const state = {
+        ...remoteState,
+
         change: 0,
         outerRect: {
             margin,
@@ -323,13 +329,12 @@ export function createEditorState(editor, overlay, canvas, debug, levelState) {
         levelSetControls,
         levelSelectControls,
 
-        levelState: levelState,
-
         tick: 0,
         activePlatform: null,
         elements: [],
         selectedElements: [],
         mouse: {
+            startTime: 0,
             startingEl: null,
             state: "invalid",
         }

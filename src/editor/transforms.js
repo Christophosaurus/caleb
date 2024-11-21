@@ -1,4 +1,5 @@
 import * as State from "./state.js"
+import * as Platform from "./platform.js"
 import * as Search from "./search.js"
 import * as Consts from "./consts.js"
 import { assert, never } from "../assert.js"
@@ -221,6 +222,19 @@ export class Transforms {
         let state = this.state
         return this.chain(function platformSelectedThisTick() {
             return State.activePlatform(state).selected.tick >= state.tick - within
+        })
+    }
+
+    /**
+     * @returns {this}
+     */
+    platformMoving() {
+        let state = this.state
+        return this.chain(function platformMoving() {
+            if (!State.hasActivePlatform(state)) {
+                return false
+            }
+            return Platform.isMoving(State.activePlatform(state))
         })
     }
 

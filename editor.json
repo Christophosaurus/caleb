@@ -1,6 +1,1 @@
-{
-    "levels": [],
-    "current": 0
-}
-
-
+{"change":1,"outerRect":{"margin":7,"maxX":39,"maxY":31},"debug":false,"levelState":{"levels":[{"levels":[{"letterMap":[],"platforms":[{"selected":null,"AABB":{"pos":{"x":15,"y":11},"width":14,"height":10},"behaviors":{}}],"initialPosition":{"x":24,"y":24}}],"title":"empty","difficulty":0,"initialLevel":0,"current":0}],"current":0},"tick":99,"selectedElements":[],"mouse":{"startTime":1732223049470,"startingEl":null}}

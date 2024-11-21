@@ -1,6 +1,6 @@
 
 export const platform = {
-    sqDistForMoving: 64
+    sqDistForMoving: 8
 }
 
 export const editor = {

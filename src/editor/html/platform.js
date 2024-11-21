@@ -49,9 +49,9 @@ export class PlatformControls extends HTMLElement {
         // TODO can i have multiple of these??
         Bus.listen("show-platform", (platform) => this.revealControls(platform))
         Bus.listen("hide-platform", () => this.hideControls())
-        Bus.listen("move-platform", (platform) => this.moveControls(platform))
+        Bus.listen("move-platform", () => this.hideControls())
         Bus.listen("release-platform", (platform) => this.save(platform))
-        Bus.listen("delete-platform", (platform) => this.hideControls())
+        Bus.listen("delete-platform", () => this.hideControls())
         Bus.listen("resize", this.change);
 
         let template = /** @type {HTMLTemplateElement} */(document.getElementById("platform-controls"))
@@ -86,8 +86,9 @@ export class PlatformControls extends HTMLElement {
 
     /** @param {EditorPlatform} platform */
     moveControls(platform) {
-        const topPos = platform.AABB.pos.clone().subtract(new Vector2D(0, 3))
-        let pos = Utils.unproject(platform.state, topPos)
+
+        const rect = this.controls.getBoundingClientRect()
+        let pos = Utils.unproject(platform.state, platform.AABB.pos).subtract(new Vector2D(0, rect.height))
 
         if (pos.y < 0) {
             const topPos = platform.AABB.pos.clone().add(new Vector2D(0, platform.AABB.height + 0.5))
@@ -96,6 +97,7 @@ export class PlatformControls extends HTMLElement {
 
         this.controls.style.top = `${pos.y}px`
         this.controls.style.left = `${pos.x}px`
+
     }
 
     /** @param {EditorPlatform} platform */

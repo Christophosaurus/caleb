@@ -246,7 +246,7 @@ declare global {
 
     type RenderEvent = Event & {type: "render"}
     type ResizeEvent = Event & {type: "resize"}
-    type SaveEvent = {type: "editor-save", platforms: EditorPlatform[]}
+    type SaveEvent = {type: "editor-save", state: EditorState}
     type ChangeEvent = {type: "editor-change"}
 
     type BusType = "hide-platform" | "show-platform" | "move-platform" | "release-platform" | "render" | "editor-save" | "editor-change" | "delete-platform" | "editor-started"
