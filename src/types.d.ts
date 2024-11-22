@@ -250,9 +250,10 @@ declare global {
     type ChangeEvent = {type: "editor-change", state: EditorState}
     type EditorStateLoadedEvent = {type: "editor-state-loaded", state: EditorState}
     type SizeChangeEvent = {type: "editor-size-change"} & EditorRects
-    type BusEvent = RenderEvent | ResizeEvent | UpdatedEvent | ChangeEvent | EditorStateLoadedEvent
+    type EditorChangeLevel = {type: "editor-change-level", next: number}
+    type BusEvent = EditorChangeLevel | RenderEvent | ResizeEvent | UpdatedEvent | ChangeEvent | EditorStateLoadedEvent
 
-    type BusType = "editor-size-change" | "hide-platform" | "show-platform" | "move-platform" | "release-platform" | "render" | "editor-change" | "delete-platform" | "editor-started" | "editor-state-loaded" | "editor-updated"
+    type BusType = "editor-change-level" | "editor-size-change" | "hide-platform" | "show-platform" | "move-platform" | "release-platform" | "render" | "editor-change" | "delete-platform" | "editor-started" | "editor-state-loaded" | "editor-updated"
     type BusArgMap = {
         "editor-started": EditorState;
         "resize": ResizeEvent;
@@ -266,6 +267,7 @@ declare global {
         "editor-state-loaded": EditorStateLoadedEvent
         "editor-updated": UpdatedEvent
         "editor-size-change": SizeChangeEvent
+        "editor-change-level": EditorChangeLevel
     };
 
     type BusArg = EditorPlatform

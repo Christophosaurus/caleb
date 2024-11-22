@@ -63,6 +63,35 @@ export function levelSet(state) {
 
 /**
  * @param {EditorState} state
+ * @param {number} idx
+ * @returns {EditorLevel}
+ */
+export function levelByIdx(state, idx) {
+    const ls = levelSet(state)
+    const level = ls.levels[idx]
+    assert(!!level, "you selected a level that does not exist", "idx", idx, ls)
+    return level
+}
+
+/**
+ * @param {EditorState} state
+ */
+export function addNewLevel(state) {
+    const ls = levelSet(state)
+    ls.levels.push(createEmptyLevel())
+}
+
+/**
+ * @param {EditorState} state
+ * @param {number} idx
+ */
+export function selectLevelByIdx(state, idx) {
+    levelByIdx(state, idx)
+    state.levelSet.current = idx
+}
+
+/**
+ * @param {EditorState} state
  * @returns {EditorLevel}
  */
 export function level(state) {
@@ -215,6 +244,17 @@ export function hasSelected(state) {
 /**
  * @param {EditorState} state
  */
+export function clearPlatformElements(state) {
+    const ps = platforms(state)
+    for (const p of ps) {
+        p.el.remove()
+        p.el = null
+    }
+}
+
+/**
+ * @param {EditorState} state
+ */
 export function clearActiveState(state) {
     clearSelectElements(state);
     Mouse.clearState(state);
@@ -253,18 +293,24 @@ export function endRound(state) {
 }
 
 /**
- * @returns {EditorLevelSet}
+ * @returns {EditorLevel}
  */
-export function createEmptyLevelSet() {
-    /** @type {EditorLevel} */
-    const emptyLevel = {
+export function createEmptyLevel() {
+    return {
         letterMap: [],
         platforms: [],
         initialPosition: new Vector2D(24, 24),
     };
+}
+
+
+/**
+ * @returns {EditorLevelSet}
+ */
+export function createEmptyLevelSet() {
 
     return {
-        levels: [emptyLevel],
+        levels: [createEmptyLevel()],
         title: "empty",
         difficulty: 0,
         initialLevel: 0,

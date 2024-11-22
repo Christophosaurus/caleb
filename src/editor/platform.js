@@ -22,8 +22,6 @@ function assertSelected(platform) {
 export function createPlatform(state, start, end) {
 
     return {
-        state,
-
         selected: null,
         AABB: from2Vecs(start.pos, end.pos),
         behaviors: {},

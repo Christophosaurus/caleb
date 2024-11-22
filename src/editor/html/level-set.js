@@ -54,7 +54,6 @@ export function readyLevelState(state) {
     for (const level of levelState.levels) {
         for (const p of level.platforms) {
             p.el = null
-            p.state = state
             const a = p.AABB
             p.AABB = new AABB(new Vector2D(a.pos.x, a.pos.y), a.width, a.height)
         }
@@ -191,6 +190,12 @@ export class LevelSelectControls extends HTMLElement {
     /** @type {HTMLElement} */
     controls
 
+    /** @type {HTMLElement[]} */
+    levels
+
+    /** @type {EditorState} */
+    state
+
     constructor() {
         super();
         let template = /** @type {HTMLTemplateElement} */(document.getElementById("level-select-controls"))
@@ -201,11 +206,104 @@ export class LevelSelectControls extends HTMLElement {
         shadowRoot.appendChild(templateContent.cloneNode(true));
 
         this.controls = shadowRoot.querySelector(".level-select-controls");
-        Bus.listen("editor-started", this.hydrateFromState)
+        this.levels = []
+    }
+
+    connectedCallback() {
+        const createLevel = this.#getCreateLevel()
+        Bus.listen("editor-started", this.#hydrateFromState)
+        Bus.listen("editor-state-loaded", this.#pluckState)
+        createLevel.addEventListener("click", this.#createLevel);
+    }
+
+    disconnectedCallback() {
+        const createLevel = this.#getCreateLevel()
+        Bus.remove("editor-started", this.#hydrateFromState)
+        Bus.remove("editor-state-loaded", this.#pluckState)
+        createLevel.removeEventListener("click", this.#createLevel);
+    }
+
+    /** @param {EditorStateLoadedEvent} evt */
+    #pluckState = (evt) => {
+        this.#hydrateFromState(evt.state)
+    }
+
+    /**
+     * @param {Event} evt
+     */
+    #createLevel = (evt) => {
+        evt.stopImmediatePropagation()
+        evt.preventDefault()
+
+        const el = this.#createLevelElement(this.levels.length)
+        this.levels.push(el)
+        State.addNewLevel(this.state)
+        this.#selectLevel(el)
+        this.#levels().append(el)
+        Bus.render()
     }
 
     /** @param {EditorState} state */
-    hydrateFromState = (state) => {
+    #hydrateFromState = (state) => {
+        this.state = state
+
+        for (const level of this.levels) {
+            level.removeEventListener("click", this.#handleSelectLevel)
+            level.remove()
+        }
+
+        const levelSet = State.levelSet(state)
+        const levels = []
+        const levelEl = this.#levels()
+
+        for (let i = 0; i < levelSet.levels.length; ++i) {
+            const el = this.#createLevelElement(i)
+            if (i === 0) {
+                el.classList.add("selected")
+            }
+            levels.push(el)
+            levelEl.append(el)
+        }
+
+        this.levels = levels
     }
+
+    /** @param {Event} evt */
+    #handleSelectLevel = (evt) => {
+        const event = /** @type {MouseEvent} */(evt)
+        this.#selectLevel(/** @type {HTMLElement} */(event.target))
+    }
+
+    /** @param {HTMLElement} el */
+    #selectLevel = (el) => {
+        for (const l of this.levels) {
+            l.classList.remove("selected")
+        }
+
+        const idx = +el.dataset.index
+        el.classList.add("selected")
+        Bus.emit("editor-change-level", { type: "editor-change-level", next: idx})
+    }
+
+    #levels() {
+        return this.controls.querySelector(".levels")
+    }
+
+    #getCreateLevel() {
+        return this.controls.querySelector("#new-level")
+    }
+
+    /** @param {number} idx
+     * @returns {HTMLElement}
+     * */
+    #createLevelElement(idx) {
+        const el = document.createElement("div")
+        el.dataset.index = String(idx)
+        el.innerText = `Level ${idx}`
+        el.addEventListener("click", this.#handleSelectLevel)
+        el.classList.add("level")
+        return el
+    }
+
 }
 

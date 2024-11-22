@@ -23,18 +23,39 @@
                         "x": 24,
                         "y": 24
                     }
+                },
+                {
+                    "letterMap": [],
+                    "platforms": [
+                        {
+                            "selected": null,
+                            "AABB": {
+                                "pos": {
+                                    "x": 15,
+                                    "y": 12
+                                },
+                                "width": 14,
+                                "height": 8
+                            },
+                            "behaviors": {}
+                        }
+                    ],
+                    "initialPosition": {
+                        "x": 24,
+                        "y": 24
+                    }
                 }
             ],
             "title": "empty",
             "difficulty": 0,
             "initialLevel": 0,
-            "current": 0
+            "current": 1
         },
         "debug": false,
-        "tick": 1584,
-        "change": 1,
+        "tick": 2325,
+        "change": 2,
         "mouse": {
-            "startTime": 1732230842248,
+            "startTime": 1732301367308,
             "startingEl": null
         },
         "outerRect": {

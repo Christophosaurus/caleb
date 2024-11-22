@@ -158,8 +158,39 @@
     display: block;
     width: 15vw;
 }
+            /* General container styling */
+.levels {
+  display: flex;
+  flex-direction: column; /* Ensure vertical alignment */
+  gap: 5px; /* Add spacing between divs */
+  padding: 0;
+  margin: 0;
+}
+
+/* Individual item styling */
+.level {
+  padding: 10px 15px; /* Add padding for better spacing */
+  border: 1px solid #ccc; /* Add a light border around items */
+  cursor: pointer; /* Indicate items are clickable */
+  font-size: 16px; /* Standard font size */
+  background-color: #fff; /* Default background color */
+  transition: background-color 0.2s ease; /* Smooth background transition */
+}
+
+/* Selected item styling */
+.level.selected {
+  background-color: #d9e8f5; /* Light bluish background */
+  color: #333; /* Text color for contrast */
+  font-weight: bold; /* Emphasize selected items */
+}
 </style>
-            <div class="level-select-controls"> </div>
+            <div class="level-select-controls">
+                <label>Levels</label>
+                <div class="levels">
+                    None
+                </div>
+                <button id="new-level">New Level</button>
+            </div>
         </template>
         <template id="level-set-controls">
 <style>

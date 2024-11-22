@@ -36,7 +36,7 @@ function actionResize(e) {
     Bus.emit("resize", /** @type {ResizeEvent} */(e))
 }
 
-function editorChange() {
+function handleEditorChange() {
     assert(!!currentEditorState, "expected editor state to be set")
     currentEditorState.change++
 }
@@ -50,9 +50,13 @@ function addListeners() {
     }
     window.addEventListener("resize", actionResize)
 
+    // @ts-ignore SHIT I HAVE TO FIX THESE TYPES
+    Bus.listenAll(currentTakeAction)
+
     Bus.listen("editor-state-loaded", currentTakeAction)
     Bus.listen("render", currentTakeAction)
-    Bus.listen("editor-change", editorChange)
+    Bus.listen("editor-level-changed", currentTakeAction)
+    Bus.listen("editor-level-changed", currentTakeAction)
     Bus.render()
 }
 
@@ -66,7 +70,8 @@ function removeListeners() {
     window.removeEventListener("resize", actionResize)
     Bus.remove("render", currentTakeAction)
     Bus.remove("editor-state-loaded", currentTakeAction)
-    Bus.remove("editor-change", editorChange)
+    Bus.remove("editor-change", handleEditorChange)
+    Bus.remove("editor-level-changed", currentTakeAction)
 }
 
 /**
@@ -82,20 +87,6 @@ export function start(state) {
     window.state = state
 
     Bus.emit("editor-started", state)
-}
-
-
-/**
- * @param {EditorState} state
- */
-export function debug(state) {
-    if (State.hasSelected(state)) {
-        console.log("STATE: has selected")
-    }
-
-    if (State.hasActivePlatform(state)) {
-        console.log("STATE: has active platform")
-    }
 }
 
 /**
@@ -261,6 +252,16 @@ export function handleShowPlatform(state) {
     Bus.emit("show-platform", State.activePlatform(state));
 }
 
+/**
+ * @param {EditorState} state
+ */
+export function handleChangeLevel(state, e) {
+    const evt = /** @type {EditorChangeLevel} */(e)
+    State.clearActiveState(state);
+    State.clearPlatformElements(state);
+    State.selectLevelByIdx(this.state, evt.next)
+}
+
 /** @param {EditorState} state
  * @param {boolean} render - i need ot remove this and have take action emit renders
  *
@@ -308,8 +309,13 @@ export function createActionTaken(state, render = true) {
     const play = T(handlePlay).type("keydown").key("p").not.stateHasSelected().not.activePlatform()
     const mousedown = T(handleMouseDown).type("mousedown")
     const mouseup = T(handleMouseUp).type("mouseup")
+    const levelChanged = T(handleChangeLevel).type("editor-change-level")
+    const change = T(handleEditorChange).type("editor-change")
+
     const prehandlers = [
         mousedown,
+        levelChanged,
+        change,
     ]
 
     const posthandlers = [

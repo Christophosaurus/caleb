@@ -3,6 +3,11 @@
 /** @type {BusListeners} */
 let listeners = {};
 let emitTypes = false
+/**
+ * @template {keyof BusArgMap} K
+ * @type {((args: BusArgMap[K]) => void)[]}
+ */
+let allListeners = []
 
 export function debug() {
     emitTypes = true
@@ -20,7 +25,20 @@ export function emit(type, args) {
     for (const cb of listeners[type] || []) {
         cb(args)
     }
+
+    for (const cb of allListeners) {
+        cb(args)
+    }
 }
+
+/**
+ * @template {keyof BusArgMap} K
+ * @param {(args: BusArgMap[K]) => void} cb
+ */
+export function listenAll(cb) {
+    allListeners.push(cb)
+}
+
 
 /**
  * @template {keyof BusArgMap} K
