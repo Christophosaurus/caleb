@@ -8,10 +8,13 @@ export class PlatformControls extends HTMLElement {
     /** @type {HTMLElement} */
     controls = null
 
+    /** @type {SizeChangeEvent} */
+    rects = null
+
     /**
      * @param {Event} evt
      */
-    change = (evt) => {
+    #change = (evt) => {
         if (evt.type === "resize" && this.lastPlatform) {
             this.moveControls(this.lastPlatform);
             return
@@ -45,6 +48,13 @@ export class PlatformControls extends HTMLElement {
      */
     lastPlatform = null
 
+    /**
+     * @param {SizeChangeEvent} change
+     */
+    #sizeChanged = (change) => {
+        this.rects = change;
+    }
+
     constructor() {
         super();
         // TODO can i have multiple of these??
@@ -53,7 +63,8 @@ export class PlatformControls extends HTMLElement {
         Bus.listen("move-platform", () => this.hideControls())
         Bus.listen("release-platform", (platform) => this.save(platform))
         Bus.listen("delete-platform", () => this.hideControls())
-        Bus.listen("resize", this.change);
+        Bus.listen("resize", this.#change);
+        Bus.listen("editor-size-change", this.#sizeChanged);
 
         let template = /** @type {HTMLTemplateElement} */(document.getElementById("platform-controls"))
         assert(!!template, "unable to retrieve template")
@@ -73,7 +84,7 @@ export class PlatformControls extends HTMLElement {
         this.setInputState()
         this.moveControls(platform)
         for (const [_, v] of Object.entries(this.getControls())) {
-            v.addEventListener("change", this.change)
+            v.addEventListener("change", this.#change)
         }
     }
 
@@ -81,19 +92,20 @@ export class PlatformControls extends HTMLElement {
         this.lastPlatform = null
         this.controls.classList.remove("show")
         for (const [_, v] of Object.entries(this.getControls())) {
-            v.removeEventListener("change", this.change)
+            v.removeEventListener("change", this.#change)
         }
     }
 
     /** @param {EditorPlatform} platform */
     moveControls(platform) {
+        assert(!!this.rects, "somehow rects were not set")
 
         const rect = this.controls.getBoundingClientRect()
-        let pos = Utils.unproject(platform.state, platform.AABB.pos).subtract(new Vector2D(0, rect.height))
+        let pos = Utils.unproject(this.rects, platform.AABB.pos).subtract(new Vector2D(0, rect.height))
 
         if (pos.y < 0) {
             const topPos = platform.AABB.pos.clone().add(new Vector2D(0, platform.AABB.height + 0.5))
-            pos = Utils.unproject(platform.state, topPos)
+            pos = Utils.unproject(this.rects, topPos)
         }
 
         this.controls.style.top = `${pos.y}px`

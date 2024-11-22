@@ -26,8 +26,8 @@ export function render(state) {
 
     // TODO configure?
     // ... wait... this is not something i need to do a bunch...
-    const start = Utils.unproject(state, new Vector2D(state.outerRect.margin, state.outerRect.margin))
-    const dims = Utils.unproject(state, new Vector2D(state.outerRect.maxX, state.outerRect.maxY)).subtract(start)
+    const start = Utils.unproject(State.getUIRects(state), new Vector2D(state.outerRect.margin, state.outerRect.margin))
+    const dims = Utils.unproject(State.getUIRects(state), new Vector2D(state.outerRect.maxX, state.outerRect.maxY)).subtract(start)
     state.worldOutline.style.width = `${Math.ceil(dims.x)}px`
     state.worldOutline.style.height = `${Math.ceil(dims.y)}px`
     state.worldOutline.style.top = `${Math.ceil(start.y)}px`

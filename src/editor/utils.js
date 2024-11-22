@@ -30,16 +30,13 @@ export function project(state, pos, zero = Math.floor) {
 }
 
 /**
- * @param {EditorState} state
+ * @param {EditorRects} rects
  * @param {Vector2D} pos
  * @returns {Vector2D}
  */
-export function unproject(state, pos) {
-    const editorRect = state.editor.getBoundingClientRect()
-    const rect = state.elements[0][0].el.getBoundingClientRect()
-
-    const w = rect.width
-    const h = rect.height
+export function unproject({editorRect, elementRect}, pos) {
+    const w = elementRect.width
+    const h = elementRect.height
 
     return new Vector2D(Math.floor(pos.x * w + editorRect.left), Math.floor(pos.y * h + editorRect.top));
 }

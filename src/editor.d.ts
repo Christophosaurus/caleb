@@ -24,6 +24,11 @@ declare global {
         current: number
     }
 
+    type EditorRects = {
+        editorRect: DOMRect
+        elementRect: DOMRect
+    }
+
     type EditorLevel = {
         platforms: EditorPlatform[]
         initialPosition: Vector2D
@@ -77,7 +82,6 @@ declare global {
     type Action = (s: EditorState, evt: Event, es?: ElementState) => void
 
     type EditorPlatform = {
-        state: EditorState,
         AABB: AABB,
         selected: {
             offset: Vector2D,

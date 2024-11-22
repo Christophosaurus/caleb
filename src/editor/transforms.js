@@ -219,9 +219,9 @@ export class Transforms {
      * @returns {this}
      */
     platformSelectedThisTick(within = 1) {
-        let state = this.state
+        let that = this
         return this.chain(function platformSelectedThisTick() {
-            return State.activePlatform(state).selected.tick >= state.tick - within
+            return State.activePlatform(that.state).selected.tick >= that.state.tick - within
         })
     }
 
@@ -229,12 +229,12 @@ export class Transforms {
      * @returns {this}
      */
     platformMoving() {
-        let state = this.state
+        let that = this
         return this.chain(function platformMoving() {
-            if (!State.hasActivePlatform(state)) {
+            if (!State.hasActivePlatform(that.state)) {
                 return false
             }
-            return Platform.isMoving(State.activePlatform(state))
+            return Platform.isMoving(State.activePlatform(that.state))
         })
     }
 
@@ -242,13 +242,13 @@ export class Transforms {
      * @returns {this}
      */
     inActivePlatform() {
-        let state = this.state
+        let that = this;
         return this.chain(function fromPlatform(evt) {
-            if (!State.hasActivePlatform(state)) {
+            if (!State.hasActivePlatform(that.state)) {
                 return false
             }
-            const ap = State.activePlatform(state)
-            const platform = Search.platform(state, evt)
+            const ap = State.activePlatform(that.state)
+            const platform = Search.platform(that.state, evt)
             return platform !== null && platform === ap
         })
     }
@@ -268,10 +268,10 @@ export class Transforms {
      * @returns {this}
      */
     moving() {
-        let state = this.state
+        let that = this
         return this.chain(function moving() {
-            return State.hasActivePlatform(state) &&
-                State.activePlatform(state).selected.moving
+            return State.hasActivePlatform(that.state) &&
+                State.activePlatform(that.state).selected.moving
         })
     }
 
@@ -301,6 +301,7 @@ export class Transforms {
      */
     controls() {
         let that = this
+
         return this.chain(function controls(evt) {
             return hasParent(that.state.platformControls, evt)
         })
@@ -365,6 +366,7 @@ export class Transforms {
         return true
     }
 
+    /** @param {EditorState} state */
     updateState(state) {
         this.state = state
     }

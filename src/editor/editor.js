@@ -352,6 +352,14 @@ export function createActionTaken(state, render = true) {
         posthandlers.forEach(x => x.updateState(state));
         handlers.forEach(x => x.updateState(state));
 
+        Bus.emit("editor-size-change", {
+            type: "editor-size-change",
+            ...State.getUIRects(state),
+        });
+
+        // @ts-ignore
+        window.state = state
+
     }).type("editor-state-loaded")
 
     // TODO: The Event | BusEvent thing is real but again i don't want to

@@ -43,6 +43,17 @@ export function toGameState(state) {
 
 /**
  * @param {EditorState} state
+ * @returns {EditorRects}
+ */
+export function getUIRects(state) {
+    return {
+        editorRect: state.editor.getBoundingClientRect(),
+        elementRect: state.elements[0][0].el.getBoundingClientRect(),
+    }
+}
+
+/**
+ * @param {EditorState} state
  * @returns {EditorLevelSet}
  */
 export function levelSet(state) {
