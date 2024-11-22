@@ -35,6 +35,8 @@ export class PlatformControls extends HTMLElement {
             circuitEndY,
             nextLevel,
             nextLevelLevel,
+            nextLevelX,
+            nextLevelY,
         } = this.getControls()
         instagib.disabled = obstacle.checked
         obstacle.disabled = instagib.checked
@@ -43,6 +45,8 @@ export class PlatformControls extends HTMLElement {
         circuitEndX.disabled = !circuit.checked
         circuitEndY.disabled = !circuit.checked
         nextLevelLevel.disabled = !nextLevel.checked
+        nextLevelX.disabled = !nextLevel.checked
+        nextLevelY.disabled = !nextLevel.checked
     }
 
     /**
@@ -134,6 +138,8 @@ export class PlatformControls extends HTMLElement {
             circuitEndY,
             nextLevel,
             nextLevelLevel,
+            nextLevelX,
+            nextLevelY,
             render,
         } = this.values()
 
@@ -155,7 +161,7 @@ export class PlatformControls extends HTMLElement {
         platform.behaviors.next = nextLevel ? {
             type: "next-level",
             toLevel: nextLevelLevel,
-            toLevelPosition: new Vector2D(0, 0),
+            toLevelPosition: new Vector2D(nextLevelX, nextLevelY),
         } : undefined
 
         Bus.editorChange()
@@ -174,6 +180,8 @@ export class PlatformControls extends HTMLElement {
             nextLevel,
             nextLevelLevel,
             render,
+            nextLevelX,
+            nextLevelY,
         } = this.getControls()
 
         const behaviors = platform.behaviors
@@ -181,9 +189,12 @@ export class PlatformControls extends HTMLElement {
         instagib.checked = !!behaviors.instagib
         render.checked = !!behaviors.render
 
-        if (behaviors.next) {
+        const next = behaviors.next;
+        if (next) {
             nextLevel.checked = true
-            nextLevelLevel.value = String(behaviors.next.toLevel)
+            nextLevelLevel.value = String(next.toLevel)
+            nextLevelX.value = String(next.toLevelPosition.x)
+            nextLevelY.value = String(next.toLevelPosition.y)
         }
 
         if (behaviors.circuit) {
@@ -224,6 +235,8 @@ export class PlatformControls extends HTMLElement {
             circuitEndY: /** @type {HTMLInputElement} */this.controls.querySelector("#circuit-ey"),
             nextLevel: /** @type {HTMLInputElement} */this.controls.querySelector("#next-level"),
             nextLevelLevel: /** @type {HTMLInputElement} */this.controls.querySelector("#nl-id"),
+            nextLevelX: /** @type {HTMLInputElement} */this.controls.querySelector("#next-x"),
+            nextLevelY: /** @type {HTMLInputElement} */this.controls.querySelector("#next-y"),
             render: /** @type {HTMLInputElement} */this.controls.querySelector("#render"),
         };
     }

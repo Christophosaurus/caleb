@@ -36,11 +36,9 @@ async function save(state, path) {
             return value
         }));
 
-    // MORE CURSED
-    saveState.editorState.selectedElements = state.selectedElements
+    // TODO super cursed
+    saveState.editorState.selectedElements = []
     State.clearActiveState(saveState.editorState)
-
-    // TODO: clearly a hack... whay??
     State.cleanPlatformSelectedState(saveState.editorState)
     saveState.editorState.selectedElements = undefined
 

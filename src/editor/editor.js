@@ -107,7 +107,6 @@ export function handleMouseDown(state, _, es) {
  */
 export function handleMouseUp(state, _, es) {
     State.Mouse.up(state)
-    State.change(state)
 }
 
 /**
@@ -294,7 +293,7 @@ export function createActionTaken(state, render = true) {
     const movePlatform = T(handleMovePlatform).
         type("mousemove").activePlatform().not.controls().stateMouseDown()
 
-    const delPlatform = T(handleDeletePlatform).type("keydown").key("Backspace")
+    const delPlatform = T(handleDeletePlatform).type("keydown").key("Backspace").not.controls()
 
     const eMove = T(handleEditorOver).
         type("mousemove").not.activePlatform().
