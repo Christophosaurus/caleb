@@ -293,7 +293,7 @@ export function createActionTaken(state, render = true) {
     const movePlatform = T(handleMovePlatform).
         type("mousemove").activePlatform().not.controls().stateMouseDown()
 
-    const delPlatform = T(handleDeletePlatform).type("keydown").key("Backspace").not.controls()
+    const delPlatform = T(handleDeletePlatform).type("keydown").key("Backspace").activePlatform().not.controls()
 
     const eMove = T(handleEditorOver).
         type("mousemove").not.activePlatform().

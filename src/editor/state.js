@@ -92,6 +92,27 @@ export function selectLevelByIdx(state, idx) {
 
 /**
  * @param {EditorState} state
+ * @returns {number}
+ */
+export function initialLevelIdx(state) {
+    initialLevel(state)
+    return state.levelSet.initialLevel
+}
+
+/**
+ * @param {EditorState} state
+ * @returns {EditorLevel}
+ */
+export function initialLevel(state) {
+    const ls = levelSet(state)
+    const l = ls.levels[ls.initialLevel]
+    assert(!!l, "somehow you have requested a level that doesn't exist", ls)
+    return l
+}
+
+
+/**
+ * @param {EditorState} state
  * @returns {EditorLevel}
  */
 export function level(state) {

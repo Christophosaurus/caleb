@@ -173,6 +173,11 @@ export class LevelSetControls extends HTMLElement {
         const levelSet = State.levelSet(state)
         controls.title.value = levelSet.title
         controls.difficulty.value = "" + levelSet.difficulty
+
+        const initial = State.initialLevel(state)
+        controls.startX.value = String(initial.initialPosition.x)
+        controls.startY.value = String(initial.initialPosition.y)
+        controls.initial.value = String(levelSet.initialLevel)
     }
 
     /**
@@ -180,6 +185,9 @@ export class LevelSetControls extends HTMLElement {
      * path: HTMLInputElement,
      * title: HTMLInputElement,
      * difficulty: HTMLInputElement,
+     * startX: HTMLInputElement,
+     * startY: HTMLInputElement,
+     * initial: HTMLInputElement,
      * save: HTMLButtonElement,
      * load: HTMLButtonElement,
      * delete: HTMLButtonElement,
@@ -190,6 +198,9 @@ export class LevelSetControls extends HTMLElement {
             path: this.controls.querySelector("#level-path"),
             title: this.controls.querySelector("#level-set-title"),
             difficulty: this.controls.querySelector("#level-set-diff"),
+            startX: this.controls.querySelector("#level-set-x"),
+            startY: this.controls.querySelector("#level-set-y"),
+            initial: this.controls.querySelector("#level-set-initial"),
             save: this.controls.querySelector("#save-level-set"),
             load: this.controls.querySelector("#load-level-set"),
             delete: this.controls.querySelector("#delete-level-set"),
