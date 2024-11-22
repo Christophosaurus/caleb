@@ -39,6 +39,17 @@ export function listenAll(cb) {
     allListeners.push(cb)
 }
 
+/**
+ * @template {keyof BusArgMap} K
+ * @param {(args: BusArgMap[K]) => void} cb
+ */
+export function removeAll(cb) {
+    const idx = allListeners.indexOf(cb)
+    if (idx >= 0) {
+        allListeners.splice(idx, 1)
+    }
+}
+
 
 /**
  * @template {keyof BusArgMap} K

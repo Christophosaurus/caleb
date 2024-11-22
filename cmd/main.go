@@ -28,7 +28,7 @@ func save(w http.ResponseWriter, r *http.Request) {
     var data Data
     err = json.Unmarshal(body, &data)
     if err != nil {
-        slog.Error("unable to decode json body", "error", err)
+        slog.Error("unable to decode json body", "error", err, "body", string(body))
         http.Error(w, "Failed to decode json body", http.StatusBadRequest)
         return
     }

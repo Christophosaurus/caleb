@@ -23,12 +23,10 @@ const dropKeys = [
  * @param {string} path
  */
 async function save(state, path) {
-    const res = await fetch("/save", {
-        method: "POST",
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
+
+    // todo insane??
+    /** @type {EditorSaveRequest} */
+    const saveState = JSON.parse(JSON.stringify({
             path,
             editorState: state,
         }, (key, value) => {
@@ -36,7 +34,22 @@ async function save(state, path) {
                 return undefined
             }
             return value
-        }, 4)
+        }));
+
+    // MORE CURSED
+    saveState.editorState.selectedElements = state.selectedElements
+    State.clearActiveState(saveState.editorState)
+
+    // TODO: clearly a hack... whay??
+    State.cleanPlatformSelectedState(saveState.editorState)
+    saveState.editorState.selectedElements = undefined
+
+    const res = await fetch("/save", {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(saveState),
     })
     assert(res.ok, "unable to save the editor state")
 }

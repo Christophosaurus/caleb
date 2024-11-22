@@ -13,7 +13,7 @@ export {Mouse}
 /**
  * @param {EditorState} state
  */
-function change(state) {
+export function change(state) {
     state.change++
 }
 
@@ -262,6 +262,19 @@ export function clearActiveState(state) {
         releasePlatform(state);
     }
 }
+
+/**
+ * @param {EditorState} state
+ */
+export function cleanPlatformSelectedState(state) {
+    const ls = levelSet(state)
+    for (const level of ls.levels) {
+        for (const p of level.platforms) {
+            p.selected = null
+        }
+    }
+}
+
 
 /**
  * @param {EditorState} state

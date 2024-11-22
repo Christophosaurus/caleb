@@ -22,6 +22,8 @@ export class PlatformControls extends HTMLElement {
         this.setInputState()
     }
 
+    showing = false
+
     setInputState = () => {
         const {
             obstacle,
@@ -78,6 +80,11 @@ export class PlatformControls extends HTMLElement {
 
     /** @param {EditorPlatform} platform */
     revealControls(platform) {
+        if (this.showing) {
+            return
+        }
+
+        this.showing = true
         this.lastPlatform = platform
         this.controls.classList.add("show")
         this.hydrateState(platform)
@@ -89,6 +96,7 @@ export class PlatformControls extends HTMLElement {
     }
 
     hideControls() {
+        this.showing = false
         this.lastPlatform = null
         this.controls.classList.remove("show")
         for (const [_, v] of Object.entries(this.getControls())) {
@@ -128,6 +136,8 @@ export class PlatformControls extends HTMLElement {
             nextLevelLevel,
             render,
         } = this.values()
+
+        console.log("save", this.values())
 
         platform.behaviors.obstacle = !nextLevel && obstacle ? {type: "obstacle"} : undefined
         platform.behaviors.instagib = !nextLevel && instagib ? {type: "instagib"} : undefined

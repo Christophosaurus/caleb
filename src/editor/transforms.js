@@ -92,6 +92,9 @@ export class Transforms {
     /** @type {boolean} */
     #or
 
+    /** @type {boolean} */
+    #and
+
     /** @param {EditorState} state
     /** @param {Action} action */
     constructor(state, action) {
@@ -146,11 +149,24 @@ export class Transforms {
                     last,
                 ]
             }
+        } else if (this.#and) {
+            const last = this.cbs.pop()
+            filter = {
+                or: false,
+                and: true,
+                invert: false, // cannot not(or(...)) under this logic (i am ok with that)
+                name: `and(${f.name}, ${last.name})`,
+                fn: [
+                    f,
+                    last,
+                ]
+            }
         }
 
         this.cbs.push(filter);
         this.#not = false
         this.#or = false
+        this.#and = false
         return this;
     }
 
@@ -166,7 +182,15 @@ export class Transforms {
 
     get or() {
         assert(this.cbs.length >= 1, "there must be at least one call on the stack")
+        assert(this.#and, "you cannot and an and harry")
         this.#or = true
+        return this;
+    }
+
+    get and() {
+        assert(this.cbs.length >= 1, "there must be at least one call on the stack")
+        assert(this.#or, "you cannot and an or lloyd")
+        this.#and = true
         return this;
     }
 
@@ -201,6 +225,16 @@ export class Transforms {
         return this.chain(function stateMouseDown() {
             return State.Mouse.isDown(that.state)
         });
+    }
+
+    /**
+     * @returns {this}
+     */
+    selected() {
+        let that = this
+        return this.chain(function selected() {
+            return State.hasSelected(that.state)
+        })
     }
 
     /**
