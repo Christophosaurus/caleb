@@ -19,26 +19,34 @@ export function change(state) {
 
 /**
  * @param {EditorState} state
- * @returns {any}
+ * @returns {LevelSet}
  */
-export function toGameState(state) {
-    const plats = platforms(state).map(plat => {
-        return Platform.toPlatform(state, plat)
+export function gameLevelSet(state) {
+    const ls = levelSet(state);
+
+    const gameLevels = /** @type {LevelSet} */({
+        initialLevel: ls.initialLevel,
+        title: ls.title,
+        difficulty: ls.difficulty,
+        levels: []
     })
 
-    /** @type {Level} */
-    const level = {
-        platforms: plats,
-        initialPosition: new Vector2D(10, 0),
-        letterMap: Level.createLetterMap(plats),
+    for (let i = 0; i < ls.levels.length; ++i) {
+        const level = ls.levels[i]
+
+        const plats = level.platforms.map(plat => {
+            return Platform.toPlatform(state, plat)
+        })
+        gameLevels.levels[i] = {
+            platforms: plats,
+            initialPosition: level.initialPosition,
+            letterMap: Level.createLetterMap(plats),
+        }
     }
 
-    return {
-        title: "editor state",
-        difficulty: 1,
-        levels: [level],
-        initialLevel: level,
-    }
+    gameLevels.activeLevel = gameLevels.levels[gameLevels.initialLevel]
+
+    return gameLevels
 }
 
 /**
@@ -154,14 +162,7 @@ export function releasePlatform(state) {
  * @returns {EditorPlatform}
  */
 export function selectPlatform(state, evt) {
-    let found = null
-    for (const p of platforms(state)) {
-        if (evt.target  === p.el) {
-            found = p
-            break
-        }
-    }
-
+    const found = Search.platform(state, evt)
     assert(found !== null, "select platform was called and unable to select platform")
 
     found.selected = {
@@ -436,5 +437,79 @@ export function createEditorState(editor, overlay, canvas, debug, remoteState) {
     }
 
     return state
+}
+
+
+/**
+ * @param {HTMLElement} el
+ * @param {number} x
+ * @param {number} y
+ * @returns {boolean}
+ */
+function within(el, x, y) {
+    return el.offsetTop <= y && el.offsetTop + el.offsetHeight > y &&
+        el.offsetLeft <= x && el.offsetLeft + el.offsetWidth > x;
+}
+
+export const Search = {
+    /**
+     * @param {EditorState} state
+     * @param {Event} event
+     * @returns {EditorPlatform | null}
+     */
+    platform(state, event) {
+        if (!event.type.includes("mouse")) {
+            return null
+        }
+        const evt = /** @type {MouseEvent} */(event)
+
+        const x = evt.clientX
+        const y = evt.clientY
+        const plats = platforms(state)
+
+        for (const platform of plats) {
+            if (within(platform.el, x, y)) {
+                return platform
+            }
+        }
+
+        return null
+    },
+
+    /**
+     * @param {EditorState} state
+     * @param {Event} event
+     * @returns {ElementState | null}
+     */
+    gridItem(state, event) {
+        if (!event.type.includes("mouse")) {
+            return null
+        }
+        const evt = /** @type {MouseEvent} */(event)
+
+        const x = evt.clientX
+        const y = evt.clientY
+
+        // TODO technically i can binary search over this 2D array, once with Y and once with X
+        // Since its 2D and square, i can do both the X and the Y at the same time
+        /** @type {ElementState | null} */
+        let found = null
+        outer: for (const row of state.elements) {
+            const first = row[0]
+            if (first.el.offsetTop + first.el.offsetHeight < y) {
+                continue
+            }
+            for (const el of row) {
+                if (el.el.offsetLeft + el.el.offsetWidth < x) {
+                    continue
+                }
+                found = el
+                break outer
+            }
+        }
+
+        return found
+    }
+
 }
 

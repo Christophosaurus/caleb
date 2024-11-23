@@ -3,6 +3,7 @@ import * as Bus from "../../bus.js"
 import { AABB } from "../../math/aabb.js";
 import { Vector2D } from "../../math/vector.js";
 import * as State from "../state.js"
+import * as Utils from "./utils.js"
 
 const dropKeys = [
     "activePlatform",
@@ -68,7 +69,10 @@ export function readyLevelState(state) {
             const a = p.AABB
             p.AABB = new AABB(new Vector2D(a.pos.x, a.pos.y), a.width, a.height)
         }
+
+        level.initialPosition = new Vector2D(level.initialPosition.x, level.initialPosition.y)
     }
+
 
     return state
 }
@@ -120,6 +124,15 @@ export class LevelSetControls extends HTMLElement {
     }
 
     #save = () => {
+        const controls = this.#controls()
+        this.state.levelSet.difficulty = +controls.difficulty.value
+        this.state.levelSet.title = controls.title.value
+        this.state.levelSet.initialLevel = +controls.initial.value
+
+        const initLevel = State.initialLevel(this.state)
+        const x = Utils.parseCoord(controls.startX.value)
+        const y = Utils.parseCoord(controls.startY.value)
+        initLevel.initialPosition = new Vector2D(x, y)
         save(this.state, this.path)
     }
 
@@ -144,6 +157,7 @@ export class LevelSetControls extends HTMLElement {
     /** @param {UpdatedEvent} updated */
     #editorUpdated = (updated) => {
         this.state = updated.state;
+        this.#hydrateFromState(this.state)
         this.#save()
     }
 

@@ -1,6 +1,5 @@
 import * as State from "./state.js"
 import * as Platform from "./platform.js"
-import * as Search from "./search.js"
 import * as Consts from "./consts.js"
 import { assert, never } from "../assert.js"
 
@@ -243,7 +242,7 @@ export class Transforms {
     inPlatform() {
         let that = this
         return this.chain(function fromPlatform(evt) {
-            const platform = Search.platform(that.state, evt)
+            const platform = State.Search.platform(that.state, evt)
             return platform !== null
         })
     }
@@ -282,7 +281,7 @@ export class Transforms {
                 return false
             }
             const ap = State.activePlatform(that.state)
-            const platform = Search.platform(that.state, evt)
+            const platform = State.Search.platform(that.state, evt)
             return platform !== null && platform === ap
         })
     }
@@ -391,12 +390,19 @@ export class Transforms {
             return false
         }
 
-        const es = Search.gridItem(this.state, evt)
+        const es = State.Search.gridItem(this.state, evt)
         if (this.#debug) {
             console.log(`${this.name}(success): ${ran.map(filterString).join(".")}`, es)
         }
 
-        this.action(this.state, evt, es)
+        try {
+            this.action(this.state, evt, es)
+        } catch (e) {
+            console.log(`${this.name}(error): ${ran.map(filterString).join(".")}`, es)
+            throw new Error("transformer failed", {
+                cause: e
+            })
+        }
         return true
     }
 

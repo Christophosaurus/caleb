@@ -2,7 +2,16 @@ import { assert, never } from "../../assert.js";
 import * as Bus from "../../bus.js"
 import { Vector2D } from "../../math/vector.js";
 import * as Utils from "../utils.js"
+import * as HTMLUtils from "./utils.js"
 
+const coordValues = [
+    "-x",
+    "-y",
+    "-sx",
+    "-sy",
+    "-ex",
+    "-ey",
+]
 
 export class PlatformControls extends HTMLElement {
     /** @type {HTMLElement} */
@@ -120,6 +129,9 @@ export class PlatformControls extends HTMLElement {
             pos = Utils.unproject(this.rects, topPos)
         }
 
+        pos.x = Math.max(0, Math.min(window.innerWidth - rect.width, pos.x))
+        pos.y = Math.max(0, Math.min(window.innerHeight - rect.height, pos.y))
+
         this.controls.style.top = `${pos.y}px`
         this.controls.style.left = `${pos.x}px`
 
@@ -213,6 +225,8 @@ export class PlatformControls extends HTMLElement {
         for (const [k, v] of Object.entries(controls)) {
             if (v.type === "checkbox") {
                 out[k] = v.checked
+            } else if (coordValues.some(x => v.id.includes(x))) {
+                out[k] = HTMLUtils.parseCoord(v.value)
             } else {
                 out[k] = +v.value
             }

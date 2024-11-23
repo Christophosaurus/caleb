@@ -205,7 +205,7 @@ export function handlePlay(state) {
     handlePlayListeners(state)
 
     const ticks = [Runner.tickWithRender]
-    const levelSet = State.toGameState(state)
+    const levelSet = State.gameLevelSet(state)
     const config = Config.getGameConfig(false)
     const gstate = Config.createCanvasGame(state.canvas, config, levelSet)
     const loop = Runner.createGameLoop(gstate)
