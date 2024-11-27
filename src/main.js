@@ -5,6 +5,7 @@ import * as Runner from "./game-runner.js";
 import * as Simulation from "./simulation/state.js";
 import * as State from "./state/state.js";
 import * as Utils from "./utils.js";
+import * as Input from "./input/input.js";
 
 const canvas = /** @type {HTMLCanvasElement} */ (document.getElementById("game_canvas"))
 assert(!!canvas, "expected canvas to exist")
@@ -47,9 +48,9 @@ if (seed > 0) {
 
 } else {
     state = Config.createCanvasGame(canvas, Config.getGameConfig(debug), level)
-    Config.addInputListener(state, canvas)
 }
 
+Input.addListenersTo(state, canvas)
 Config.addBrowserListeners(state)
 State.projectStaticObjects(state);
 

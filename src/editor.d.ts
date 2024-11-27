@@ -82,6 +82,8 @@ declare global {
     type Action = (s: EditorState, evt: Event, es?: ElementState) => void
 
     type EditorPlatform = {
+        id: number,
+
         AABB: AABB,
         selected: {
             offset: Vector2D,
@@ -90,7 +92,6 @@ declare global {
             tick: number,
         } | null
         behaviors: {
-            lettered?: Lettered
             next?: NextLevelBehavior
             obstacle?: ObstacleBehavior
             instagib?: InstaGib

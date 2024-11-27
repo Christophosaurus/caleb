@@ -106,18 +106,13 @@ export function resize(dim) {
     const wRatio = width / FULL_WIDTH
     const hRatio = height / FULL_HEIGHT
 
-    console.log("window is", width, height, wRatio, hRatio)
     if (wRatio > hRatio) {
         width -= (wRatio - hRatio) * FULL_WIDTH
-        console.log("adjusting width", width)
     } else {
         height -= (hRatio - wRatio) * FULL_HEIGHT
-        console.log("adjusting height", height)
     }
-    console.log("ratio'd width", width, height)
 
     dim.width = Math.floor(width)
     dim.height = Math.floor(height)
-
 }
 

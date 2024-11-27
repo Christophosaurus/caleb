@@ -1,3 +1,5 @@
+import { assert } from "../assert.js";
+
 function precision(num) {
     return Math.floor(num * 100) / 100
 }
@@ -7,6 +9,16 @@ function precision(num) {
  * @class
  */
 export class Vector2D {
+    /**
+     * @param {any} obj
+     * @returns {Vector2D}
+     */
+    static fromObject(obj) {
+        assert(typeof obj.x === "number", "expected property x to be a number")
+        assert(typeof obj.y === "number", "expected property y to be a number")
+        return new Vector2D(obj.x, obj.y)
+    }
+
     /**
    * @constructor
    * @param {number} x - The x component of the vector.

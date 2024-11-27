@@ -8,6 +8,18 @@ import { Vector2D } from "./vector.js";
 
 export class AABB {
     /**
+     * @param {any} obj
+     * @returns {AABB}
+     */
+    static fromObject(obj) {
+        assert(typeof obj.width === "number", "expected property width to be a number")
+        assert(typeof obj.height === "number", "expected property height to be a number")
+
+        const pos = Vector2D.fromObject(obj.pos)
+        return new AABB(pos, obj.width, obj.height)
+    }
+
+    /**
    * @constructor
    * @param {Vector2D} pos
    * @param {number} width

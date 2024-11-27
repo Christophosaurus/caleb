@@ -1,4 +1,4 @@
-import { assert, never } from "../../assert.js";
+import { assert } from "../../assert.js";
 import * as Bus from "../../bus.js"
 import { Vector2D } from "../../math/vector.js";
 import * as Utils from "../utils.js"

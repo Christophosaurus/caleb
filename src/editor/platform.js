@@ -13,6 +13,8 @@ function assertSelected(platform) {
     assert(!!platform.selected, "expected platform to be selected")
 }
 
+let _id = 0
+
 /**
  * @param {EditorState} state
  * @param {ElementState} start
@@ -20,8 +22,8 @@ function assertSelected(platform) {
  * @returns {EditorPlatform}
  */
 export function createPlatform(state, start, end) {
-
     return {
+        id: ++_id,
         selected: null,
         AABB: from2Vecs(start.pos, end.pos),
         behaviors: {},
@@ -54,7 +56,6 @@ export function toPlatform(state, platform) {
     plat.behaviors.next = platform.behaviors.next
     plat.behaviors.instagib = platform.behaviors.instagib
     plat.behaviors.obstacle = platform.behaviors.obstacle
-    plat.behaviors.lettered = platform.behaviors.lettered
 
     if (platform.behaviors.render) {
         plat.behaviors.render = {

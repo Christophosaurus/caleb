@@ -24,7 +24,6 @@ const dropKeys = [
  * @param {string} path
  */
 async function save(state, path) {
-
     // todo insane??
     /** @type {EditorSaveRequest} */
     const saveState = JSON.parse(JSON.stringify({
@@ -316,9 +315,9 @@ export class LevelSelectControls extends HTMLElement {
             l.classList.remove("selected")
         }
 
-        const idx = +el.dataset.index
+        const next = +el.dataset.index
         el.classList.add("selected")
-        Bus.emit("editor-change-level", { type: "editor-change-level", next: idx})
+        Bus.emit("editor-change-level", { type: "editor-change-level", next})
     }
 
     #levels() {

@@ -25,6 +25,10 @@ export function projectStaticObjects(state) {
  * @param state {GameState}
  */
 export function reset(state) {
+    if (!state.level.activeLevel) {
+        state.level.activeLevel = state.level.levels[state.level.initialLevel]
+    }
+
     state.caleb = Caleb.createCaleb(state)
     state.gameOver = false;
     state.loopStartTime = Utils.now()

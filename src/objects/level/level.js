@@ -52,14 +52,6 @@ export function render(state) {
             render.renderWidth,
             render.renderHeight
         );
-
-        const letters = p.behaviors.lettered?.letters
-        if (letters) {
-            const {x, y} = p.physics.current.body.pos
-            for (let i = 0; i < letters.length; ++i) {
-                renderText(ctx, letters[i], x, y + i, calebY);
-            }
-        }
     }
 
 }
@@ -130,27 +122,6 @@ export function withNextLevel(platform, toLevel, toLevelPosition) {
 
 /**
  * @param {BasedPlatform} platform
- * @param {string} letters
- * @returns {BasedPlatform}
-*/
-export function withLetters(platform, letters) {
-    const aabb = platform.physics.current.body;
-    assert(aabb.width >= 1, "aabb width has to be at least 1", aabb)
-    if (aabb.width === 1) {
-        assert(letters.length === aabb.height, "letters.length must be equal to aabb.height", "letters", letters, "aabb", aabb);
-    } else {
-        assert(letters.length === aabb.height * 2, "if width of aabb is 2 or more, then letters.length === aabb.height * 2", "letters", letters, "aabb", aabb);
-    }
-
-    platform.behaviors.lettered = {
-        type: "lettered",
-        letters: letters,
-    };
-    return platform
-}
-
-/**
- * @param {BasedPlatform} platform
  * @returns {BasedPlatform}
  */
 export function withInstaGib(platform) {
@@ -187,18 +158,6 @@ export function createLetterMap(platforms) {
     const out = [];
     for (let y = 0; y < GAME_HEIGHT; y++) {
         out.push(new Array(GAME_WIDTH).fill(null));
-    }
-
-    for (const p of platforms) {
-        const letters = p.behaviors.lettered?.letters
-        if (!letters) {
-            continue
-        }
-
-        const {x, y} = p.physics.current.body.pos
-        for (let i = 0; i < letters.length && y + i < GAME_HEIGHT; ++i) {
-            out[y + i][x] = letters[i]
-        }
     }
 
     return out;
