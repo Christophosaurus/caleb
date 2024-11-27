@@ -56,6 +56,10 @@ export function convertLevelSet(levelSet) {
                 },
             }
 
+            if (platform.behaviors.portal) {
+                platform.behaviors.portal.normal = Vector2D.fromObject(platform.behaviors.portal.normal)
+            }
+
             level.platforms.push(platform)
             out.platforms.set(platform.id, platform)
         }

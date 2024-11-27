@@ -413,6 +413,7 @@ export function createActionTaken(state, render = true) {
         if (ran.length >= 2) {
             console.log("ambiguous event", ran.map(x => x.toString()))
         }
+
         if (render) {
             Renderer.render(state)
         }
