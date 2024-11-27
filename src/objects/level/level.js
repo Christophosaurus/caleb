@@ -259,6 +259,15 @@ export function update(state, delta) {
 
 /**
  * @param {GameState} state
+ * @param {number} id
+ * @returns {BasedPlatform | undefined}
+ */
+export function findPlatformById(state, id) {
+    return state.level.platforms.get(id)
+}
+
+/**
+ * @param {GameState} state
  */
 export function tickClear(state) {
 }

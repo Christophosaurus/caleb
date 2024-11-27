@@ -131,6 +131,7 @@ declare global {
         levels: Level[]
         activeLevel?: Level
         initialLevel: number
+        platforms: Map<number, BasedPlatform>
     }
 
     type Level = {

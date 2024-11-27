@@ -1,6 +1,7 @@
 import { assert } from "../../assert.js";
 import * as Bus from "../../bus.js"
 import { Vector2D } from "../../math/vector.js";
+import { platforms } from "../state.js";
 import * as Utils from "../utils.js"
 import * as HTMLUtils from "./utils.js"
 
@@ -153,6 +154,10 @@ export class PlatformControls extends HTMLElement {
             nextLevelX,
             nextLevelY,
             render,
+            portal,
+            portalX,
+            portalY,
+            portalTo,
         } = this.values()
 
         console.log("save", this.values())
@@ -178,6 +183,11 @@ export class PlatformControls extends HTMLElement {
             toLevel: nextLevelLevel,
             toLevelPosition: new Vector2D(nextLevelX, nextLevelY),
         } : undefined
+        platform.behaviors.portal = portal ? {
+            to: portalTo,
+            normal: new Vector2D(portalX, portalY),
+            type: "portal"
+        } : undefined
 
         Bus.editorChange()
     }
@@ -197,6 +207,10 @@ export class PlatformControls extends HTMLElement {
             render,
             nextLevelX,
             nextLevelY,
+            portal,
+            portalX,
+            portalY,
+            portalTo,
         } = this.getControls()
 
         const behaviors = platform.behaviors
@@ -218,7 +232,13 @@ export class PlatformControls extends HTMLElement {
             circuitStartY.value = String(behaviors.circuit.startPos.y)
             circuitEndX.value = String(behaviors.circuit.endPos.x)
             circuitEndY.value = String(behaviors.circuit.endPos.y)
+        }
 
+        if (behaviors.portal) {
+            portal.checked = true
+            portalX.value = String(behaviors.portal.normal.x)
+            portalY.value = String(behaviors.portal.normal.y)
+            portalTo.value = String(behaviors.portal.to)
         }
     }
 
@@ -255,6 +275,10 @@ export class PlatformControls extends HTMLElement {
             nextLevelX: /** @type {HTMLInputElement} */this.controls.querySelector("#next-x"),
             nextLevelY: /** @type {HTMLInputElement} */this.controls.querySelector("#next-y"),
             render: /** @type {HTMLInputElement} */this.controls.querySelector("#render"),
+            portal: /** @type {HTMLInputElement} */this.controls.querySelector("#portal"),
+            portalX: /** @type {HTMLInputElement} */this.controls.querySelector("#portal-x"),
+            portalY: /** @type {HTMLInputElement} */this.controls.querySelector("#portal-y"),
+            portalTo: /** @type {HTMLInputElement} */this.controls.querySelector("#portal-to"),
         };
     }
 }
