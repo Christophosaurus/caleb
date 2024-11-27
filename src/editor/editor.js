@@ -137,7 +137,6 @@ export function handleSelectPlatform(state, event) {
     assert(evt instanceof MouseEvent, "selection of platform without mouse event")
 
     const found = State.selectPlatform(state, evt)
-    Platform.down(found)
 
     Bus.emit("show-platform", found)
 }
@@ -150,7 +149,6 @@ export function handleUpPlatform(state) {
     const duration = Platform.selectedDuration(state, platform)
     const moving = Platform.isMoving(platform)
 
-    Platform.up(platform)
     if (moving || duration < Consts.behaviors.fastClickTimeMS) {
         Bus.emit("show-platform", platform)
     }

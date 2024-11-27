@@ -86,6 +86,7 @@ export function createPlatform(aabb) {
  */
 export function withRender(platform) {
     platform.behaviors.render = {
+        type: "render",
         renderX: 0,
         renderY: 0,
         renderWidth: 0,

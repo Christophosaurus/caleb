@@ -109,14 +109,17 @@ declare global {
     }
     type ObstacleBehavior = { type: "obstacle" }
     type InstaGib = { type: "instagib" }
-    type Render = { type: "render" }
+    type Render = CanvasProjectable & { type: "render" }
+    type PortalBehavior = { type: "portal", to: number, normal: Vector2D }
     type Behavior = {
         next?: NextLevelBehavior
         obstacle?: ObstacleBehavior
         instagib?: InstaGib
         circuit?: Circuit
-        render?: CanvasProjectable
+        render?: Render
+        portal?: PortalBehavior
     }
+
     type BasedPlatform = Collidable & {
         id: number,
         behaviors: Behavior
@@ -210,7 +213,7 @@ declare global {
         inputs: Input[]
         tick: number
         numericModifier: number
-        listener: (e: KeyboardEvent) => void
+        listener?: (e: KeyboardEvent) => void
         anykey: ((state: GameState) => void) | null
     }
 

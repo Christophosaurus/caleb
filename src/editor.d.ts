@@ -91,13 +91,7 @@ declare global {
             moving: boolean,
             tick: number,
         } | null
-        behaviors: {
-            next?: NextLevelBehavior
-            obstacle?: ObstacleBehavior
-            instagib?: InstaGib
-            circuit?: Circuit
-            render?: Render
-        }
+        behaviors: Behavior
         el: HTMLElement | null
     }
 }

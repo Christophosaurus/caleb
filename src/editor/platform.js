@@ -59,6 +59,7 @@ export function toPlatform(state, platform) {
 
     if (platform.behaviors.render) {
         plat.behaviors.render = {
+            type: "render",
             renderX: 0,
             renderY: 0,
             renderWidth: 0,
@@ -105,31 +106,6 @@ export function orInMoving(platform, moving) {
     assertSelected(platform)
     platform.selected.moving ||= moving
     return platform.selected.moving
-}
-
-/**
- * @param {EditorPlatform} platform
- * @returns {boolean}
- */
-export function isDown(platform) {
-    assertSelected(platform)
-    return platform.selected.down
-}
-
-/**
- * @param {EditorPlatform} platform
- */
-export function down(platform) {
-    assertSelected(platform)
-    platform.selected.down = true
-}
-
-/**
- * @param {EditorPlatform} platform
- */
-export function up(platform) {
-    assertSelected(platform)
-    platform.selected.down = false
 }
 
 /**

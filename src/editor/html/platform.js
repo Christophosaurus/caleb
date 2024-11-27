@@ -169,7 +169,10 @@ export class PlatformControls extends HTMLElement {
             currentDir: 1,
             currentTime: 0,
         } : undefined
-        platform.behaviors.render = !nextLevel && render ? {type: "render"} : undefined
+        platform.behaviors.render = !nextLevel && render ? {
+            type: "render",
+            renderX: 0, renderY: 0, renderHeight: 0, renderWidth: 0,
+        } : undefined
         platform.behaviors.next = nextLevel ? {
             type: "next-level",
             toLevel: nextLevelLevel,

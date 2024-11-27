@@ -44,6 +44,7 @@ export function convertLevelSet(levelSet) {
                     instagib: p.behaviors.instagib,
                     obstacle: p.behaviors.obstacle,
                     render: p.behaviors.render ? {
+                        type: "render",
                         renderX: 0,
                         renderY: 0,
                         renderWidth: 0,
