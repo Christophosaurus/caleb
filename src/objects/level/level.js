@@ -67,11 +67,13 @@ export function createPlatform(aabb) {
         id,
         physics: {
             current: {
+                vel2: new Vector2D(0, 0),
                 vel: new Vector2D(0, 0),
                 acc: new Vector2D(0, 0),
                 body: aabb,
             },
             next: {
+                vel2: new Vector2D(0, 0),
                 vel: new Vector2D(0, 0),
                 acc: new Vector2D(0, 0),
                 body: aabb.clone(),

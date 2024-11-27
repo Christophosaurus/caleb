@@ -22,11 +22,13 @@ export function clonePhysics(coll) {
     return {
         physics: {
             current: {
+                vel2: new Vector2D(0, 0),
                 body: physics.current.body.clone(),
                 acc: physics.current.acc.clone(),
                 vel: physics.current.vel.clone(),
             },
             next: {
+                vel2: new Vector2D(0, 0),
                 body: physics.next.body.clone(),
                 acc: physics.next.acc.clone(),
                 vel: physics.next.vel.clone(),

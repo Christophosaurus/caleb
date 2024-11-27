@@ -137,7 +137,6 @@ export function forEachAllPlatform(state, cb) {
     }
 }
 
-
 /**
  * @param {EditorState} state
  */

@@ -34,7 +34,6 @@ export function convertLevelSet(levelSet) {
             const aabb = AABB.fromObject(p.AABB)
             aabb.pos.subtract(margin)
 
-            console.log("portal?", p.behaviors.portal)
             const platform = {
                 physics: {
                     next: createPhysics(aabb),

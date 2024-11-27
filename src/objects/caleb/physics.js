@@ -86,6 +86,7 @@ function collidePlatform(state, platform) {
                 next.body.pos.x += x
                 state.caleb.platform.platform = platform
                 state.caleb.platform.tick = state.tick
+                CalebInput.resetVel2(state)
             } else {
                 state.caleb.platform.platform = null
                 state.caleb.platform.tick = state.tick

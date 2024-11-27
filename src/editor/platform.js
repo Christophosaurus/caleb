@@ -15,6 +15,11 @@ function assertSelected(platform) {
 
 let _id = 0
 
+/** @param {number} id */
+export function setPlatformNextId(id) {
+    _id = id
+}
+
 /**
  * @param {EditorState} state
  * @param {ElementState} start

@@ -7,9 +7,9 @@ import { ZERO } from "./vector.js";
 */
 export function createPhysics(from) {
     return {
-        acc: ZERO,
-        vel: ZERO,
-        vel2: undefined,
+        acc: ZERO.clone(),
+        vel: ZERO.clone(),
+        vel2: ZERO.clone(),
         body: from.clone(),
     }
 }

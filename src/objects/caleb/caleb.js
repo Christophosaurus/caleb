@@ -6,7 +6,6 @@ import * as CalebInput from "./input.js";
 import {CALEB_HEIGHT as HEIGHT, CALEB_WIDTH as WIDTH} from "./utils.js";
 import * as CalebPhysics from "./physics.js";
 import { assert } from "../../assert.js";
-import { resetDashState, resetJumpState } from "./input.js";
 
 const debugLog = debugForCallCount(100);
 
@@ -23,11 +22,13 @@ export function createCaleb(state) {
 
         physics: {
             current: {
+                vel2: new Vector2D(0, 0),
                 acc: new Vector2D(0, 0),
                 vel: new Vector2D(0, 0),
                 body: new AABB(state.level.activeLevel.initialPosition.clone(), 0.5, 1),
             },
             next: {
+                vel2: new Vector2D(0, 0),
                 acc: new Vector2D(0, 0),
                 vel: new Vector2D(0, 0),
                 body: new AABB(state.level.activeLevel.initialPosition.clone(), 0.5, 1),
@@ -152,6 +153,7 @@ function updatePortal(state) {
     if (!caleb.portal) {
         return false
     }
+    caleb.portal = false
 
     // TODO should i move all these data retrievals behind an interface?
     const aabb = caleb.physics.current.body
@@ -162,8 +164,11 @@ function updatePortal(state) {
         const portal = p.behaviors.portal
         if (!!portal && p.physics.current.body.intersects(aabb)) {
 
-            resetJumpState(state);
-            resetDashState(state);
+            const vel = caleb.physics.current.vel.clone()
+
+            CalebInput.resetJumpState(state);
+            CalebInput.resetDashState(state);
+            CalebInput.resetPlatformHold(state)
 
             const next = state.level.platforms.get(p.behaviors.portal.to)
 
@@ -171,12 +176,12 @@ function updatePortal(state) {
             // that would put caleb into potentially an obstacle which is currently undefined behavior
             caleb.physics.next.body.pos.set(next.physics.current.body.center())
 
-            const curr = caleb.physics.current.vel.clone()
             if (caleb.physics.current.vel2) {
-                curr.add(caleb.physics.current.vel2)
+                vel.add(caleb.physics.current.vel2)
             }
 
-            caleb.physics.next.vel = portal.normal.clone().multiply(curr.magnitude())
+            caleb.physics.next.vel2 = portal.normal.clone().multiply(vel.magnitude())
+            break
         }
     }
 
@@ -229,9 +234,9 @@ function updatePosition(state, delta) {
     }
 
     next.body.pos = pos.add(vel.clone().multiply(deltaNorm));
-    if (next.vel2) {
-        next.body.pos = pos.add(next.vel2.clone().multiply(deltaNorm));
-    }
+    next.body.pos = pos.add(next.vel2.clone().multiply(deltaNorm));
+
+    next.vel2.multiply(1 - (deltaNorm / 2.0)); // <-- delta norm rate?
 }
 
 /**
@@ -297,6 +302,4 @@ export function tickClear(state) {
         caleb.dead = true;
         caleb.deadAt = state.now()
     }
-
-    caleb.portal = false
 }

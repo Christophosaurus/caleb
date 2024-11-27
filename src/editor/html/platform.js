@@ -160,8 +160,6 @@ export class PlatformControls extends HTMLElement {
             portalTo,
         } = this.values()
 
-        console.log("save", this.values())
-
         platform.behaviors.obstacle = !nextLevel && obstacle ? {type: "obstacle"} : undefined
         platform.behaviors.instagib = !nextLevel && instagib ? {type: "instagib"} : undefined
         platform.behaviors.circuit = !nextLevel && circuit ? {

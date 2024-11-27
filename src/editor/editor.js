@@ -364,6 +364,14 @@ export function createActionTaken(state, render = true) {
             elements: state.elements,
         }
 
+        let highestId = 0
+        State.forEachAllPlatform(state, p => {
+            if (p.id > highestId) {
+                highestId = p.id
+            }
+        });
+
+        Platform.setPlatformNextId(highestId + 1)
         prehandlers.forEach(x => x.updateState(state));
         posthandlers.forEach(x => x.updateState(state));
         handlers.forEach(x => x.updateState(state));

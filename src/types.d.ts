@@ -188,7 +188,7 @@ declare global {
     }
 
     type PhysicsBody = {
-        vel2?: Vector2D,
+        vel2: Vector2D,
         vel: Vector2D,
         acc: Vector2D,
         body: AABB,

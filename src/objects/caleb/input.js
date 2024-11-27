@@ -1,4 +1,5 @@
 import * as Input from "../../input/input.js"
+import { ZERO } from "../../math/vector.js";
 import * as Level from "../level/level.js"
 import * as CalebUtils from "./utils.js";
 
@@ -26,6 +27,7 @@ function moveWB(dir) {
         dash.dashDir = dir
 
         resetJumpState(state);
+        resetVel2(state);
 
         return true;
     }
@@ -68,6 +70,7 @@ function moveKJ(dir) {
         }
 
         resetDashState(state);
+        resetVel2(state);
 
         return true;
     }
@@ -79,6 +82,7 @@ function moveKJ(dir) {
  */
 function moveHL(dir) {
     return function(state) {
+        resetVel2(state);
         state.caleb.physics.next.vel.x = state.opts.caleb.normWidthsPerSecond * dir
         return true;
     }
@@ -140,6 +144,7 @@ function completefFtT(state) {
     state.input.anykey = null
     resetJumpState(state);
     resetDashState(state);
+    resetVel2(state);
 
     const row = CalebUtils.getNextRow(state.caleb)
     const letters = Level.getLetters(state, row)
@@ -342,6 +347,21 @@ export function defaultfFtT() {
         type: "f",
         startTick: 0,
     }
+}
+
+/**
+ * @param state {GameState}
+ */
+export function resetPlatformHold(state) {
+    state.caleb.platform.platform = null
+}
+
+/**
+ * @param state {GameState}
+ */
+export function resetVel2(state) {
+    state.caleb.physics.current.vel2.set(ZERO);
+    state.caleb.physics.next.vel2.set(ZERO);
 }
 
 /**
