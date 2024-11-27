@@ -7,6 +7,7 @@ import * as Platform from "./platform.js"
 import * as Utils from "./utils.js"
 import * as Consts from "./consts.js"
 import * as Level from "../objects/level/level.js"
+import * as LevelUtils from "../objects/level/levels/utils.js"
 
 export {Mouse}
 
@@ -23,30 +24,7 @@ export function change(state) {
  */
 export function gameLevelSet(state) {
     const ls = levelSet(state);
-
-    const gameLevels = /** @type {LevelSet} */({
-        initialLevel: ls.initialLevel,
-        title: ls.title,
-        difficulty: ls.difficulty,
-        levels: []
-    })
-
-    for (let i = 0; i < ls.levels.length; ++i) {
-        const level = ls.levels[i]
-
-        const plats = level.platforms.map(plat => {
-            return Platform.toPlatform(state, plat)
-        })
-        gameLevels.levels[i] = {
-            platforms: plats,
-            initialPosition: level.initialPosition,
-            letterMap: Level.createLetterMap(plats),
-        }
-    }
-
-    gameLevels.activeLevel = gameLevels.levels[gameLevels.initialLevel]
-
-    return gameLevels
+    return LevelUtils.convertLevelSet(ls)
 }
 
 /**
@@ -146,6 +124,19 @@ export function elements(state) {
 export function platforms(state) {
     return level(state).platforms
 }
+
+/**
+ * @param {EditorState} state
+ * @param {(plat: EditorPlatform) => void} cb
+ */
+export function forEachAllPlatform(state, cb) {
+    for (const level of state.levelSet.levels) {
+        for (const p of level.platforms) {
+            cb(p)
+        }
+    }
+}
+
 
 /**
  * @param {EditorState} state
@@ -334,7 +325,7 @@ export function createEmptyLevel() {
     return {
         letterMap: [],
         platforms: [],
-        initialPosition: new Vector2D(24, 24),
+        initialPosition: new Vector2D(1, 1),
     };
 }
 

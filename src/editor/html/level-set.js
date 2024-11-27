@@ -67,6 +67,11 @@ export function readyLevelState(state) {
             p.el = null
             const a = p.AABB
             p.AABB = new AABB(new Vector2D(a.pos.x, a.pos.y), a.width, a.height)
+
+            const portal = p.behaviors.portal
+            if (portal) {
+                portal.normal = Vector2D.fromObject(portal.normal)
+            }
         }
 
         level.initialPosition = new Vector2D(level.initialPosition.x, level.initialPosition.y)

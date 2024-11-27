@@ -32,6 +32,15 @@ function moveWB(dir) {
 }
 
 /**
+ * @param {GameState} state
+ */
+function movePortal(state) {
+    const caleb = state.caleb;
+    caleb.portal = true
+    return true
+}
+
+/**
  * @param {-1 | 1} dir
  * @returns {InputHandler}
  */
@@ -237,6 +246,7 @@ const F = onDown(filter("F", movefFtT("F")));
 const T = onDown(filter("T", movefFtT("T")));
 const quit = onDown(filter(":", command));
 const numeric = onDown(isNumeric(numericModifier))
+const portal = onDown(filter("%", movePortal));
 
 /**
  * @param {GameState} state
@@ -287,6 +297,7 @@ export function update(state, _) {
         t(state, i)
         T(state, i)
         quit(state, i)
+        portal(state, i)
     }
 }
 

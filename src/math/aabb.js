@@ -43,6 +43,16 @@ export class AABB {
     }
 
     /**
+     * @returns {Vector2D}
+     */
+    center() {
+        return new Vector2D(
+            this.pos.x + (this.width / 2),
+            this.pos.y + (this.height / 2),
+        );
+    }
+
+    /**
    * @param {AABB} other
    * @returns {boolean}
    */

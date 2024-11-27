@@ -185,7 +185,7 @@ export class PlatformControls extends HTMLElement {
         } : undefined
         platform.behaviors.portal = portal ? {
             to: portalTo,
-            normal: new Vector2D(portalX, portalY),
+            normal: new Vector2D(portalX, portalY).normalize(),
             type: "portal"
         } : undefined
 
@@ -211,7 +211,11 @@ export class PlatformControls extends HTMLElement {
             portalX,
             portalY,
             portalTo,
+            id,
         } = this.getControls()
+
+
+        id.innerText = String(platform.id)
 
         const behaviors = platform.behaviors
         obstacle.checked = !!behaviors.obstacle
@@ -246,12 +250,16 @@ export class PlatformControls extends HTMLElement {
         const controls = this.getControls()
         const out = {}
         for (const [k, v] of Object.entries(controls)) {
-            if (v.type === "checkbox") {
-                out[k] = v.checked
-            } else if (coordValues.some(x => v.id.includes(x))) {
-                out[k] = HTMLUtils.parseCoord(v.value)
+            if (v instanceof HTMLInputElement) {
+                if (v.type === "checkbox") {
+                    out[k] = v.checked
+                } else if (coordValues.some(x => v.id.includes(x))) {
+                    out[k] = HTMLUtils.parseCoord(v.value)
+                } else {
+                    out[k] = +v.value
+                }
             } else {
-                out[k] = +v.value
+                out[k] = +v.innerText;
             }
         }
 
@@ -259,26 +267,45 @@ export class PlatformControls extends HTMLElement {
     }
 
     /**
-     * @returns {Record<string, HTMLInputElement>}
+     * @returns {{
+            id: HTMLElement
+            obstacle: HTMLInputElement
+            instagib: HTMLInputElement
+            circuit: HTMLInputElement
+            circuitStartX: HTMLInputElement
+            circuitStartY: HTMLInputElement
+            circuitEndX: HTMLInputElement
+            circuitEndY: HTMLInputElement
+            nextLevel: HTMLInputElement
+            nextLevelLevel: HTMLInputElement
+            nextLevelX: HTMLInputElement
+            nextLevelY: HTMLInputElement
+            render: HTMLInputElement
+            portal: HTMLInputElement
+            portalX: HTMLInputElement
+            portalY: HTMLInputElement
+            portalTo: HTMLInputElement
+        }}
      */
     getControls() {
         return {
-            obstacle: /** @type {HTMLInputElement} */this.controls.querySelector("#obstacle"),
-            instagib: /** @type {HTMLInputElement} */this.controls.querySelector("#instagib"),
-            circuit: /** @type {HTMLInputElement} */this.controls.querySelector("#circuit"),
-            circuitStartX: /** @type {HTMLInputElement} */this.controls.querySelector("#circuit-sx"),
-            circuitStartY: /** @type {HTMLInputElement} */this.controls.querySelector("#circuit-sy"),
-            circuitEndX: /** @type {HTMLInputElement} */this.controls.querySelector("#circuit-ex"),
-            circuitEndY: /** @type {HTMLInputElement} */this.controls.querySelector("#circuit-ey"),
-            nextLevel: /** @type {HTMLInputElement} */this.controls.querySelector("#next-level"),
-            nextLevelLevel: /** @type {HTMLInputElement} */this.controls.querySelector("#nl-id"),
-            nextLevelX: /** @type {HTMLInputElement} */this.controls.querySelector("#next-x"),
-            nextLevelY: /** @type {HTMLInputElement} */this.controls.querySelector("#next-y"),
-            render: /** @type {HTMLInputElement} */this.controls.querySelector("#render"),
-            portal: /** @type {HTMLInputElement} */this.controls.querySelector("#portal"),
-            portalX: /** @type {HTMLInputElement} */this.controls.querySelector("#portal-x"),
-            portalY: /** @type {HTMLInputElement} */this.controls.querySelector("#portal-y"),
-            portalTo: /** @type {HTMLInputElement} */this.controls.querySelector("#portal-to"),
+            id: this.controls.querySelector(".id"),
+            obstacle: this.controls.querySelector("#obstacle"),
+            instagib: this.controls.querySelector("#instagib"),
+            circuit: this.controls.querySelector("#circuit"),
+            circuitStartX: this.controls.querySelector("#circuit-sx"),
+            circuitStartY: this.controls.querySelector("#circuit-sy"),
+            circuitEndX: this.controls.querySelector("#circuit-ex"),
+            circuitEndY: this.controls.querySelector("#circuit-ey"),
+            nextLevel: this.controls.querySelector("#next-level"),
+            nextLevelLevel: this.controls.querySelector("#nl-id"),
+            nextLevelX: this.controls.querySelector("#next-x"),
+            nextLevelY: this.controls.querySelector("#next-y"),
+            render: this.controls.querySelector("#render"),
+            portal: this.controls.querySelector("#portal"),
+            portalX: this.controls.querySelector("#portal-x"),
+            portalY: this.controls.querySelector("#portal-y"),
+            portalTo: this.controls.querySelector("#portal-to"),
         };
     }
 }

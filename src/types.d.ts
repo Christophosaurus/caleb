@@ -81,6 +81,7 @@ declare global {
         jump: CalebJump
         dash: CalebDash
         fFtT: fFtT
+        portal: boolean
 
         // i don't want "proper" jumping mechanics.  i want linear jump
         // slow top (for f/F/t/T or w)

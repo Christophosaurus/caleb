@@ -56,6 +56,7 @@ export function toPlatform(state, platform) {
     plat.behaviors.next = platform.behaviors.next
     plat.behaviors.instagib = platform.behaviors.instagib
     plat.behaviors.obstacle = platform.behaviors.obstacle
+    plat.behaviors.portal = platform.behaviors.portal
 
     if (platform.behaviors.render) {
         plat.behaviors.render = {

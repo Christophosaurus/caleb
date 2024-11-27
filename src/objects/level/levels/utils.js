@@ -34,6 +34,7 @@ export function convertLevelSet(levelSet) {
             const aabb = AABB.fromObject(p.AABB)
             aabb.pos.subtract(margin)
 
+            console.log("portal?", p.behaviors.portal)
             const platform = {
                 physics: {
                     next: createPhysics(aabb),
@@ -90,5 +91,4 @@ export function validateLevel(levelSet) {
             assert(Math.abs(1 - len) <= 0.001, "expected the portal to have a magnitude 1 normal vec", portal)
         }
     }
-
 }

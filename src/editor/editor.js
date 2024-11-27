@@ -343,6 +343,17 @@ export function createActionTaken(state, render = true) {
         // @ts-ignore
         const evt = /** @type {EditorStateLoadedEvent} */(event)
 
+        State.forEachAllPlatform(state, p => {
+            if (p.el !== null) {
+                p.el.remove();
+                p.el = null
+            }
+        });
+
+        // @ts-ignore PREEMPTIVE IGNORE... THIS IS BAD BUT STFU
+        // the reason is simple.   I am about to overwrite the data from the server but i want the state of the elements on the board still within the editor state.
+        state.levelSet = null
+
         // TODO yikes
         // also, don't cause a state change that way fetches don't result in an immediate save
         state = {

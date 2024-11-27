@@ -5,6 +5,8 @@ import { debugForCallCount, debugForTickCount } from "../../debug.js";
 import * as CalebInput from "./input.js";
 import {CALEB_HEIGHT as HEIGHT, CALEB_WIDTH as WIDTH} from "./utils.js";
 import * as CalebPhysics from "./physics.js";
+import { assert } from "../../assert.js";
+import { resetDashState, resetJumpState } from "./input.js";
 
 const debugLog = debugForCallCount(100);
 
@@ -39,6 +41,7 @@ export function createCaleb(state) {
         jump: CalebInput.defaultJumpState(),
         dash: CalebInput.defaultDashStat(),
         fFtT: CalebInput.defaultfFtT(),
+        portal: false,
 
         renderWidth: 0,
         renderHeight: 0,
@@ -141,6 +144,44 @@ function updateDash(state, delta) {
     dash.noDashTime -= delta
     return dashing
 }
+/**
+* @param {GameState} state
+*/
+function updatePortal(state) {
+    const caleb = state.caleb
+    if (!caleb.portal) {
+        return false
+    }
+
+    // TODO should i move all these data retrievals behind an interface?
+    const aabb = caleb.physics.current.body
+    const level = state.level.activeLevel
+
+    assert(!!level, "performing a caleb portal and there is no active level...")
+    for (const p of level.platforms) {
+        const portal = p.behaviors.portal
+        if (!!portal && p.physics.current.body.intersects(aabb)) {
+
+            resetJumpState(state);
+            resetDashState(state);
+
+            const next = state.level.platforms.get(p.behaviors.portal.to)
+
+            // TODO: ?? is this really the best option?  the only downfall would be portals of height 1
+            // that would put caleb into potentially an obstacle which is currently undefined behavior
+            caleb.physics.next.body.pos.set(next.physics.current.body.center())
+
+            const curr = caleb.physics.current.vel.clone()
+            if (caleb.physics.current.vel2) {
+                curr.add(caleb.physics.current.vel2)
+            }
+
+            caleb.physics.next.vel = portal.normal.clone().multiply(curr.magnitude())
+        }
+    }
+
+    return true
+}
 
 /**
 * @param state {GameState}
@@ -179,7 +220,8 @@ function updatePosition(state, delta) {
 
     let deltaNorm = delta / 1000;
 
-    if (updateDash(state, delta)) {
+    if (updatePortal(state)) {
+    } else if (updateDash(state, delta)) {
     } else if (updateJump(state, delta)) {
     } else {
         vel.add(state.opts.gravity.multiplyCopy(deltaNorm));
@@ -255,4 +297,6 @@ export function tickClear(state) {
         caleb.dead = true;
         caleb.deadAt = state.now()
     }
+
+    caleb.portal = false
 }
