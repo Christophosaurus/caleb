@@ -1,7 +1,6 @@
 import * as CalebInput from "./input.js";
-import { Vector2D } from "../../math/vector.js";
-import { AABB } from "../../math/aabb.js";
 import { assert } from "../../assert.js";
+import * as Operations from "../../state/operations.js"
 import { DO_NOT_USE_FOR_INITIAL_POS_OR_YOU_WILL_BE_FIRED } from "../level/level.js";
 
 /**
@@ -68,6 +67,7 @@ function collidePlatform(state, platform) {
             body.pos.y = platformAABB.pos.y + platformAABB.pos.y
         } else {
             next.vel.x = 0;
+            next.vel2.x = 0;
             if (left) {
                 body.pos.x = platformAABB.pos.x - body.width;
             } else {
@@ -109,14 +109,6 @@ function collideLevelChange(state, p) {
     const platform = p.behaviors.next
     const next = state.caleb.physics.next;
     const body = next.body;
-    const idx = platform.toLevel;
-    const nextLevel = state.level.levels[idx]
-    const level = state.level;
-
-    assert(nextLevel !== undefined, "unable to find next level", "idx", idx, "len", state.level.levels.length);
-
-    state.levelChanged = true
-    level.activeLevel = nextLevel
 
     if (platform.toLevelPosition.x !== DO_NOT_USE_FOR_INITIAL_POS_OR_YOU_WILL_BE_FIRED) {
         body.pos.x = platform.toLevelPosition.x
@@ -124,12 +116,8 @@ function collideLevelChange(state, p) {
         body.pos.y = platform.toLevelPosition.y
     }
 
-    if (!state.caleb.dash.dashing && !state.caleb.jump.jumping) {
-        next.vel.multiply(0.5)
-    }
-
-    state.level.activeLevel.initialPosition = body.pos.clone()
-
+    console.log(state.tick, "setLevel", platform.toLevel)
+    Operations.setLevel(state, platform.toLevel, body.pos)
 }
 
 /**

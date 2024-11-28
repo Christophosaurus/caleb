@@ -60,20 +60,6 @@ async function run() {
 
     Editor.start(state)
 
-    const dropKeys = [
-        "activePlatform",
-        "elements",
-        "el",
-        "state",
-
-        "canvas",
-        "editor",
-        "overlay",
-        "platformControls",
-        "levelSetControls",
-        "levelSelectControls",
-        "worldOutline",
-    ]
 }
 
 run()

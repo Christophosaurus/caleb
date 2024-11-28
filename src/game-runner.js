@@ -6,6 +6,7 @@ import * as DebugRender from "./debug-render.js";
 import * as Level from "./objects/level/level.js"
 import * as RN from "./objects/relative_numbers.js";
 import * as State from "./state/state.js";
+import * as Operations from "./state/operations.js";
 
 /**
  * @param {GameState} state
@@ -110,10 +111,11 @@ export function tickWithRender(state) {
     }
 
     if (state.levelChanged) {
-        state.levelChanged = false;
+        Operations.clearLevelChange(state);
         State.projectStaticObjects(state)
     }
 
+    console.log("updateables", state.caleb.physics.current.body.pos);
     for (const input of state.updateables) {
         input.update(state, delta);
     }
@@ -164,7 +166,7 @@ export function tickWithoutRender(state) {
     }
 
     if (state.levelChanged) {
-        state.levelChanged = false;
+        Operations.clearLevelChange(state);
     }
 
     for (const input of state.updateables) {

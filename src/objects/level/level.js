@@ -53,7 +53,6 @@ export function render(state) {
             render.renderHeight
         );
     }
-
 }
 
 /**

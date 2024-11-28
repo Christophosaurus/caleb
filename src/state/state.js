@@ -33,7 +33,8 @@ export function reset(state) {
     state.gameOver = false;
     state.loopStartTime = Utils.now()
     state.loopDelta = 0;
-    state.levelChanged = true;
+    state.levelChanged = true
+    state.caleb.changingLevels = true
 }
 
 /**

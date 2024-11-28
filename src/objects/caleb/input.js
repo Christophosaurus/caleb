@@ -38,7 +38,8 @@ function moveWB(dir) {
  */
 function movePortal(state) {
     const caleb = state.caleb;
-    caleb.portal = true
+    caleb.portal.portaling = true
+    caleb.portal.tick = 0
     return true
 }
 
@@ -60,12 +61,12 @@ function moveKJ(dir) {
 
         input.numericModifier = 0
         jump.jumping = true;
-        jump.jumpDistance = number;
+        jump.jumpDistance = number
         jump.jumpStart = null
         jump.noJumpTime = (number * opts.noJumpMultiplier) + opts.noJumpBase;
         jump.jumpDir = dir
 
-        if (dir === -1) {
+        if (dir === 1) {
             jump.jumpDistance -= CalebUtils.CALEB_HEIGHT
         }
 
@@ -349,6 +350,15 @@ export function defaultfFtT() {
     }
 }
 
+/** @returns {CalebPortal} */
+export function defaultPortal() {
+    return {
+        portaling: false,
+        to: 0,
+    }
+}
+
+
 /**
  * @param state {GameState}
  */
@@ -386,5 +396,13 @@ export function resetDashState(state) {
     dash.dashDistance = 0;
     dash.dashDir = 1;
     dash.noDashTime = 0;
+}
+
+/**
+ * @param {GameState} state
+ */
+export function resetPortalState(state) {
+    state.caleb.portal.portaling = false
+    state.caleb.portal.tick = 0
 }
 

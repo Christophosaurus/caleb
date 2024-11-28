@@ -5,6 +5,7 @@ import { debugForCallCount, debugForTickCount } from "../../debug.js";
 import * as CalebInput from "./input.js";
 import {CALEB_HEIGHT as HEIGHT, CALEB_WIDTH as WIDTH} from "./utils.js";
 import * as CalebPhysics from "./physics.js";
+import * as Operations from "../../state/operations.js";
 import { assert } from "../../assert.js";
 
 const debugLog = debugForCallCount(100);
@@ -42,7 +43,8 @@ export function createCaleb(state) {
         jump: CalebInput.defaultJumpState(),
         dash: CalebInput.defaultDashStat(),
         fFtT: CalebInput.defaultfFtT(),
-        portal: false,
+        portal: CalebInput.defaultPortal(),
+        changingLevels: false,
 
         renderWidth: 0,
         renderHeight: 0,
@@ -150,16 +152,16 @@ function updateDash(state, delta) {
 */
 function updatePortal(state) {
     const caleb = state.caleb
-    if (!caleb.portal) {
+    if (!caleb.portal.portaling || caleb.portal.tick === state.tick) {
         return false
     }
-    caleb.portal = false
 
     // TODO should i move all these data retrievals behind an interface?
     const aabb = caleb.physics.current.body
     const level = state.level.activeLevel
 
     assert(!!level, "performing a caleb portal and there is no active level...")
+    let found = false
     for (const p of level.platforms) {
         const portal = p.behaviors.portal
         if (!!portal && p.physics.current.body.intersects(aabb)) {
@@ -170,7 +172,11 @@ function updatePortal(state) {
             CalebInput.resetDashState(state);
             CalebInput.resetPlatformHold(state)
 
-            const next = state.level.platforms.get(p.behaviors.portal.to)
+            const {
+                platform: next,
+                level,
+            } = Operations.findPlatformById(state, portal.to)
+            caleb.portal.to = level
 
             // TODO: ?? is this really the best option?  the only downfall would be portals of height 1
             // that would put caleb into potentially an obstacle which is currently undefined behavior
@@ -180,9 +186,14 @@ function updatePortal(state) {
                 vel.add(caleb.physics.current.vel2)
             }
 
-            caleb.physics.next.vel2 = portal.normal.clone().multiply(vel.magnitude())
+            caleb.physics.next.vel2 = next.behaviors.portal.normal.clone().multiply(vel.magnitude())
+            found = true
             break
         }
+    }
+
+    if (!found) {
+        CalebInput.resetPortalState(state)
     }
 
     return true
@@ -233,8 +244,9 @@ function updatePosition(state, delta) {
         forceRemainingOnMovingPlatform(state, delta)
     }
 
-    next.body.pos = pos.add(vel.clone().multiply(deltaNorm));
-    next.body.pos = pos.add(next.vel2.clone().multiply(deltaNorm));
+    next.body.pos = pos.
+        add(vel.clone().multiply(deltaNorm)).
+        add(next.vel2.clone().multiply(deltaNorm));
 
     next.vel2.multiply(1 - (deltaNorm / 2.0)); // <-- delta norm rate?
 }
@@ -244,6 +256,10 @@ function updatePosition(state, delta) {
  * @param {number} _
  */
 export function check(state, _) {
+    if (state.caleb.changingLevels) {
+        return
+    }
+
     CalebPhysics.testCollisions(state);
 }
 
@@ -252,16 +268,21 @@ export function check(state, _) {
 * @param _ {number}
 */
 export function apply(state, _) {
-
-    const next = state.caleb.physics.next;
-    const curr = state.caleb.physics.current;
+    const caleb = state.caleb
+    const next = caleb.physics.next;
+    const curr = caleb.physics.current;
 
     curr.body.set(next.body)
     curr.vel.set(next.vel)
     curr.acc.set(next.acc)
 
     // techincally i could move this into the engine side not in each update
-    Window.projectInto(state.getDim(), state.caleb, next.body);
+    Window.projectInto(state.getDim(), caleb, next.body);
+
+    if (caleb.portal.portaling && caleb.portal.tick !== state.tick) {
+        Operations.setLevel(state, caleb.portal.to, curr.body.pos)
+        caleb.portal.tick = state.tick
+    }
 }
 
 /**
@@ -281,7 +302,7 @@ export function render(state) {
 */
 export function update(gameState, delta) {
     const caleb = gameState.caleb
-    if (caleb.dead || delta === 0) {
+    if (caleb.dead || delta === 0 || caleb.changingLevels) {
         return;
     }
 
@@ -301,5 +322,9 @@ export function tickClear(state) {
     if (!caleb.dead && caleb.physics.current.body.pos.y > Window.FULL_HEIGHT + 3) {
         caleb.dead = true;
         caleb.deadAt = state.now()
+    }
+
+    if (caleb.portal.portaling) {
+        CalebInput.resetPortalState(state);
     }
 }

@@ -67,6 +67,12 @@ declare global {
         noDashTime: number,
     }
 
+    type CalebPortal = {
+        portaling: boolean
+        to: number
+        tick: number
+    }
+
     type Caleb = Collidable & CanvasProjectable & {
         opts: CalebOpts,
         renderColor: string,
@@ -81,7 +87,8 @@ declare global {
         jump: CalebJump
         dash: CalebDash
         fFtT: fFtT
-        portal: boolean
+        portal: CalebPortal
+        changingLevels: boolean
 
         // i don't want "proper" jumping mechanics.  i want linear jump
         // slow top (for f/F/t/T or w)
