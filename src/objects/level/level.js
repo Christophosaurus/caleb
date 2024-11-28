@@ -43,15 +43,19 @@ export function render(state) {
 
     for (const p of plats) {
         const render = p.behaviors.render
-        if (!render) {
-            continue
+        const lettered = p.behaviors.lettered
+        if (render) {
+            ctx.fillRect(render.renderX,
+                render.renderY,
+                render.renderWidth,
+                render.renderHeight
+            );
         }
 
-        ctx.fillRect(render.renderX,
-            render.renderY,
-            render.renderWidth,
-            render.renderHeight
-        );
+        if (lettered) {
+            const pos = p.physics.current.body.pos
+            renderText(ctx, lettered.letter, pos.x, pos.y, calebY)
+        }
     }
 }
 
@@ -160,6 +164,16 @@ export function createLetterMap(platforms) {
     const out = [];
     for (let y = 0; y < GAME_HEIGHT; y++) {
         out.push(new Array(GAME_WIDTH).fill(null));
+    }
+
+    for (const p of platforms) {
+        const letter = p.behaviors.lettered
+        if (!letter) {
+            continue
+        }
+        const pos = p.physics.current.body.pos
+
+        out[pos.y][pos.x] = letter.letter
     }
 
     return out;

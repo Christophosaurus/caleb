@@ -14,6 +14,10 @@ const coordValues = [
     "-ey",
 ]
 
+const textValue = [
+    "letter",
+]
+
 export class PlatformControls extends HTMLElement {
     /** @type {HTMLElement} */
     controls = null
@@ -48,6 +52,7 @@ export class PlatformControls extends HTMLElement {
             nextLevelX,
             nextLevelY,
         } = this.getControls()
+
         instagib.disabled = obstacle.checked
         obstacle.disabled = instagib.checked
         circuitStartX.disabled = !circuit.checked
@@ -158,6 +163,8 @@ export class PlatformControls extends HTMLElement {
             portalX,
             portalY,
             portalTo,
+            lettered,
+            letter,
         } = this.values()
 
         platform.behaviors.obstacle = !nextLevel && obstacle ? {type: "obstacle"} : undefined
@@ -186,6 +193,10 @@ export class PlatformControls extends HTMLElement {
             normal: new Vector2D(portalX, portalY).normalize(),
             type: "portal"
         } : undefined
+        platform.behaviors.lettered = lettered ? {
+            type: "lettered",
+            letter,
+        } : undefined
 
         Bus.editorChange()
     }
@@ -210,8 +221,9 @@ export class PlatformControls extends HTMLElement {
             portalY,
             portalTo,
             id,
+            lettered,
+            letter,
         } = this.getControls()
-
 
         id.innerText = String(platform.id)
 
@@ -242,6 +254,11 @@ export class PlatformControls extends HTMLElement {
             portalY.value = String(behaviors.portal.normal.y)
             portalTo.value = String(behaviors.portal.to)
         }
+
+        if (behaviors.lettered) {
+            lettered.checked = true
+            letter.value = behaviors.lettered.letter
+        }
     }
 
     values() {
@@ -253,6 +270,8 @@ export class PlatformControls extends HTMLElement {
                     out[k] = v.checked
                 } else if (coordValues.some(x => v.id.includes(x))) {
                     out[k] = HTMLUtils.parseCoord(v.value)
+                } else if (textValue.some(x => x === v.name)) {
+                    out[k] = v.value
                 } else {
                     out[k] = +v.value
                 }
@@ -283,6 +302,8 @@ export class PlatformControls extends HTMLElement {
             portalX: HTMLInputElement
             portalY: HTMLInputElement
             portalTo: HTMLInputElement
+            lettered: HTMLInputElement
+            letter: HTMLInputElement
         }}
      */
     getControls() {
@@ -304,6 +325,8 @@ export class PlatformControls extends HTMLElement {
             portalX: this.controls.querySelector("#portal-x"),
             portalY: this.controls.querySelector("#portal-y"),
             portalTo: this.controls.querySelector("#portal-to"),
+            lettered: this.controls.querySelector("#lettered"),
+            letter: this.controls.querySelector("#letter"),
         };
     }
 }

@@ -46,6 +46,7 @@ export function convertLevelSet(levelSet) {
                     instagib: p.behaviors.instagib,
                     obstacle: p.behaviors.obstacle,
                     portal: p.behaviors.portal,
+                    lettered: p.behaviors.lettered,
                     render: p.behaviors.render ? /** @type {Render} */({
                         type: "render",
                         renderX: 0,
@@ -64,6 +65,7 @@ export function convertLevelSet(levelSet) {
             out.platforms.set(platform.id, platform)
         }
 
+        level.letterMap = Level.createLetterMap(level.platforms);
         eLevel.initialPosition = Vector2D.fromObject(eLevel.initialPosition)
         out.levels.push(level)
     }

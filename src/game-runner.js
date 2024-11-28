@@ -115,7 +115,6 @@ export function tickWithRender(state) {
         State.projectStaticObjects(state)
     }
 
-    console.log("updateables", state.caleb.physics.current.body.pos);
     for (const input of state.updateables) {
         input.update(state, delta);
     }

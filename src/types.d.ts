@@ -119,6 +119,7 @@ declare global {
     type InstaGib = { type: "instagib" }
     type Render = CanvasProjectable & { type: "render" }
     type PortalBehavior = { type: "portal", to: number, normal: Vector2D }
+    type Lettered = { type: "lettered", letter: string }
     type Behavior = {
         next?: NextLevelBehavior
         obstacle?: ObstacleBehavior
@@ -126,6 +127,7 @@ declare global {
         circuit?: Circuit
         render?: Render
         portal?: PortalBehavior
+        lettered?: Lettered
     }
 
     type BasedPlatform = Collidable & {

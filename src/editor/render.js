@@ -74,6 +74,10 @@ export function renderPlatform(state, platform) {
         el.classList.remove(k)
         if (b) {
             el.classList.add(k)
+            if (b.type === "lettered") {
+                el.innerText = b.letter
+            }
         }
     }
+
 }
