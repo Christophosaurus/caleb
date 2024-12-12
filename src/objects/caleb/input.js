@@ -15,19 +15,36 @@ function moveWB(dir) {
 
         const caleb = state.caleb;
         const dash = caleb.dash;
-        const opts = caleb.opts.dash;
 
-        dash.dashing = true;
-        dash.dashDistance = opts.distance
-        if (dir === 1) {
-            dash.dashDistance - CalebUtils.CALEB_WIDTH
+        const row = CalebUtils.getNextRow(state.caleb)
+        const col = CalebUtils.getNextCol(state.caleb)
+        const letters = Level.getLetters(state, row)
+
+        let destination = -1
+        for (const {idx} of letters) {
+            if (dir === -1 && idx < col) {
+                destination = idx
+            } else if (dir === 1 && idx > col) {
+                destination = idx
+            }
         }
 
-        dash.dashStart = null
-        dash.dashDir = dir
+        if (destination === -1) {
+            return
+        }
 
         resetJumpState(state);
+        resetDashState(state);
         resetVel2(state);
+
+        const distance = destination - state.caleb.physics.next.body.pos.x
+        dash.dashing = true;
+        dash.dashDistance = Math.abs(distance)
+        dash.dashStart = null
+        dash.dashDir = distance > 0 ? 1 : -1
+        if (dash.dashDir === 1) {
+            dash.dashDistance -= CalebUtils.CALEB_WIDTH
+        }
 
         return true;
     }
@@ -48,6 +65,7 @@ function movePortal(state) {
  * @returns {InputHandler}
  */
 function moveKJ(dir) {
+
     return function(state) {
         if (state.caleb.jump.noJumpTime > 0) {
             return false;
@@ -143,9 +161,6 @@ function completefFtT(state) {
 
     state.input.inputs.length = 0
     state.input.anykey = null
-    resetJumpState(state);
-    resetDashState(state);
-    resetVel2(state);
 
     const row = CalebUtils.getNextRow(state.caleb)
     const letters = Level.getLetters(state, row)
@@ -161,6 +176,10 @@ function completefFtT(state) {
         return
     }
 
+    resetJumpState(state);
+    resetDashState(state);
+    resetVel2(state);
+
     const caleb = state.caleb;
     const fFtT = caleb.fFtT
     const dash = caleb.dash;
@@ -175,7 +194,7 @@ function completefFtT(state) {
         destination += 1
     }
 
-    const distance = destination - CalebUtils.getNextCol(state.caleb)
+    const distance = destination - state.caleb.physics.next.body.pos.x
     dash.dashing = true;
     dash.dashDistance = Math.abs(distance)
     dash.dashStart = null

@@ -117,16 +117,16 @@ export function getGameConfig(debug) {
 
         caleb: {
             hodlTime: 500,
-            normWidthsPerSecond: 10,
+            normWidthsPerSecond: 16,
             dash: {
-                dashNormWidth: 30,
+                dashNormWidth: 70,
                 distance: 5,
                 dashEaseRange: 0.10
             },
 
             jump: {
                 jumpEaseRange: 0.10,
-                jumpNormHeight: 30,
+                jumpNormHeight: 70,
                 noJumpBase: 450,
                 noJumpMultiplier: 350,
             }

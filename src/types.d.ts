@@ -120,6 +120,8 @@ declare global {
     type Render = CanvasProjectable & { type: "render" }
     type PortalBehavior = { type: "portal", to: number, normal: Vector2D }
     type Lettered = { type: "lettered", letter: string }
+    type Power = { type: "jump", start: number, stop: number }
+    type PowerUp = { type: "powerup", power: Power }
     type Behavior = {
         next?: NextLevelBehavior
         obstacle?: ObstacleBehavior
@@ -127,6 +129,7 @@ declare global {
         circuit?: Circuit
         render?: Render
         portal?: PortalBehavior
+        powerup?: PowerUp
         lettered?: Lettered
     }
 

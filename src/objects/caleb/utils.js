@@ -10,13 +10,13 @@ export function getRow(caleb) {
 }
 
 /**
- * @param caleb {Caleb}
+ * @param {Caleb} caleb
+ * @returns {number}
  */
 export function getNextRow(caleb) {
     const body = caleb.physics.next.body;
     return Math.floor(body.pos.y + body.height / 2)
 }
-
 
 /**
  * @param caleb {Caleb}
