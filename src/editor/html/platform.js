@@ -178,6 +178,11 @@ export class PlatformControls extends HTMLElement {
             powerUpActionSpeed,
         } = this.values()
 
+        if (platform.behaviors.powerup) {
+            platform.AABB.width = 2
+            platform.AABB.height = 1
+        }
+
         platform.behaviors.obstacle = !nextLevel && obstacle ? {type: "obstacle"} : undefined
         platform.behaviors.instagib = !nextLevel && instagib ? {type: "instagib"} : undefined
         platform.behaviors.circuit = !nextLevel && circuit ? {
