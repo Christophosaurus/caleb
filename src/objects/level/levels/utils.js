@@ -47,6 +47,7 @@ export function convertLevelSet(levelSet) {
                     obstacle: p.behaviors.obstacle,
                     portal: p.behaviors.portal,
                     lettered: p.behaviors.lettered,
+                    lazer: p.behaviors.lazer,
                     render: p.behaviors.render ? /** @type {Render} */({
                         type: "render",
                         renderX: 0,
