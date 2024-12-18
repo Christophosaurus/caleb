@@ -226,8 +226,6 @@ export class PlatformControls extends HTMLElement {
     /** @param {EditorPlatform} platform */
     hydrateState(platform) {
         this.clearControls()
-
-        console.log("hydrate", platform.id)
         const {
             obstacle,
             instagib,
