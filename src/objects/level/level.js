@@ -43,8 +43,35 @@ export function render(state) {
         ctx.fillStyle = "black";
 
         const render = p.behaviors.render
+        const lazer = p.behaviors.lazer
         const lettered = p.behaviors.lettered
-        if (render) {
+
+        if (lazer) {
+            // Draw black circle base
+            ctx.beginPath();
+            ctx.arc(render.renderX + render.renderWidth/2,
+                   render.renderY + render.renderHeight/2,
+                   render.renderWidth/2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Calculate direction to player
+            const platformCenter = new Vector2D(
+                p.physics.current.body.pos.x + p.physics.current.body.width/2,
+                p.physics.current.body.pos.y + p.physics.current.body.height/2
+            );
+            const playerPos = state.caleb.physics.current.body.pos;
+            const direction = playerPos.clone().subtract(platformCenter).normalize();
+
+            // Draw gray cannon
+            ctx.save();
+            ctx.translate(render.renderX + render.renderWidth/2,
+                        render.renderY + render.renderHeight/2);
+            ctx.rotate(Math.atan2(direction.y, direction.x));
+            ctx.fillStyle = "gray";
+            ctx.fillRect(0, -render.renderWidth/8,
+                        render.renderWidth/2, render.renderWidth/4);
+            ctx.restore();
+        } else if (render) {
             ctx.fillRect(render.renderX,
                 render.renderY,
                 render.renderWidth,
@@ -152,6 +179,24 @@ export function withCircuit(platform, time, endPos) {
         endPos,
     }
 
+    return platform
+}
+
+/**
+ * @param {BasedPlatform} platform
+ * @returns {BasedPlatform}
+ */
+export function withLazer(platform) {
+    platform.behaviors.lazer = {
+        type: "lazer",
+    }
+    platform.behaviors.render = {
+        type: "render",
+        renderX: 0,
+        renderY: 0,
+        renderWidth: 0,
+        renderHeight: 0,
+    }
     return platform
 }
 
