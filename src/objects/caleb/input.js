@@ -188,17 +188,13 @@ function completefFtT(state) {
     resetVel2(state);
 
     // Adjust destination based on motion type (f/F/t/T)
-    if (fFtT.type === "f") {
-        destination += CalebUtils.CALEB_WIDTH; // Move to end of character
-    } else if (fFtT.type === "F") {
-        destination -= CalebUtils.CALEB_WIDTH; // Move to start of character
-    } else if (fFtT.type === "t") {
-        destination -= CalebUtils.CALEB_WIDTH; // Move before character
+    if (fFtT.type === "t") {
+        destination -= CalebUtils.CALEB_WIDTH - 0.01; // Move before character
     } else if (fFtT.type === "T") {
-        destination += CalebUtils.CALEB_WIDTH; // Move after character
+        destination += 1.01; // Move after character
     }
 
-    const distance = destination - col;
+    const distance = destination - CalebUtils.getNextX(caleb);
     dash.dashing = true;
     dash.dashDistance = Math.abs(distance);
     dash.dashStart = null;
