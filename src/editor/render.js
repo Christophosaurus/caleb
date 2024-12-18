@@ -76,6 +76,8 @@ export function renderPlatform(state, platform) {
             el.classList.add(k)
             if (b.type === "lettered") {
                 el.innerText = b.letter
+                const minDim = Math.min(pW, pH)
+                el.style.fontSize = `${Math.floor(minDim * 0.9)}px`
             }
         }
     }
