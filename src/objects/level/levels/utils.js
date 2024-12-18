@@ -81,19 +81,36 @@ export function validateLevel(levelSet) {
     for (const level of levelSet.levels) {
         for (const platform of level.platforms) {
             const portal = platform.behaviors.portal
-            if (!portal) {
+            const lazer = platform.behaviors.lazer
+            const powerup = platform.behaviors.powerup
+
+            if (!portal && !lazer && !powerup) {
                 continue
             }
-            assert(!platform.behaviors.obstacle, "platform cannot be an obstacle", portal)
-            assert(!platform.behaviors.next, "platform cannot be a next", portal)
-            assert(!platform.behaviors.instagib, "platform cannot be a instagib", portal)
 
-            const other = levelSet.platforms.get(portal.to)
-            assert(!!other, "the to in the portal does not exist", portal)
-            assert(!!other.behaviors.portal, "the portal is pointing to a non portal", portal, other)
+            if (portal) {
+                assert(!platform.behaviors.obstacle, "platform cannot be an obstacle", portal)
+                assert(!platform.behaviors.next, "platform cannot be a next", portal)
+                assert(!platform.behaviors.instagib, "platform cannot be a instagib", portal)
 
-            const len = portal.normal.magnitude()
-            assert(Math.abs(1 - len) <= 0.001, "expected the portal to have a magnitude 1 normal vec", portal)
+                const other = levelSet.platforms.get(portal.to)
+                assert(!!other, "the to in the portal does not exist", portal)
+                assert(!!other.behaviors.portal, "the portal is pointing to a non portal", portal, other)
+
+                const len = portal.normal.magnitude()
+                assert(Math.abs(1 - len) <= 0.001, "expected the portal to have a magnitude 1 normal vec", portal)
+            }
+
+            if (lazer) {
+                const body = platform.physics.current.body;
+                assert(body.width === 1 && body.height === 1, "lazers must be 1x1")
+            }
+
+            if (powerup) {
+                const body = platform.physics.current.body;
+                assert(body.width === 2 && body.height === 1, "powerups should only be 2x1")
+            }
+
         }
     }
 }
