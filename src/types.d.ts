@@ -262,7 +262,7 @@ declare global {
     type RenderEvent = Event & {type: "render"}
     type ResizeEvent = Event & {type: "resize"}
     type UpdatedEvent = {type: "editor-updated", state: EditorState}
-    type ChangeEvent = {type: "editor-change", state: EditorState}
+    type ChangeEvent = {type: "editor-change"}
     type EditorStateLoadedEvent = {type: "editor-state-loaded", state: EditorState}
     type SizeChangeEvent = {type: "editor-size-change"} & EditorRects
     type EditorChangeLevel = {type: "editor-change-level", next: number}
