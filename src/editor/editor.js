@@ -133,6 +133,11 @@ export function handleCellClick(state, _, es) {
  * @param {Event} event
  */
 export function handleSelectPlatform(state, event) {
+    if (State.hasActivePlatform(state)) {
+        Bus.emit("hide-platform", State.activePlatform(state))
+        State.releasePlatform(state);
+    }
+
     const evt = /** @type {MouseEvent} */(event)
     assert(evt instanceof MouseEvent, "selection of platform without mouse event")
 

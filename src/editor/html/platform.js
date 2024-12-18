@@ -207,8 +207,27 @@ export class PlatformControls extends HTMLElement {
         Bus.editorChange()
     }
 
+    clearControls() {
+        const controls = this.getControls()
+        for (const [k, v] of Object.entries(controls)) {
+            if (v instanceof HTMLInputElement) {
+                if (v.type === "checkbox") {
+                    v.checked = false
+                } else {
+                    v.value = ""
+                }
+            } else {
+                v.innerText = ""
+            }
+        }
+
+    }
+
     /** @param {EditorPlatform} platform */
     hydrateState(platform) {
+        this.clearControls()
+
+        console.log("hydrate", platform.id)
         const {
             obstacle,
             instagib,
