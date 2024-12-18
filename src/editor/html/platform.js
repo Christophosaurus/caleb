@@ -15,6 +15,8 @@ const coordValues = [
 
 const textValue = [
     "letter",
+    "pu-letter",
+    "pu-action",
 ]
 
 export class PlatformControls extends HTMLElement {
@@ -167,6 +169,13 @@ export class PlatformControls extends HTMLElement {
             lettered,
             letter,
             lazer,
+            powerUp,
+            powerUpLetter,
+            powerUpStartRange,
+            powerUpEndRange,
+            powerUpRangeSpeed,
+            powerUpAction,
+            powerUpActionSpeed,
         } = this.values()
 
         platform.behaviors.obstacle = !nextLevel && obstacle ? {type: "obstacle"} : undefined
@@ -202,6 +211,17 @@ export class PlatformControls extends HTMLElement {
 
         platform.behaviors.lazer = lazer ? {
             type: "lazer",
+        } : undefined
+
+        platform.behaviors.powerup = powerUp ? {
+            type: "powerup",
+            letter: powerUpLetter,
+            rangeSpeed: +powerUpRangeSpeed,
+            startRange: +powerUpStartRange,
+            endRange: +powerUpEndRange,
+
+            actionSpeed: +powerUpActionSpeed,
+            actionList: powerUpAction,
         } : undefined
 
         Bus.editorChange()
@@ -247,6 +267,13 @@ export class PlatformControls extends HTMLElement {
             lettered,
             letter,
             lazer,
+            powerUp,
+            powerUpLetter,
+            powerUpStartRange,
+            powerUpEndRange,
+            powerUpRangeSpeed,
+            powerUpAction,
+            powerUpActionSpeed,
         } = this.getControls()
 
         id.innerText = String(platform.id)
@@ -286,6 +313,17 @@ export class PlatformControls extends HTMLElement {
 
         if (behaviors.lazer) {
             lazer.checked = true
+        }
+
+        const pu = behaviors.powerup
+        if (pu) {
+            powerUp.checked = true
+            powerUpLetter.value = pu.letter
+            powerUpAction.value = pu.actionList
+            powerUpActionSpeed.value = "" + pu.actionSpeed
+            powerUpStartRange.value = "" + pu.startRange
+            powerUpEndRange.value = "" + pu.endRange
+            powerUpRangeSpeed.value = "" + pu.rangeSpeed
         }
     }
 
@@ -333,6 +371,13 @@ export class PlatformControls extends HTMLElement {
             lettered: HTMLInputElement
             letter: HTMLInputElement
             lazer: HTMLInputElement
+            powerUp: HTMLInputElement
+            powerUpLetter: HTMLInputElement
+            powerUpStartRange: HTMLInputElement
+            powerUpEndRange: HTMLInputElement
+            powerUpRangeSpeed: HTMLInputElement
+            powerUpAction: HTMLInputElement
+            powerUpActionSpeed: HTMLInputElement
         }}
      */
     getControls() {
@@ -357,6 +402,14 @@ export class PlatformControls extends HTMLElement {
             lettered: this.controls.querySelector("#lettered"),
             letter: this.controls.querySelector("#letter"),
             lazer: this.controls.querySelector("#lazer"),
+
+            powerUp: this.controls.querySelector("#powerUp"),
+            powerUpLetter: this.controls.querySelector("#pu-letter"),
+            powerUpStartRange: this.controls.querySelector("#pu-startr"),
+            powerUpEndRange: this.controls.querySelector("#pu-endr"),
+            powerUpRangeSpeed: this.controls.querySelector("#pu-rspeed"),
+            powerUpAction: this.controls.querySelector("#pu-action"),
+            powerUpActionSpeed: this.controls.querySelector("#pu-aspeed"),
         };
     }
 }

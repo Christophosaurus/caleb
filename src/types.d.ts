@@ -121,8 +121,16 @@ declare global {
     type PortalBehavior = { type: "portal", to: number, normal: Vector2D }
     type Lettered = { type: "lettered", letter: string }
     type Lazer = { type: "lazer" }
-    type Power = { type: "jump", start: number, stop: number }
-    type PowerUp = { type: "powerup", power: Power }
+    type PowerUp = {
+        type: "powerup",
+        letter: string,
+        startRange: number,
+        endRange: number,
+        rangeSpeed: number,
+        actionList: string,
+        actionSpeed: number,
+    }
+
     type Behavior = {
         next?: NextLevelBehavior
         obstacle?: ObstacleBehavior
