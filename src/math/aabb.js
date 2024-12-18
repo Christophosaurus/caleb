@@ -250,3 +250,42 @@ export function from2Vecs(start, end) {
 
     return new AABB(start.clone(), width, height)
 }
+
+/**
+ * Determines if a line segment intersects with this AABB
+ * @param {Vector2D} start - Start point of line segment
+ * @param {Vector2D} end - End point of line segment
+ * @returns {boolean} - True if line segment intersects AABB
+ */
+export function lineIntersectsAABB(start, end, aabb) {
+    const dir = end.clone().subtract(start);
+
+    if (dir.magnituteSquared() === 0) {
+        return aabb.contains(start);
+    }
+
+    const tMin = new Vector2D(
+        (aabb.pos.x - start.x) / dir.x,
+        (aabb.pos.y - start.y) / dir.y
+    );
+    const tMax = new Vector2D(
+        (aabb.pos.x + aabb.width - start.x) / dir.x,
+        (aabb.pos.y + aabb.height - start.y) / dir.y
+    );
+
+    if (dir.x < 0) {
+        [tMin.x, tMax.x] = [tMax.x, tMin.x];
+    }
+    if (dir.y < 0) {
+        [tMin.y, tMax.y] = [tMax.y, tMin.y];
+    }
+
+    if (tMin.x > tMax.y || tMin.y > tMax.x) {
+        return false;
+    }
+
+    const tEnter = Math.max(tMin.x, tMin.y);
+    const tExit = Math.min(tMax.x, tMax.y);
+
+    return tEnter <= 1 && tExit >= 0;
+}
