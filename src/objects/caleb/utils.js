@@ -3,6 +3,7 @@ export const CALEB_WIDTH = 0.5
 
 /**
  * @param caleb {Caleb}
+ * @returns {number}
  */
 export function getRow(caleb) {
     const body = caleb.physics.current.body;
@@ -20,6 +21,7 @@ export function getNextRow(caleb) {
 
 /**
  * @param caleb {Caleb}
+ * @returns {number}
  */
 export function getCol(caleb) {
     return Math.floor(caleb.physics.current.body.pos.x)
@@ -27,8 +29,17 @@ export function getCol(caleb) {
 
 /**
  * @param caleb {Caleb}
+ * @returns {number}
  */
 export function getNextCol(caleb) {
     return Math.floor(caleb.physics.next.body.pos.x)
+}
+
+/**
+ * @param caleb {Caleb}
+ * @returns {number}
+ */
+export function getNextX(caleb) {
+    return caleb.physics.next.body.pos.x
 }
 
