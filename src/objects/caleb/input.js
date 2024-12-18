@@ -154,57 +154,58 @@ function command(state) {
  * @param {GameState} state
  */
 function completefFtT(state) {
-    const input = state.input.inputs[0]
+    const caleb = state.caleb;
+    const fFtT = caleb.fFtT;
+    const dash = caleb.dash;
+    const input = state.input.inputs[0];
     if (!input) {
-        return
+        return;
     }
 
-    state.input.inputs.length = 0
-    state.input.anykey = null
+    state.input.inputs.length = 0;
+    state.input.anykey = null;
 
-    const row = CalebUtils.getNextRow(state.caleb)
-    const letters = Level.getLetters(state, row)
-    let destination = -1
+    const row = CalebUtils.getNextRow(state.caleb);
+    const col = CalebUtils.getNextCol(state.caleb);
+    const letters = Level.getLetters(state, row);
+    let destination = -1;
     for (const {key, idx} of letters) {
         if (input.key === key) {
-            destination = idx
-            break
+            if ((fFtT.type === "f" || fFtT.type === "t") && idx > col ||
+                (fFtT.type === "F" || fFtT.type === "T") && idx < col) {
+                destination = idx;
+                break;
+            }
         }
     }
 
     if (destination === -1) {
-        return
+        return;
     }
 
     resetJumpState(state);
     resetDashState(state);
     resetVel2(state);
 
-    const caleb = state.caleb;
-    const fFtT = caleb.fFtT
-    const dash = caleb.dash;
-    // Only execute if moving forward with f/t or backward with F/T
-    if (destination < 0 && (fFtT.type === "F" || fFtT.type === "T") ||
-        destination > 0 && (fFtT.type === "f" || fFtT.type === "t")) {
-        // Continue execution
-    } else {
-        return
-    }
-
+    // Adjust destination based on motion type (f/F/t/T)
     if (fFtT.type === "f") {
-        destination += CalebUtils.CALEB_WIDTH
+        destination += CalebUtils.CALEB_WIDTH; // Move to end of character
     } else if (fFtT.type === "F") {
-        destination -= CalebUtils.CALEB_WIDTH
+        destination -= CalebUtils.CALEB_WIDTH; // Move to start of character
+    } else if (fFtT.type === "t") {
+        destination -= CalebUtils.CALEB_WIDTH; // Move before character
+    } else if (fFtT.type === "T") {
+        destination += CalebUtils.CALEB_WIDTH; // Move after character
     }
 
-    const distance = destination - state.caleb.physics.next.body.pos.x
+    const distance = destination - col;
     dash.dashing = true;
-    dash.dashDistance = Math.abs(distance)
-    dash.dashStart = null
-    dash.dashDir = distance > 0 ? 1 : -1
-    if (dash.dashDir === 1) {
-        dash.dashDistance -= CalebUtils.CALEB_WIDTH
-    }
+    dash.dashDistance = Math.abs(distance);
+    dash.dashStart = null;
+    dash.dashDir = distance > 0 ? 1 : -1;
+
+    caleb.physics.next.acc.x = 0;
+    caleb.physics.next.acc.y = 0;
 }
 
 /**
@@ -221,10 +222,6 @@ function filter(key, next) {
     }
 }
 
-/**
-* @param {InputHandler} next
-* @returns {InputHandler}
-*/
 function onDown(next) {
     return function(state, input) {
         if (input.type !== "down" && input.type !== "down-up") {
