@@ -37,7 +37,7 @@ function moveWB(dir) {
         resetDashState(state);
         resetVel2(state);
 
-        const distance = destination - state.caleb.physics.next.body.pos.x
+        const distance = destination - state.caleb.physics.next.body.pos.x + CalebUtils.CALEB_WIDTH
         dash.dashing = true;
         dash.dashDistance = Math.abs(distance)
         dash.dashStart = null
@@ -188,10 +188,10 @@ function completefFtT(state) {
         return
     }
 
-    if (fFtT.type === "t") {
-        destination -= 1
-    } else if (fFtT.type === "T") {
-        destination += 1
+    if (fFtT.type === "f") {
+        destination += CalebUtils.CALEB_WIDTH
+    } else if (fFtT.type === "F") {
+        destination -= CalebUtils.CALEB_WIDTH
     }
 
     const distance = destination - state.caleb.physics.next.body.pos.x
