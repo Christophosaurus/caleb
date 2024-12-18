@@ -183,8 +183,11 @@ function completefFtT(state) {
     const caleb = state.caleb;
     const fFtT = caleb.fFtT
     const dash = caleb.dash;
-    if (destination > 0 && (fFtT.type === "F" || fFtT.type === "T") ||
-        destination < 0 && (fFtT.type === "f" || fFtT.type === "t")) {
+    // Only execute if moving forward with f/t or backward with F/T
+    if (destination < 0 && (fFtT.type === "F" || fFtT.type === "T") ||
+        destination > 0 && (fFtT.type === "f" || fFtT.type === "t")) {
+        // Continue execution
+    } else {
         return
     }
 
