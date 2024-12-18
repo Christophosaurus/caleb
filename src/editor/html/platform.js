@@ -1,7 +1,6 @@
 import { assert } from "../../assert.js";
 import * as Bus from "../../bus.js"
 import { Vector2D } from "../../math/vector.js";
-import { platforms } from "../state.js";
 import * as Utils from "../utils.js"
 import * as HTMLUtils from "./utils.js"
 
@@ -51,6 +50,7 @@ export class PlatformControls extends HTMLElement {
             nextLevelLevel,
             nextLevelX,
             nextLevelY,
+            lazer,
         } = this.getControls()
 
         instagib.disabled = obstacle.checked
@@ -62,6 +62,7 @@ export class PlatformControls extends HTMLElement {
         nextLevelLevel.disabled = !nextLevel.checked
         nextLevelX.disabled = !nextLevel.checked
         nextLevelY.disabled = !nextLevel.checked
+        lazer.disabled = nextLevel.checked || obstacle.checked || instagib.checked || circuit.checked
     }
 
     /**
@@ -165,6 +166,7 @@ export class PlatformControls extends HTMLElement {
             portalTo,
             lettered,
             letter,
+            lazer,
         } = this.values()
 
         platform.behaviors.obstacle = !nextLevel && obstacle ? {type: "obstacle"} : undefined
@@ -198,6 +200,10 @@ export class PlatformControls extends HTMLElement {
             letter,
         } : undefined
 
+        platform.behaviors.lazer = lazer ? {
+            type: "lazer",
+        } : undefined
+
         Bus.editorChange()
     }
 
@@ -223,6 +229,7 @@ export class PlatformControls extends HTMLElement {
             id,
             lettered,
             letter,
+            lazer,
         } = this.getControls()
 
         id.innerText = String(platform.id)
@@ -258,6 +265,10 @@ export class PlatformControls extends HTMLElement {
         if (behaviors.lettered) {
             lettered.checked = true
             letter.value = behaviors.lettered.letter
+        }
+
+        if (behaviors.lazer) {
+            lazer.checked = true
         }
     }
 
@@ -304,6 +315,7 @@ export class PlatformControls extends HTMLElement {
             portalTo: HTMLInputElement
             lettered: HTMLInputElement
             letter: HTMLInputElement
+            lazer: HTMLInputElement
         }}
      */
     getControls() {
@@ -327,6 +339,7 @@ export class PlatformControls extends HTMLElement {
             portalTo: this.controls.querySelector("#portal-to"),
             lettered: this.controls.querySelector("#lettered"),
             letter: this.controls.querySelector("#letter"),
+            lazer: this.controls.querySelector("#lazer"),
         };
     }
 }

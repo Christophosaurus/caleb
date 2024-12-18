@@ -120,6 +120,7 @@ declare global {
     type Render = CanvasProjectable & { type: "render" }
     type PortalBehavior = { type: "portal", to: number, normal: Vector2D }
     type Lettered = { type: "lettered", letter: string }
+    type Lazer = { type: "lazer" }
     type Power = { type: "jump", start: number, stop: number }
     type PowerUp = { type: "powerup", power: Power }
     type Behavior = {
@@ -131,6 +132,7 @@ declare global {
         portal?: PortalBehavior
         powerup?: PowerUp
         lettered?: Lettered
+        lazer?: Lazer
     }
 
     type BasedPlatform = Collidable & {
