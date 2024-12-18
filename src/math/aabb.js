@@ -255,6 +255,7 @@ export function from2Vecs(start, end) {
  * Determines if a line segment intersects with this AABB
  * @param {Vector2D} start - Start point of line segment
  * @param {Vector2D} end - End point of line segment
+ * @param {AABB} aabb - The AABB to check intersection with
  * @returns {boolean} - True if line segment intersects AABB
  */
 export function lineIntersectsAABB(start, end, aabb) {
