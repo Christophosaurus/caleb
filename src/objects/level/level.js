@@ -36,12 +36,12 @@ function renderText(ctx, text, x, y, calebY) {
 */
 export function render(state) {
     const ctx = state.getCtx();
-    ctx.fillStyle = "black";
-
     const plats = state.level.activeLevel.platforms
     const calebY = getRow(state.caleb);
 
     for (const p of plats) {
+        ctx.fillStyle = "black";
+
         const render = p.behaviors.render
         const lettered = p.behaviors.lettered
         if (render) {
