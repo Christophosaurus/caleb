@@ -195,7 +195,7 @@ export class PlatformControls extends HTMLElement {
             currentDir: 1,
             currentTime: 0,
         } : undefined
-        platform.behaviors.render = !nextLevel && render ? {
+        platform.behaviors.render = !nextLevel && render || lazer ? {
             type: "render",
             renderX: 0, renderY: 0, renderHeight: 0, renderWidth: 0,
         } : undefined
@@ -286,7 +286,7 @@ export class PlatformControls extends HTMLElement {
         const behaviors = platform.behaviors
         obstacle.checked = !!behaviors.obstacle
         instagib.checked = !!behaviors.instagib
-        render.checked = !!behaviors.render
+        render.checked = !!behaviors.render || !!behaviors.lazer
 
         const next = behaviors.next;
         if (next) {
